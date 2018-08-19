@@ -1,6 +1,6 @@
-(ns bbloom.wasm-test
+(ns wasm-clj.core-test
   (:require [clojure.test :refer :all]
-            [bbloom.wasm :refer :all]))
+            [wasm-clj.core :refer :all]))
 
 (deftest a-test
   (testing "FIXME, I fail."

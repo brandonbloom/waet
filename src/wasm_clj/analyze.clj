@@ -1,6 +1,8 @@
-(ns bbloom.wasm.analyze
+(ns wasm-clj.analyze
   (:require [clojure.spec.alpha :as s])
-  (:use [bbloom.wasm.util]))
+  (:use [wasm-clj.util]))
+
+;;; See https://webassembly.github.io/spec/core/text/index.html
 
 (defn free-name [ctx]
   (gensym)) ;TODO: Something stable.
@@ -142,6 +144,8 @@
 
   (false? (id? 'x))
   (true? (id? '$x))
+
+  ;;TODO Test more [MDN Examples](https://github.com/mdn/webassembly-examples).
 
   (party
     (module

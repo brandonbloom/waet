@@ -1,4 +1,4 @@
-(ns bbloom.wasm.util)
+(ns wasm-clj.util)
 
 (defn fail
   ([msg] (fail msg {}))
