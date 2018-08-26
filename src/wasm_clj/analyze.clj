@@ -15,6 +15,10 @@
   (and (simple-symbol? x)
        (= (first (str x)) \$)))
 
+(defn index? [x]
+  (or (id? x)
+      (pos-int? x)))
+
 (defn name? [x]
   ;;TODO: Tighter validation.
   (string? x))
@@ -49,33 +53,112 @@
 
 ;(defmethod -analyze :int
 ;  [ctx form]
-;  {:head :const
+;  {:sort :expression XXX
+;   :head :const
 ;   :value form})
+
+(defn scan-optional-id [input]
+  (if (id? (first input))
+    [(first input) (next input)]
+    [nil input]))
 
 (defmethod -analyze [:module 'module]
   [ctx [_ & tail]]
-  (let [[id & fields] (if (id? (first tail))
-                        tail
-                        (cons nil tail))
+  (let [[id fields] (scan-optional-id tail)
         fields (let [ctx (assoc ctx :sort :modulefield)]
                  (vec (mapcat #(analyze ctx %) fields)))]
-    {:head 'module
+    {:sort :module
+     :head 'module
      :id id
      :fields fields}))
 
 ;TODO modulefield: type, import, table, mem, global, export, start, elem, data.
 
-(defn scan-typeuse [tail]
-  [[] tail]) ;XXX
+(defn has-head? [head form]
+  (and (seq? form)
+       (= (first form) head)))
 
-(defn scan-locals [tail]
-  [[] tail]) ;XXX
+(defn analyze-valtype [form]
+  (when-not ('#{i32 i64 f32 f64} form)
+    (fail "invalid valtype" {:form form}))
+  {:sort :valtype
+   :valtype form})
+
+(defn analyze-params [[head & tail]]
+  {:pre [(= head 'param)]}
+  (let [[id tail] (scan-optional-id tail)]
+    (if id
+      (let [[valtype & tail] tail]
+        (when-first [x tail]
+          (fail "malformed param" {:at x}))
+        [{:head 'param
+          :id id
+          :valtype (analyze-valtype valtype)}])
+      (mapv (fn [x]
+              {:head 'param
+               :valtype (analyze-valtype x)})
+            tail))))
+
+(defn analyze-results [[head & tail]]
+  {:pre [(= head 'result)]}
+  (mapv (fn [x]
+          {:head 'result
+           :valtype (analyze-valtype x)})
+        tail))
+
+(defn scan-params [[x & xs :as input]]
+  (if (has-head? x 'param)
+    [(analyze-params x) xs]
+    [nil input]))
+
+(defn scan-results [[x & xs :as input]]
+  (prn input)
+  (if (has-head? x 'result)
+    [(analyze-results x) xs]
+    [nil input]))
+
+(defn analyze-params-and-results [input]
+  (let [[params input] (loop [params []
+                              input input]
+                         (let [[params* input] (scan-params input)]
+                           (if params*
+                             (recur (into params params*) input)
+                             [params input])))
+        [results input] (loop [results []
+                               input input]
+                          (let [[results* input] (scan-results input)]
+                            (if results*
+                              (recur (into results results*) input)
+                              (do (when (seq input)
+                                    (fail "unexpected" {:form (first input)}))
+                                  [results input]))))]
+    {:params params
+     :results results}))
+
+(defn analyze-typeuse [[head index & extra :as form]]
+  {:pre [(= head 'type)]}
+  (when (some? extra)
+    (fail "malformed typeuse" {:form form}))
+  (when-not (index? index)
+    (fail "expected index" {:form form :actual index}))
+  {:head 'type
+   :index index})
+
+(defn scan-typeuse [[x & xs :as input]]
+  (prn (list 'scan-typeuse input))
+  (if (has-head? 'type x)
+    (let [typeuse (analyze-typeuse (first x))]
+      (if (seq xs)
+        (merge typeuse (analyze-params-and-results xs))
+        typeuse))
+    (analyze-params-and-results input)))
+
+(defn scan-locals [input]
+  [[] input]) ;XXX
 
 (defmethod -analyze [:modulefield 'func]
   [ctx [_ & tail :as form]]
-  (let [[id & tail] (if (id? (first tail))
-                      tail
-                      (cons nil tail))
+  (let [[id tail] (scan-optional-id tail)
         macro (and (seq? (first tail))
                    (#{'import 'export} (ffirst tail)))]
     (case macro
@@ -94,7 +177,8 @@
                            tail ;XXX scan-instructions
                            ;(vec (mapcat #(analyze ctx %) tail))
                            )]
-        {:head 'func
+        {:sort :modulefield
+         :head 'func
          :typeuse typeuse
          :locals locals
          :instructions instructions}))))
@@ -113,7 +197,8 @@
                    (fail "invalid export" {:head export}))
                  {:export export
                   :index index}))]
-    {:head 'export
+    {:sort :modulefield
+     :head 'export
      :name name
      :desc desc}))
 
@@ -128,14 +213,23 @@
             (fail "expected import name" {:actual name}))
         desc (let [ctx (assoc ctx :sort :importdesc)]
                (analyze1 ctx desc))]
-    {:head 'import
+    {:sort :modulefield
+     :head 'import
      :module module
      :name name
      :desc desc}))
 
 (defmethod -analyze [:importdesc 'func]
-  [ctx form]
-  {}) ;XXX
+  [ctx [_ & tail :as form]]
+  (let [[id tail] (scan-optional-id form)
+        [typeuse tail] (scan-typeuse tail)]
+    (when (seq tail)
+      (fail "expected end of form" {:form form
+                                    :at (first tail)}))
+    {:sort :importdesc
+     :head 'func
+     :id id
+     :func typeuse}))
 
 (comment
 
