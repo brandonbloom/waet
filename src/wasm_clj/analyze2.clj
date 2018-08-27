@@ -5,7 +5,6 @@
 ;;;; See https://webassembly.github.io/spec/core/text/index.html
 
 (defmacro phrase-spec [head & body-specs]
-  ;;XXX check it's a list!
   `(s/spec (s/and seq?
                   (s/cat :head #{'~head} ~@body-specs))))
 
