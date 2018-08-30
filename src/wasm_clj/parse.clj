@@ -68,19 +68,42 @@
     (set! *input* nil)
     (vec xs)))
 
+(def no-match-exception (Exception. "no match"))
+
+(defn no-match []
+  ;; Uncomment exception allocation to get stacktraces for debugging.
+  (throw (ex-info "no match" {::no-match true}))
+  (throw no-match-exception))
+
+(defn no-match? [ex]
+  (or (identical? ex no-match-exception) ; Fast path (preallocated).
+      (::no-match (ex-data ex))))        ; Slow path (with stacktrace).
+
+(defmacro opt [& body]
+  `(try
+     ~@body
+     (catch Exception ex#
+       (when-not (no-match? ex#)
+         (throw ex#)))))
+
 (defn scan-pred [pred]
   (let [[x & xs] *input*]
-    (when (pred x)
-      (set! *input* xs)
-      x)))
+    (if (pred x)
+      (do (set! *input* xs)
+          x)
+      (no-match))))
 
 (defn scan-all [scan]
-  (->> (repeatedly scan)
-       (take-while some?)
-       vec))
+  (loop [v []]
+    (if-let [x (opt (scan))]
+      (recur (conj v x))
+      v)))
 
 (defn scan-id []
   (scan-pred id?))
+
+(defn scan-name []
+  (scan-pred name?))
 
 (defn scan-phrase [head]
   (scan-pred #(has-head? head %)))
@@ -89,21 +112,39 @@
   (scan-phrase 'import))
 
 (defn scan-typeuse []
-  (let [type (scan-phrase 'type)
+  (let [type (opt (scan-phrase 'type))
         params (scan-all #(scan-phrase 'param))
         results (scan-all #(scan-phrase 'result))]
     {:type type
      :params params
-     :results results}))
+     :results results
+     :forms (concat (when type [type]) params results)}))
 
-(defn scan-export []
-  (scan-phrase 'export))
+(defn scan-inline-export []
+  (let [form (scan-phrase 'export)
+        ast (s/conform (phrase-spec export :name name?) form)]
+    (when (s/invalid? ast)
+      (bad-syntax form "malformed export"))
+    ast))
 
-(defn scan-import []
-  (scan-phrase 'import))
+(defn scan-inline-import []
+  (let [form (scan-phrase 'import)
+        ast (s/conform (phrase-spec import :module name? :name name?)
+                       form)]
+    (when (s/invalid? ast)
+      (bad-syntax form "malformed import"))
+    ast))
 
 (defn scan-locals []
   (scan-all #(scan-phrase 'local)))
+
+(defn scan-importdesc []
+  (let [form (scan-phrase 'func)] ;XXX func, table, memory, or global.
+    form))
+
+(defn scan-exportdesc []
+  (let [form (scan-phrase 'func)] ;XXX func, table, memory, or global.
+    form))
 
 ;;; Module Fields.
 
@@ -111,34 +152,42 @@
 
 (defn modulefield [form]
   (check-phrase form)
-  (-modulefield form))
+  (assoc (-modulefield form) :head (first form) :form form))
 
 (defmethod -modulefield 'type [form]
   (fail "not implemented: parse/-modulefield 'type"))
 
-(defmethod -modulefield 'import [form]
-  (fail "not implemented: parse/-modulefield 'import"))
-
-(defmethod -modulefield 'func [[_ & tail :as form]]
+(defmethod -modulefield 'import [[_ & tail]]
   (scanning tail
-    (let [id (scan-id)
-          import (scan-import)]
+    (let [module (scan-name)
+          name (scan-name)
+          desc (scan-importdesc)]
+      {:module module
+       :name name
+       :desc desc})))
+
+(defmethod -modulefield 'func [[_ & tail]]
+  (scanning tail
+    (let [id (opt (scan-id))
+          import (opt (scan-inline-import))]
       (if import
         (let [type (scan-typeuse)]
-          {:head 'func
-           :id id
+          {:id id
            :import import
            :type type})
-        (let [export (scan-export)
-              type (scan-typeuse)
-              locals (scan-locals)
-              body (scan-rest)]
-          {:head 'func
-           :id id
-           :export export
-           :type type
-           :locals locals
-           :body body})))))
+        (let [export (opt (scan-inline-export))]
+          (if export
+            (let [tail (scan-rest)]
+              {:id id
+               :export export
+               :tail tail})
+            (let [type (scan-typeuse)
+                  locals (scan-locals)
+                  body (scan-rest)]
+              {:id id
+               :type type
+               :locals locals
+               :body body})))))))
 
 (defmethod -modulefield 'table [form]
   (fail "not implemented: parse/-modulefield 'table"))
@@ -149,8 +198,12 @@
 (defmethod -modulefield 'global [form]
   (fail "not implemented: parse/-modulefield 'global"))
 
-(defmethod -modulefield 'export [form]
-  (fail "not implemented: parse/-modulefield 'export"))
+(defmethod -modulefield 'export [[_ & tail]]
+  (scanning tail
+    (let [name (scan-name)
+          desc (scan-exportdesc)]
+      {:name name
+       :desc desc})))
 
 (defmethod -modulefield 'start [form]
   (fail "not implemented: parse/-modulefield 'start"))
@@ -182,8 +235,10 @@
   (module '(module))
   (module '(module 1 2 3))
 
-  (modulefield '(func $i (import "imports" "imported_func") (param i32)))
-  (modulefield '(func (export "exported_func") i32.const 42 call $i))
+  (fipp.edn/pprint
+    (modulefield '(func $i (import "imports" "imported_func") (param i32))))
+  (fipp.edn/pprint
+    (modulefield '(func (export "exported_func") i32.const 42 call $i)))
 
   (party
     (module
