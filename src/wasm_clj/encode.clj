@@ -22,11 +22,36 @@
   (dotimes [_ 5]
     (.write *w* 0x00)))
 
-(defn write-leb128 [n]
-  (.write *w* 0x00)) ;XXX write leb-128
+(defn leb128-write-loop [shift-right until n]
+  (loop [^long n n]
+    (let [b (bit-and n 0x7F)
+          n (shift-right n 7)]
+      (if (until n b)
+        (.write *w* b)
+        (do (.write *w* (bit-or b 0x80))
+            (recur n))))))
+
+(defn write-unsigned-leb128 [n]
+  (leb128-write-loop
+    unsigned-bit-shift-right
+    (fn [^long n, ^long b]
+      (zero? n))
+    n))
+
+(defn write-signed-leb128 [^long n]
+  (leb128-write-loop
+    bit-shift-right
+    (if (neg? n)
+      (fn [n b]
+        (and (= n -1)
+             (bit-test b 6)))
+      (fn [n b]
+        (and (zero? ^long n)
+             (not (bit-test b 6)))))
+    n))
 
 (defn begin-section [id]
-  (.write *w* id)
+  (.write *w* ^byte id)
   (reserve-leb128))
 
 (defn end-section [offset]
@@ -34,14 +59,14 @@
   )
 
 (defmacro writing-section [id & body]
-  `(let [offset# :XXX
+  `(let [offset# :XXX ;XXX
          _# (begin-section ~id)
-         res# (do ~@body)] ;XXX
+         res# (do ~@body)]
      (end-section offset#)
      res#))
 
 (defn write-vec [write xs]
-  (write-leb128 (count xs))
+  (write-unsigned-leb128 (count xs))
   (run! write xs))
 
 (defn write-char [char]
@@ -53,10 +78,10 @@
 (defn write-importdesc [{:keys [head] :as desc}]
   (case head
     func (do (.write *w* 0x00)
-             (write-leb128 (:typeidx desc))) ;XXX wrong key?
-    ; table
-    ; mem
-    ; global
+             (write-unsigned-leb128 (:typeidx desc))) ;XXX wrong key?
+    ;XXX table
+    ;XXX mem
+    ;XXX global
     ))
 
 (defn write-import [{:keys [name module desc] :as import}]
@@ -66,7 +91,7 @@
 
 (defn write-importsec [imports]
   (writing-section 0x02
-    (write-vec import imports)))
+    (write-vec write-import imports)))
 
 (defn write-module [ast]
   (write-magic)
