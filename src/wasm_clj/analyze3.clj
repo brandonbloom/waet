@@ -17,15 +17,15 @@
 
 (defmethod -modulefield 'func [ast]
   (if-let [{:keys [module name]} (:import ast)]
-    [(modulefield (list 'import module name
-                        (concat ['func]
-                                (when-let [id (:id ast)]
-                                  [id])
-                                (-> ast :type :forms))))]
+    (modulefield (list 'import module name
+                       (concat ['func]
+                               (when-let [id (:id ast)]
+                                 [id])
+                               (-> ast :type :forms))))
     (if-let [{:keys [name tail]} (:export ast)]
       (let [id (gensym name)]
-        [(modulefield (list 'export name (list 'func id)))
-         (modulefield (list* 'func id tail))])
+        (concat (modulefield (list 'export name (list 'func id)))
+                (modulefield (list* 'func id tail))))
       [ast])))
 
 (defmethod -modulefield 'table [ast]
@@ -52,8 +52,16 @@
 ;;; Modules.
 
 (defn module [form]
-  (-> (parse/module form)
-      (update :fields #(vec (mapcat modulefield %)))))
+  (let [ast (parse/module form)
+        ast (update ast :fields #(vec (mapcat modulefield %)))
+        fields (group-by :head (:fields ast))
+        funcs (fields 'func [])]
+    (assoc ast
+           :types (mapv :type funcs)
+           :funcs funcs
+           :imports (fields 'import [])
+           :exports (fields 'export [])
+           )))
 
 ;;; End.
 
