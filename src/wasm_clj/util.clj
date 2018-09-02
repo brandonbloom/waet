@@ -4,3 +4,6 @@
   ([msg] (fail msg {}))
   ([msg data]
    (throw (ex-info msg data))))
+
+(defmacro change! [var f & args]
+  `(set! ~var (~f ~var ~@args)))

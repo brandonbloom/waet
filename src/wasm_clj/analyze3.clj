@@ -4,6 +4,26 @@
 
 ;;; Module Fields.
 
+(def ^:dynamic *module*)
+
+(defn fresh-id [name]
+  (let [n (:counter *module*)]
+    (change! *module* update :counter inc)
+    (symbol (str "$" name "__" n)))) ;TODO: Something less likely to collide.
+
+(defn lookup [id]
+  (or (get-in *module* [:env id])
+      (fail (str "undefined: " id) {:id id})))
+
+(defn emit-field [key ast]
+  (let [index (-> ast key count)
+        path [key index]]
+    (when-let [id (:id ast)]
+      (change! *module* assoc-in [:env id] path))
+    (change! *module* update key conj (assoc ast :index index))
+    (change! *module* update :fields conj path)
+    index))
+
 (defmulti -modulefield :head)
 
 (defn modulefield [form]
@@ -13,7 +33,7 @@
   (fail "not analyze/-modulefield 'type"))
 
 (defmethod -modulefield 'import [ast]
-  [ast]) ;XXX (fail "not analyze/-modulefield 'import")
+  (emit-field :imports ast)) ;XXX parseme
 
 (defmethod -modulefield 'func [ast]
   (if-let [{:keys [module name]} (:import ast)]
@@ -23,10 +43,10 @@
                                  [id])
                                (-> ast :type :forms))))
     (if-let [{:keys [name tail]} (:export ast)]
-      (let [id (gensym name)]
-        (concat (modulefield (list 'export name (list 'func id)))
-                (modulefield (list* 'func id tail))))
-      [ast])))
+      (let [id (fresh-id name)]
+        (modulefield (list 'export name (list 'func id)))
+        (modulefield (list* 'func id tail)))
+      (emit-field :funcs ast))))
 
 (defmethod -modulefield 'table [ast]
   (fail "not analyze/-modulefield 'table"))
@@ -38,7 +58,8 @@
   (fail "not analyze/-modulefield 'global"))
 
 (defmethod -modulefield 'export [ast]
-  [ast]) ;XXX (fail "not analyze/-modulefield 'export")
+  (prn '!!! ast)
+  (emit-field :exports ast)) ;XXX parseme
 
 (defmethod -modulefield 'start [ast]
   (fail "not analyze/-modulefield 'start"))
@@ -52,16 +73,18 @@
 ;;; Modules.
 
 (defn module [form]
-  (let [ast (parse/module form)
-        ast (update ast :fields #(vec (mapcat modulefield %)))
-        fields (group-by :head (:fields ast))
-        funcs (fields 'func [])]
-    (assoc ast
-           :types (mapv :type funcs)
-           :funcs funcs
-           :imports (fields 'import [])
-           :exports (fields 'export [])
-           )))
+  (let [{:keys [fields] :as ast} (parse/module form)
+        ast (assoc ast
+                   :env {}
+                   :counter 0
+                   :fields []
+                   :types []
+                   :funcs []
+                   :imports []
+                   :exports [])]
+    (binding [*module* ast]
+      (run! modulefield fields)
+      *module*)))
 
 ;;; End.
 

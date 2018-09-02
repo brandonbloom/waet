@@ -1,34 +1,23 @@
 (ns wasm-clj.encode
   (:use [wasm-clj.util])
-  (:import [java.io ByteArrayOutputStream]))
+  (:require [wasm-clj.io :as io])
+  (:import [java.nio.charset Charset StandardCharsets]))
 
-(def ^:dynamic ^ByteArrayOutputStream *w*)
+(def ^:dynamic ^io/WriteSeeker *w*)
 
-(defn write-magic []
-  (doto *w*
-    (.write 0x00)
-    (.write 0x61)
-    (.write 0x73)
-    (.write 0x6D)))
+(defn write-byte [^long b]
+  (io/write-byte *w* b))
 
-(defn write-version []
-  (doto *w*
-    (.write 0x01)
-    (.write 0x00)
-    (.write 0x00)
-    (.write 0x00)))
-
-(defn reserve-leb128 []
-  (dotimes [_ 5]
-    (.write *w* 0x00)))
+(defn write-bytes [^bytes bs]
+  (io/write-bytes *w* bs))
 
 (defn leb128-write-loop [shift-right until n]
   (loop [^long n n]
     (let [b (bit-and n 0x7F)
           n (shift-right n 7)]
       (if (until n b)
-        (.write *w* b)
-        (do (.write *w* (bit-or b 0x80))
+        (write-byte b)
+        (do (write-byte (bit-or b 0x80))
             (recur n))))))
 
 (defn write-unsigned-leb128 [n]
@@ -50,39 +39,75 @@
              (not (bit-test b 6)))))
     n))
 
-(defn begin-section [id]
-  (.write *w* ^byte id)
-  (reserve-leb128))
+(defn pos ^long []
+  (io/position *w*))
 
-(defn end-section [offset]
-  ;XXX write size at offset
-  )
+(def max-u32-leb128-size 5)
+
+(defn reserve-u32-leb128 []
+  (let [begin (pos)]
+    (dotimes [_ max-u32-leb128-size]
+      (write-byte 0x00))
+    begin))
+
+(defn begin-section [id]
+  (write-byte ^byte id)
+  (reserve-u32-leb128))
+
+(defn write-fixed-u32-leb128 [^long n]
+  (write-byte (bit-or (bit-and n 0x7F) 0x80))
+  (write-byte (bit-or (bit-and (unsigned-bit-shift-right n 7) 0x7F) 0x80))
+  (write-byte (bit-or (bit-and (unsigned-bit-shift-right n 14) 0x7F) 0x80))
+  (write-byte (bit-or (bit-and (unsigned-bit-shift-right n 21) 0x7F) 0x80))
+  (write-byte (bit-and (unsigned-bit-shift-right n 28) 0x7F)))
+
+(defn end-section [^long mark]
+  (let [end (pos)
+        size (- end mark ^long max-u32-leb128-size)]
+    (io/seek *w* mark)
+    (write-fixed-u32-leb128 size)
+    (io/seek *w* mark)))
 
 (defmacro writing-section [id & body]
-  `(let [offset# :XXX ;XXX
-         _# (begin-section ~id)
+  `(let [mark# (begin-section ~id)
          res# (do ~@body)]
-     (end-section offset#)
+     (end-section mark#)
      res#))
 
 (defn write-vec [write xs]
   (write-unsigned-leb128 (count xs))
   (run! write xs))
 
-(defn write-char [char]
-  (.write *w* (byte char))) ;XXX aux utf8 function
+(def ^Charset utf8 StandardCharsets/UTF_8)
+
+(defn write-utf8 [^String s]
+  (let [^bytes bs (.getBytes s utf8)
+        n (count bs)]
+    (write-unsigned-leb128 n)
+    (write-bytes bs)))
 
 (defn write-name [name]
-  (write-vec write-char (str name)))
+  (write-utf8 (str name)))
 
-(defn write-importdesc [{:keys [head] :as desc}]
-  (case head
-    func (do (.write *w* 0x00)
-             (write-unsigned-leb128 (:typeidx desc))) ;XXX wrong key?
-    ;XXX table
-    ;XXX mem
-    ;XXX global
-    ))
+(defn write-magic []
+  (write-byte 0x00)
+  (write-byte 0x61)
+  (write-byte 0x73)
+  (write-byte 0x6D))
+
+(defn write-version []
+  (write-byte 0x01)
+  (write-byte 0x00)
+  (write-byte 0x00)
+  (write-byte 0x00))
+
+(defn write-importdesc [{:keys [head index] :as desc}]
+  (write-byte (case head
+                type   0x00
+                table  0x01
+                mem    0x02
+                global 0x03))
+  (write-unsigned-leb128 index))
 
 (defn write-import [{:keys [name module desc] :as import}]
   (write-name name)
@@ -90,8 +115,24 @@
   (write-importdesc desc))
 
 (defn write-importsec [imports]
-  (writing-section 0x02
+  (writing-section 2
     (write-vec write-import imports)))
+
+(defn write-exportdesc [{:keys [head index] :as desc}]
+  (write-byte (case head
+                func   0x00
+                table  0x01
+                mem    0x02
+                global 0x03))
+  (write-unsigned-leb128 index))
+
+(defn write-export [{:keys [name desc] :as export}]
+  (write-name name)
+  (write-exportdesc desc))
+
+(defn write-exportsec [exports]
+  (writing-section 7
+    (write-vec write-export exports)))
 
 (defn write-module [ast]
   (write-magic)
@@ -101,7 +142,7 @@
   ;(write-typesec (:types ast))
   ;(write-tablesec (:tables ast))
   ;(write-globalsec (:globals ast))
-  ;(write-exportsec (:exports ast))
+  (write-exportsec (:exports ast))
   ;(write-startsec (:start ast))
   ;(write-elemsec (:elems ast))
   ;(write-codesec (:code ast))
@@ -111,14 +152,13 @@
 (comment
 
   (require '[wasm-clj.analyze3 :as analyze])
-  (binding [*w* (ByteArrayOutputStream.)]
-    (let [form '(module
-                  (func (export "the_answer")
-                    i32.const 42))
-          ast (analyze/module form)
-          _ (fipp.edn/pprint ast)
-          _ (write-module ast)
-          bytes (.toByteArray *w*)]
-      (prn (seq bytes))))
+  (with-open [^java.io.Closeable w (io/open-file-writer "/tmp/scratch.wasm")]
+    (binding [*w* w]
+      (let [form '(module
+                    (func (export "the_answer") (result i32)
+                      i32.const 42))
+            ast (analyze/module form)]
+        (fipp.edn/pprint ast)
+        (write-module ast))))
 
 )

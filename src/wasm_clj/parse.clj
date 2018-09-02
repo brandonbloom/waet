@@ -99,14 +99,20 @@
       (recur (conj v x))
       v)))
 
+(defn scan-u32 []
+  (scan-pred u32?))
+
 (defn scan-id []
   (scan-pred id?))
 
 (defn scan-name []
   (scan-pred name?))
 
-(defn scan-phrase [head]
-  (scan-pred #(has-head? head %)))
+(defn scan-phrase
+  ([]
+   (scan-pred phrase?))
+  ([head]
+   (scan-pred #(has-head? head %))))
 
 (defn scan-import []
   (scan-phrase 'import))
@@ -119,6 +125,39 @@
      :params params
      :results results
      :forms (concat (when type [type]) params results)}))
+
+(defn scan-limits []
+  (let [n (scan-u32)
+        m (opt (scan-u32))]
+    {:min n
+     :max (or m n)}))
+
+(defn scan-memtype []
+  (scan-limits))
+
+(defn scan-elemtype []
+  (scan-pred #{'anyfunc}))
+
+(defn scan-tabletype []
+  (let [limits (scan-limits)
+        elemtype (scan-elemtype)]
+    {:limits limits
+     :elemtype elemtype}))
+
+(defn scan-valtype []
+  (scan-pred '#{i32 i64 f32 f64}))
+
+(defn scan-globaltype []
+  (let [var (opt (scan-phrase 'mut))]
+    (if-let [[head & tail] var]
+      (scanning tail
+        (let [type (scan-valtype)]
+          {:head head
+           :kind :var
+           :type type}))
+      (let [type (scan-valtype)]
+        {:kind :const
+         :type type}))))
 
 (defn scan-inline-export []
   (let [form (scan-phrase 'export)
@@ -139,12 +178,21 @@
   (scan-all #(scan-phrase 'local)))
 
 (defn scan-importdesc []
-  (let [form (scan-phrase 'func)] ;XXX func, table, memory, or global.
-    form))
+  (let [[head & tail :as form] (scan-phrase)
+        ast (scanning tail
+              (let [id (opt (scan-id))
+                    type (case head
+                           func (scan-typeuse)
+                           table (scan-tabletype)
+                           memory (scan-memtype)
+                           global (scan-globaltype))]
+                {:id id :type type}))]
+    (assoc ast :head head :form form)))
 
 (defn scan-exportdesc []
   (let [form (scan-phrase 'func)] ;XXX func, table, memory, or global.
-    form))
+    {:head 'func
+     :form form}))
 
 ;;; Module Fields.
 
