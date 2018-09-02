@@ -151,13 +151,13 @@
 
 (comment
 
-  (require '[wasm-clj.analyze3 :as analyze])
+  (require '[wasm-clj.analyze :refer [analyze-module]])
   (with-open [^java.io.Closeable w (io/open-file-writer "/tmp/scratch.wasm")]
     (binding [*w* w]
       (let [form '(module
                     (func (export "the_answer") (result i32)
                       i32.const 42))
-            ast (analyze/module form)]
+            ast (analyze-module form)]
         (fipp.edn/pprint ast)
         (write-module ast))))
 
