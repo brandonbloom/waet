@@ -1,8 +1,6 @@
 (ns wasm-clj.encode
   (:use [wasm-clj.util])
-  (:require [clojure.spec.alpha :as s]
-            [wasm-clj.ast :as ast]
-            [wasm-clj.io :as io])
+  (:require [wasm-clj.io :as io])
   (:import [java.nio.charset Charset StandardCharsets]))
 
 (def ^:dynamic ^io/WriteSeeker *w*)
@@ -134,8 +132,6 @@
 
 ;;; Types.
 
-(s/fdef write-functype :args (s/cat :functype :wasm/functype))
-
 (defn write-functype [{:keys [params results]}]
   (write-byte 0x60)
   (write-vec write-valtype params)
@@ -260,23 +256,21 @@
 
 ;;; Modules.
 
-(s/fdef write-module :args (s/cat :module :wasm/module))
-
-(defn write-module [ast]
+(defn write-module [module]
   (write-magic)
   (write-version)
   ;TODO: custom sections interleaved throughout.
-  (write-typesec (:types ast))
-  (write-importsec (:imports ast))
-  (write-funcsec (:funcs ast))
-  (write-tablesec (:tables ast))
-  (write-memsec (:mems ast))
-  (write-globalsec (:globals ast))
-  (write-exportsec (:exports ast))
-  (write-startsec (:start ast))
-  (write-elemsec (:elems ast))
-  (write-codesec (:code ast))
-  (write-datasec (:data ast)))
+  (write-typesec (:types module))
+  (write-importsec (:imports module))
+  (write-funcsec (:funcs module))
+  (write-tablesec (:tables module))
+  (write-memsec (:mems module))
+  (write-globalsec (:globals module))
+  (write-exportsec (:exports module))
+  (write-startsec (:start module))
+  (write-elemsec (:elems module))
+  (write-codesec (:code module))
+  (write-datasec (:data module)))
 
 (comment
 
