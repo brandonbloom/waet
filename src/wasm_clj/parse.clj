@@ -1,37 +1,12 @@
 (ns wasm-clj.parse
-  (:use [wasm-clj.util]))
+  (:use [wasm-clj.util])
+  (:require [wasm-clj.values :refer [id? u32? index? name?]]))
 
 ;;;; See https://webassembly.github.io/spec/core/text/index.html
 
 (defn bad-syntax [form message]
   (fail (str "syntax error: " message)
         {:form form}))
-
-;;; Values.
-
-(defn name? [x]
-  ;;TODO: Tighter validation.
-  (string? x))
-
-(defn id? [x]
-  (and (simple-symbol? x)
-       (= (first (str x)) \$)))
-
-(defn value? [x]
-  (or (int? x)
-      (float? x)
-      (string? x) ; Includes names.
-      (id? x)))
-
-(defn u32? [x]
-  (and (int? x)
-       (<= 0 x))) ;TODO: max.
-
-(defn u64? [x]
-  (and (int? x)
-       (<= 0 x))) ;TODO: max.
-
-(def index? u32?)
 
 ;;; Utils.
 
@@ -102,9 +77,6 @@
 (defn scan-id []
   (scan-pred id?))
 
-(defn scan-ref []
-  (scan-pred #(or (id? %) (index? %))))
-
 (defn scan-name []
   (scan-pred name?))
 
@@ -118,13 +90,24 @@
   (scan-phrase 'import))
 
 (defn scan-typeuse []
-  (let [type (scan-opt (scan-phrase 'type))
+  (let [use (scan-opt (scan-phrase 'type))
         params (scan-all #(scan-phrase 'param))
-        results (scan-all #(scan-phrase 'result))]
-    {:type type
-     :params params
-     :results results
-     :forms (concat (when type [type]) params results)}))
+        results (scan-all #(scan-phrase 'result))
+        forms (concat (when use [use]) params results)
+        id (when use
+             (scanning (next use)
+               (scan-id)))
+        signature [params results]
+        type {:id id
+              :params params
+              :results results}
+        index (or (get-in *module* [:signatures signature])
+                  (let [index (emit-field :types type)]
+                    (change! *module* assoc-in [:signatures signature] index)
+                    index))]
+    (assoc type
+           :index index
+           :forms forms)))
 
 (defn scan-limits []
   (let [n (scan-u32)
@@ -180,28 +163,6 @@
 (defn scan-locals []
   (scan-all #(scan-phrase 'local)))
 
-(defn scan-importdesc []
-  (let [[head & tail :as form] (scan-phrase)
-        ast (scanning tail
-              (let [id (scan-opt (scan-id))
-                    type (case head
-                           func (scan-typeuse)
-                           table (scan-tabletype)
-                           memory (scan-memtype)
-                           global (scan-globaltype))]
-                {:id id :type type}))]
-    (assoc ast :head head :form form)))
-
-(defn scan-exportdesc []
-  (let [[head & tail :as form] (scan-phrase)]
-    (when-not ('#{func table memory global} head)
-      (bad-syntax form (str "cannot export " head)))
-    (scanning tail
-      (let [ref (scan-ref)]
-        {:head head
-         :form form
-         :ref ref}))))
-
 ;;; Module Fields.
 
 (def ^:dynamic *module*)
@@ -211,17 +172,13 @@
     (change! *module* update :counter inc)
     (symbol (str "$" name "__" n)))) ;TODO: Something less likely to collide.
 
-(defn lookup [id]
-  (or (get-in *module* [:env id])
-      (fail (str "undefined: " id) {:id id})))
-
-(defn emit-field [key ast]
-  (let [index (-> ast key count)
-        path [key index]]
-    (when-let [id (:id ast)]
-      (change! *module* assoc-in [:env id] path))
-    (change! *module* update key conj (assoc ast :index index))
-    (change! *module* update :fields conj path)
+(defn emit-field [section field]
+  (let [field (assoc field :sort :modulefield)
+        index (-> field section count)]
+    (change! *module* update :fields conj [section index])
+    (when-let [id (:id field)]
+      (change! *module* assoc-in [section :env id] index))
+    (change! *module* update-in [section :fields] conj field)
     index))
 
 (defmulti -parse-modulefield first)
@@ -233,11 +190,26 @@
 (defmethod -parse-modulefield 'type [ast]
   (fail "cannot parse/-modulefield 'type"))
 
+(defn scan-importdesc []
+  (let [[head & tail :as form] (scan-phrase)
+        ast (scanning tail
+              (let [id (scan-opt (scan-id))
+                    [section type] (case head
+                                     func [:funcs (scan-typeuse)]
+                                     table [:tables (scan-tabletype)]
+                                     memory [:mems (scan-memtype)]
+                                     global [:globals (scan-globaltype)]
+                                     (fail (str "cannot import " head)))]
+                {:id id
+                 :section section
+                 :type type}))]
+    (assoc ast :head head :form form)))
+
 (defmethod -parse-modulefield 'import [[head & tail :as form]]
   (scanning tail
     (let [module (scan-name)
           name (scan-name)
-          desc (scan-importdesc) ;XXX parse me
+          desc (scan-importdesc)
           ast {:head head
                :form form
                :module module
@@ -262,13 +234,14 @@
             (parse-modulefield (list* 'func id tail)))
           (let [type (scan-typeuse)
                 locals (scan-locals)
-                body (scan-rest)]
-            {:head 'func
-             :form form
-             :id id
-             :type type
-             :locals locals
-             :body body}))))))
+                body (scan-rest)
+                func {:head 'func
+                      :form form
+                      :id id
+                      :type type
+                      :locals locals
+                      :body body}]
+            (emit-field :funcs func)))))))
 
 (defmethod -parse-modulefield 'table [ast]
   (fail "cannot parse/-modulefield 'table"))
@@ -279,6 +252,22 @@
 (defmethod -parse-modulefield 'global [ast]
   (fail "cannot parse/-modulefield 'global"))
 
+(defn scan-exportdesc []
+  (let [[head & tail :as form] (scan-phrase)
+        section (case head
+                  func :funcs
+                  table :tables
+                  memory :mems
+                  global :globals
+                  (fail (str "cannot export " head)))]
+    (scanning tail
+      (let [id (scan-id)]
+        {:sort :exportdesc
+         :head head
+         :form form
+         :section section
+         :id id}))))
+
 (defmethod -parse-modulefield 'export [[head & tail :as form]]
   (scanning tail
     (let [name (scan-name)
@@ -286,7 +275,7 @@
           ast {:head head
                :form form
                :name name
-               :desc desc}] ;XXX parseme.
+               :desc desc}]
       (emit-field :exports ast))))
 
 (defmethod -parse-modulefield 'start [ast]
@@ -300,16 +289,19 @@
 
 ;;; Modules.
 
+(def empty-section {:env {} :fields []})
+
 (defn parse-module [[head & tail :as form]]
   {:pre [(has-head? 'module form)]}
-  (binding [*module* {:head head
-                      :env {}
+  (binding [*module* {:sort :toplevel
+                      :head head
                       :counter 0
-                      :fields []
-                      :types []
-                      :funcs []
-                      :imports []
-                      :exports []}]
+                      :signatures {}
+                      :fields empty-section
+                      :types empty-section
+                      :funcs empty-section
+                      :imports empty-section
+                      :exports empty-section}]
     (run! parse-modulefield tail)
     *module*))
 
@@ -323,7 +315,7 @@
 
   (party (module
             (func $i (import "imports" "imported_func") (param i32))
-            #_(func (export "exported_func")
+            (func (export "exported_func")
                   i32.const 42
                   call $i)))
 

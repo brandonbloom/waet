@@ -7,3 +7,7 @@
 
 (defmacro change! [var f & args]
   `(set! ~var (~f ~var ~@args)))
+
+(defn tap [x f]
+  (f x)
+  x)
