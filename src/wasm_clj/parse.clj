@@ -24,6 +24,24 @@
   (and (phrase? form)
        (= (first form) head)))
 
+;;; Fields.
+
+(def ^:dynamic *module*)
+
+(defn fresh-id [name]
+  (let [n (:counter *module*)]
+    (change! *module* update :counter inc)
+    (symbol (str "$" name "__" n)))) ;TODO: Something less likely to collide.
+
+(defn emit-field [section field]
+  (let [field (assoc field :sort :modulefield)
+        index (-> field section count)]
+    (change! *module* update :fields conj [section index])
+    (when-let [id (:id field)]
+      (change! *module* assoc-in [section :env id] index))
+    (change! *module* update-in [section :fields] conj field)
+    index))
+
 ;;; Scanning.
 
 (def ^:dynamic *input*)
@@ -90,13 +108,18 @@
   (scan-phrase 'import))
 
 (defn scan-typeuse []
-  (let [use (scan-opt (scan-phrase 'type))
-        params (scan-all #(scan-phrase 'param))
-        results (scan-all #(scan-phrase 'result))
-        forms (concat (when use [use]) params results)
-        id (when use
-             (scanning (next use)
+  (let [type-form (scan-opt (scan-phrase 'type))
+        param-forms (scan-all #(scan-phrase 'param))
+        result-forms (scan-all #(scan-phrase 'result))
+        forms (concat (when type-form
+                        [type-form])
+                      param-forms
+                      result-forms)
+        id (when type-form
+             (scanning (next type-form)
                (scan-id)))
+        params (mapv second param-forms) ;TODO: validate.
+        results (mapv second result-forms) ;TODO: validate.
         signature [params results]
         type {:id id
               :params params
@@ -164,22 +187,6 @@
   (scan-all #(scan-phrase 'local)))
 
 ;;; Module Fields.
-
-(def ^:dynamic *module*)
-
-(defn fresh-id [name]
-  (let [n (:counter *module*)]
-    (change! *module* update :counter inc)
-    (symbol (str "$" name "__" n)))) ;TODO: Something less likely to collide.
-
-(defn emit-field [section field]
-  (let [field (assoc field :sort :modulefield)
-        index (-> field section count)]
-    (change! *module* update :fields conj [section index])
-    (when-let [id (:id field)]
-      (change! *module* assoc-in [section :env id] index))
-    (change! *module* update-in [section :fields] conj field)
-    index))
 
 (defmulti -parse-modulefield first)
 

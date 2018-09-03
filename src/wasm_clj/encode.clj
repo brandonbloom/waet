@@ -1,6 +1,8 @@
 (ns wasm-clj.encode
   (:use [wasm-clj.util])
-  (:require [wasm-clj.io :as io])
+  (:require [clojure.spec.alpha :as s]
+            [wasm-clj.ast :as ast]
+            [wasm-clj.io :as io])
   (:import [java.nio.charset Charset StandardCharsets]))
 
 (def ^:dynamic ^io/WriteSeeker *w*)
@@ -68,7 +70,7 @@
         size (- end mark ^long max-u32-leb128-size)]
     (io/seek *w* mark)
     (write-padded-u32-leb128 size)
-    (io/seek *w* mark)))
+    (io/seek *w* end)))
 
 (defmacro writing-section [id & body]
   `(let [mark# (begin-section ~id)
@@ -132,6 +134,8 @@
 
 ;;; Types.
 
+(s/fdef write-functype :args (s/cat :functype :wasm/functype))
+
 (defn write-functype [{:keys [params results]}]
   (write-byte 0x60)
   (write-vec write-valtype params)
@@ -161,12 +165,12 @@
 
 ;;; Functions.
 
-(defn write-functype [{:keys [index]}]
+(defn write-type [{:keys [index]}]
   (write-index index))
 
 (defn write-funcsec [{:keys [fields]}]
   (prn 'funcsec-types= (map :type fields))
-  (write-vec-section 3 write-functype (map :type fields)))
+  (write-vec-section 3 write-type (map :type fields)))
 
 ;;; Tables.
 
@@ -255,6 +259,8 @@
   (write-vec-section 11 write-data fields))
 
 ;;; Modules.
+
+(s/fdef write-module :args (s/cat :module :wasm/module))
 
 (defn write-module [ast]
   (write-magic)

@@ -23,4 +23,6 @@
     (.close f)))
 
 (defn open-file-writer [^String path]
-  (FileWriter. (RandomAccessFile. path "rw")))
+  (let [f (RandomAccessFile. path "rw")]
+    (.setLength f 0)
+    (FileWriter. f)))
