@@ -1,6 +1,5 @@
 (ns wasm-clj.validate
-  (:use [wasm-clj.util])
-  (:require [wasm-clj.visit :refer [visit]]))
+  (:use [wasm-clj.util]))
 
 (defn validate-module [ast]
   ast) ;XXX

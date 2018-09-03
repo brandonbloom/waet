@@ -102,7 +102,7 @@
   (write-u32-leb128 (count xs))
   (run! write xs))
 
-(defn write-vec-section [id write fields]
+(defn write-vecsec [id write fields]
   (when (seq fields)
     (writing-section id
       (write-vec write fields))))
@@ -176,7 +176,7 @@
   (write-vec write-valtype results))
 
 (defn write-typesec [types]
-  (write-vec-section 1 write-functype types))
+  (write-vecsec 1 write-functype types))
 
 ;;; Imports.
 
@@ -195,7 +195,7 @@
   (write-importdesc desc))
 
 (defn write-importsec [imports]
-  (write-vec-section 2 write-import imports))
+  (write-vecsec 2 write-import imports))
 
 ;;; Functions.
 
@@ -204,7 +204,7 @@
 
 (defn write-funcsec [funcs]
   (prn 'funcsec-types= (map :type funcs))
-  (write-vec-section 3 write-type (map :type funcs)))
+  (write-vecsec 3 write-type (map :type funcs)))
 
 ;;; Tables.
 
@@ -217,7 +217,7 @@
   (write-limits limits))
 
 (defn write-tablesec [tables]
-  (write-vec-section 4 write-tabletype tables))
+  (write-vecsec 4 write-tabletype tables))
 
 ;;; Memory.
 
@@ -226,7 +226,7 @@
 (def write-mem write-memtype)
 
 (defn write-memsec [mems]
-  (write-vec-section 5 write-mem mems))
+  (write-vecsec 5 write-mem mems))
 
 ;;; Globals.
 
@@ -241,7 +241,7 @@
   (write-expr expr))
 
 (defn write-globalsec [globals]
-  (write-vec-section 6 write-global globals))
+  (write-vecsec 6 write-global globals))
 
 ;;; Exports.
 
@@ -259,7 +259,7 @@
   (write-exportdesc desc))
 
 (defn write-exportsec [exports]
-  (write-vec-section 7 write-export exports))
+  (write-vecsec 7 write-export exports))
 
 ;;; Start.
 
@@ -276,7 +276,7 @@
   (write-vec write-index (map :index init)))
 
 (defn write-elemsec [elems]
-  (write-vec-section 9 write-elem elems))
+  (write-vecsec 9 write-elem elems))
 
 ;;; Code.
 
@@ -295,7 +295,7 @@
     (write-expr body)))
 
 (defn write-codesec [funcs]
-  (write-vec-section 10 write-code funcs))
+  (write-vecsec 10 write-code funcs))
 
 ;;; Data.
 
@@ -305,7 +305,7 @@
   (write-vec write-byte init))
 
 (defn write-datasec [data]
-  (write-vec-section 11 write-data data))
+  (write-vecsec 11 write-data data))
 
 ;;; Modules.
 
@@ -344,7 +344,10 @@
     (binding [*w* w]
       (let [form '(module
                     (func (export "the_answer") (result i32)
-                      i32.const 42))
+                      i32.const 42)
+                    (func $main (result i32)
+                      i32.const 123)
+                    (start $main))
             ast (analyze-module form)]
         (write-module ast))))
 

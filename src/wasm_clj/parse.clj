@@ -35,9 +35,11 @@
     (symbol (str "$" name "__" n)))) ;TODO: Something less likely to collide.
 
 (defn emit-field [section field]
-  (let [field (assoc field :sort :modulefield)
-        index (-> field section count)]
-    (change! *module* update :fields conj [section index])
+  (let [index (-> *module* section :fields count)
+        field (assoc field
+                     :sort :modulefield
+                     :index index)]
+    (change! *module* update :fields conj [section :fields index])
     (when-let [id (:id field)]
       (change! *module* assoc-in [section :env id] index))
     (change! *module* update-in [section :fields] conj field)
@@ -158,7 +160,7 @@
   (scan-all scan-result))
 
 (defn scan-typeuse []
-  (let [typeid (scanning-opt scan-typeid)
+  (let [typeid (scanning-opt (scan-typeid))
         params (scan-params)
         results (scan-results)
         forms (concat (when typeid
@@ -177,7 +179,7 @@
                     index))]
     (assoc type
            :index index
-           :forms forms)))
+           :forms (vec forms))))
 
 (defn scan-limits []
   (let [n (scan-u32)
@@ -303,7 +305,7 @@
   (check-phrase form)
   (-parse-modulefield form))
 
-(defmethod -parse-modulefield 'type [ast]
+(defmethod -parse-modulefield 'type [form]
   (fail "cannot parse/-modulefield 'type"))
 
 (defn scan-importdesc []
@@ -359,13 +361,13 @@
                       :body body}]
             (emit-field :funcs func)))))))
 
-(defmethod -parse-modulefield 'table [ast]
+(defmethod -parse-modulefield 'table [form]
   (fail "cannot parse/-modulefield 'table"))
 
-(defmethod -parse-modulefield 'mem [ast]
+(defmethod -parse-modulefield 'mem [form]
   (fail "cannot parse/-modulefield 'mem"))
 
-(defmethod -parse-modulefield 'global [ast]
+(defmethod -parse-modulefield 'global [form]
   (fail "cannot parse/-modulefield 'global"))
 
 (defn scan-exportdesc []
@@ -394,18 +396,25 @@
                :desc desc}]
       (emit-field :exports ast))))
 
-(defmethod -parse-modulefield 'start [ast]
-  (fail "cannot parse/-modulefield 'start"))
+(defmethod -parse-modulefield 'start [[head & tail :as form]]
+  (change! *module* update :fields conj [:start])
+  (let [start (scanning tail
+                (let [id (scan-id)]
+                  {:sort :modulefield
+                   :head head
+                   :func {:section :funcs :id id}
+                   :form form}))]
+    (change! *module* assoc :start start)))
 
-(defmethod -parse-modulefield 'elem [ast]
+(defmethod -parse-modulefield 'elem [form]
   (fail "cannot parse/-modulefield 'elem"))
 
-(defmethod -parse-modulefield 'data [ast]
+(defmethod -parse-modulefield 'data [form]
   (fail "cannot parse/-modulefield 'data"))
 
 ;;; Modules.
 
-(def empty-section {:env {} :fields []})
+(def empty-vecsec {:env {} :fields []})
 
 (defn parse-module [[head & tail :as form]]
   {:pre [(has-head? 'module form)]}
@@ -413,10 +422,10 @@
                       :head head
                       :counter 0
                       :signatures {}
-                      :fields empty-section
-                      :types empty-section
-                      :funcs empty-section
-                      :imports empty-section
-                      :exports empty-section}]
+                      :fields []
+                      :types empty-vecsec
+                      :funcs empty-vecsec
+                      :imports empty-vecsec
+                      :exports empty-vecsec}]
     (run! parse-modulefield tail)
     *module*))
