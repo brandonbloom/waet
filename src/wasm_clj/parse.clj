@@ -1,6 +1,7 @@
 (ns wasm-clj.parse
   (:use [wasm-clj.util])
-  (:require [wasm-clj.values :refer [id? u32? index? name?]]))
+  (:require [wasm-clj.values :as val]
+            [wasm-clj.inst :as inst]))
 
 ;;;; See https://webassembly.github.io/spec/core/text/index.html
 
@@ -69,7 +70,7 @@
   (or (identical? ex no-match-exception) ; Fast path (preallocated).
       (::no-match (ex-data ex))))        ; Slow path (with stacktrace).
 
-(defmacro scan-opt [& body]
+(defmacro scanning-opt [& body]
   `(try
      ~@body
      (catch Exception ex#
@@ -83,20 +84,23 @@
           x)
       (no-match))))
 
+(defn scan []
+  (scan-pred (constantly true)))
+
 (defn scan-all [scan]
   (loop [v []]
-    (if-let [x (scan-opt (scan))]
+    (if-let [x (scanning-opt (scan))]
       (recur (conj v x))
       v)))
 
 (defn scan-u32 []
-  (scan-pred u32?))
+  (scan-pred val/u32?))
 
 (defn scan-id []
-  (scan-pred id?))
+  (scan-pred val/id?))
 
 (defn scan-name []
-  (scan-pred name?))
+  (scan-pred val/name?))
 
 (defn scan-phrase
   ([]
@@ -107,21 +111,64 @@
 (defn scan-import []
   (scan-phrase 'import))
 
+(defn scan-typeid []
+  (let [[_ & tail :as form] (scan-phrase 'type)]
+    (scanning tail
+      (let [id scan-id]
+        {:head 'type
+         :id id}))))
+
+(defn scan-valtype []
+  (scan-pred '#{i32 i64 f32 f64}))
+
+(defn scan-local []
+  (let [[_ & tail :as form] (scan-phrase 'local)]
+    (if-let [id (scanning-opt (scan-id))]
+      (let [type (scan-valtype)]
+        {:head 'local
+         :id id
+         :type type
+         :form form})
+      (let [types (scan-all scan-valtype)]
+        {:head 'local
+         :types types
+         :form form}))))
+
+(defn scan-locals []
+  (scan-all scan-local))
+
+(defn scan-param []
+  (let [[_ & tail :as form] (scan-phrase 'param)]
+    (let [type (scan-valtype)]
+      {:head 'param
+       :type type
+       :form form})))
+
+(defn scan-params []
+  (scan-all scan-param))
+
+(defn scan-result []
+  (let [[_ & tail :as form] (scan-phrase 'result)]
+    (let [type (scan-valtype)]
+      {:head 'param
+       :type type
+       :form form})))
+
+(defn scan-results []
+  (scan-all scan-result))
+
 (defn scan-typeuse []
-  (let [type-form (scan-opt (scan-phrase 'type))
-        param-forms (scan-all #(scan-phrase 'param))
-        result-forms (scan-all #(scan-phrase 'result))
-        forms (concat (when type-form
-                        [type-form])
-                      param-forms
-                      result-forms)
-        id (when type-form
-             (scanning (next type-form)
-               (scan-id)))
-        params (mapv second param-forms) ;TODO: validate.
-        results (mapv second result-forms) ;TODO: validate.
-        signature [params results]
-        type {:id id
+  (let [typeid (scanning-opt scan-typeid)
+        params (scan-params)
+        results (scan-results)
+        forms (concat (when typeid
+                        [(:form typeid)])
+                      (map :form params)
+                      (map :form results))
+        signature [(mapv :type params)
+                   (mapv :type results)]
+        type {:id (:id typeid)
+              :typeid typeid
               :params params
               :results results}
         index (or (get-in *module* [:signatures signature])
@@ -134,7 +181,7 @@
 
 (defn scan-limits []
   (let [n (scan-u32)
-        m (scan-opt (scan-u32))]
+        m (scanning-opt (scan-u32))]
     {:min n
      :max (or m n)}))
 
@@ -150,11 +197,8 @@
     {:limits limits
      :elemtype elemtype}))
 
-(defn scan-valtype []
-  (scan-pred '#{i32 i64 f32 f64}))
-
 (defn scan-globaltype []
-  (let [var (scan-opt (scan-phrase 'mut))]
+  (let [var (scanning-opt (scan-phrase 'mut))]
     (if-let [[head & tail] var]
       (scanning tail
         (let [type (scan-valtype)]
@@ -183,8 +227,73 @@
          :module module
          :name name}))))
 
-(defn scan-locals []
-  (scan-all #(scan-phrase 'local)))
+;;; Instructions.
+
+(def op? symbol?)
+
+(declare scan-inst)
+
+(defn scan-body []
+  (loop [body []]
+    (let [{:keys [op] :as inst} (scan-inst)]
+      (if ('#{end else} op)
+        [body op]
+        (recur (conj body inst))))))
+
+(def scan-label scan-id)
+
+(defn scan-block []
+  (let [label (scan-label)
+        result (scan-results)
+        [body terminator] (scan-body)
+        id (scanning-opt (scan-id))]
+    {:label label
+     :result result
+     :body body
+     :id id
+     :terminator terminator}))
+
+(defn scan-end-block []
+  (let [block (scan-block)]
+    (when (not= (:terminator block) 'end)
+      (fail "expected end"))
+    block))
+
+(defn scan-then+else []
+  (let [then (scan-block)
+        else (case (:terminator then)
+               end nil
+               then (scan-end-block))]
+    {:then then
+     :else else}))
+
+(defn scan-branches []
+  (fail "TODO: scan-branches")) ;XXX
+
+(defn scan-memarg []
+  (fail "TODO: scan-memags")) ;XXX
+
+(defn scan-op []
+  (scan-pred op?))
+
+(defn scan-inst []
+  (let [op (scan-op)
+        args (case (get-in inst/by-name [op :shape])
+               :nullary {}
+               :body (scan-block)
+               :if (scan-then+else)
+               :label {:label (scan-label)}
+               :br_table (scan-branches)
+               :call {:func (scan-id)}
+               :call_indirect {:type (scan-typeuse)}
+               :local {:local (scan-id)}
+               :global {:global (scan-id)}
+               :mem (scan-memarg)
+               :i32 {:value (scan-pred val/i32?)}
+               :i64 {:value (scan-pred val/i64?)}
+               :f32 {:value (scan-pred val/f32?)}
+               :f64 {:value (scan-pred val/f64?)})]
+    (assoc args :op op)))
 
 ;;; Module Fields.
 
@@ -200,7 +309,7 @@
 (defn scan-importdesc []
   (let [[head & tail :as form] (scan-phrase)
         ast (scanning tail
-              (let [id (scan-opt (scan-id))
+              (let [id (scanning-opt (scan-id))
                     [section type] (case head
                                      func [:funcs (scan-typeuse)]
                                      table [:tables (scan-tabletype)]
@@ -226,22 +335,22 @@
 
 (defmethod -parse-modulefield 'func [[head & tail :as form]]
   (scanning tail
-    (let [id (scan-opt (scan-id))
-          import (scan-opt (scan-inline-import))]
+    (let [id (scanning-opt (scan-id))
+          import (scanning-opt (scan-inline-import))]
       (if-let [{:keys [module name]} import]
         (let [type (scan-typeuse)]
           (parse-modulefield (list 'import module name
                                    (concat ['func]
                                            (when id [id])
                                            (:forms type)))))
-        (if-let [{:keys [name]} (scan-opt (scan-inline-export))]
+        (if-let [{:keys [name]} (scanning-opt (scan-inline-export))]
           (let [tail (scan-rest)
                 id (fresh-id name)]
             (parse-modulefield (list 'export name (list 'func id)))
             (parse-modulefield (list* 'func id tail)))
           (let [type (scan-typeuse)
                 locals (scan-locals)
-                body (scan-rest)
+                body (scan-all scan-inst)
                 func {:head 'func
                       :form form
                       :id id
@@ -311,19 +420,3 @@
                       :exports empty-section}]
     (run! parse-modulefield tail)
     *module*))
-
-;;; End.
-
-(comment
-
-  (defmacro party [form]
-    (require 'fipp.edn)
-    `(fipp.edn/pprint (parse-module '~form)))
-
-  (party (module
-            (func $i (import "imports" "imported_func") (param i32))
-            (func (export "exported_func")
-                  i32.const 42
-                  call $i)))
-
-)
