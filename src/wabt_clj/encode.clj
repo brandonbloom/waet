@@ -339,18 +339,6 @@
   (write-codesec (-> module :funcs :fields))
   (write-datasec (-> module :data :fields)))
 
-(comment
-
-  (require '[wabt-clj.analyze :refer [analyze-module]])
-  (with-open [^java.io.Closeable w (io/open-file-writer "/tmp/scratch.wasm")]
-    (binding [*w* w]
-      (let [form '(module
-                    (func (export "the_answer") (result i32)
-                      i32.const 42)
-                    (func $main (result i32)
-                      i32.const 123)
-                    (start $main))
-            ast (analyze-module form)]
-        (write-module ast))))
-
-)
+(defn encode-module [w module]
+  (binding [*w* w]
+    (write-module module)))
