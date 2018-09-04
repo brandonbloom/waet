@@ -1,5 +1,5 @@
-(ns wasm-clj.validate
-  (:use [wasm-clj.util]))
+(ns wabt-clj.validate
+  (:use [wabt-clj.util]))
 
 ;;;; See <https://webassembly.github.io/spec/core/valid/index.html>.
 

@@ -1,8 +1,8 @@
-(ns wasm-clj.encode
-  (:use [wasm-clj.util])
-  (:require [wasm-clj.values :refer [u32?]]
-            [wasm-clj.inst :as inst]
-            [wasm-clj.io :as io])
+(ns wabt-clj.encode
+  (:use [wabt-clj.util])
+  (:require [wabt-clj.values :refer [u32?]]
+            [wabt-clj.inst :as inst]
+            [wabt-clj.io :as io])
   (:import [java.nio.charset Charset StandardCharsets]))
 
 ;;;; See <https://webassembly.github.io/spec/core/binary/index.html>.
@@ -341,7 +341,7 @@
 
 (comment
 
-  (require '[wasm-clj.analyze :refer [analyze-module]])
+  (require '[wabt-clj.analyze :refer [analyze-module]])
   (with-open [^java.io.Closeable w (io/open-file-writer "/tmp/scratch.wasm")]
     (binding [*w* w]
       (let [form '(module

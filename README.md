@@ -1,6 +1,4 @@
-# wasm-clj
-
-TODO: Rename to wabt-clj
+# wabt-clj
 
 A Clojure library designed to ... well, that part is up to you.
 

@@ -1,4 +1,4 @@
-(ns wasm-clj.inst)
+(ns wabt-clj.inst)
 
 (def header [:opcode :name :shape])
 (def table '[

@@ -1,7 +1,7 @@
-(ns wasm-clj.parse
-  (:use [wasm-clj.util])
-  (:require [wasm-clj.values :as val]
-            [wasm-clj.inst :as inst]))
+(ns wabt-clj.parse
+  (:use [wabt-clj.util])
+  (:require [wabt-clj.values :as val]
+            [wabt-clj.inst :as inst]))
 
 ;;;; See <https://webassembly.github.io/spec/core/text/index.html>.
 

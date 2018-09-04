@@ -1,7 +1,7 @@
-(ns wasm-clj.xref
-  (:use [wasm-clj.util])
-  (:require [wasm-clj.values :refer [id? index?]]
-            [wasm-clj.inst :as inst]))
+(ns wabt-clj.xref
+  (:use [wabt-clj.util])
+  (:require [wabt-clj.values :refer [id? index?]]
+            [wabt-clj.inst :as inst]))
 
 (def ^:dynamic *module*)
 

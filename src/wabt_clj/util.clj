@@ -1,4 +1,4 @@
-(ns wasm-clj.util)
+(ns wabt-clj.util)
 
 (defn fail
   ([msg] (fail msg {}))

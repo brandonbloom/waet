@@ -1,4 +1,4 @@
-(ns wasm-clj.io
+(ns wabt-clj.io
   (:require [clojure.core :as clj])
   (:import [java.io RandomAccessFile Closeable]))
 
