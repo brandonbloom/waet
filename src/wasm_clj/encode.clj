@@ -5,6 +5,8 @@
             [wasm-clj.io :as io])
   (:import [java.nio.charset Charset StandardCharsets]))
 
+;;;; See <https://webassembly.github.io/spec/core/binary/index.html>.
+
 (def ^:dynamic ^io/WriteSeeker *w*)
 
 (defn pos ^long []
@@ -63,8 +65,8 @@
       (write-byte 0x00))
     begin))
 
-(defn begin-section [id]
-  (write-byte ^byte id)
+(defn begin-section [secid]
+  (write-byte ^byte secid)
   (reserve-u32-leb128))
 
 (defn write-padded-u32-leb128 [^long n]
@@ -81,8 +83,8 @@
     (write-padded-u32-leb128 size)
     (io/seek *w* end)))
 
-(defmacro writing-section [id & body]
-  `(let [mark# (begin-section ~id)
+(defmacro writing-section [secid & body]
+  `(let [mark# (begin-section ~secid)
          res# (do ~@body)]
      (end-section mark#)
      res#))
@@ -102,9 +104,9 @@
   (write-u32-leb128 (count xs))
   (run! write xs))
 
-(defn write-vecsec [id write fields]
+(defn write-vecsec [secid write fields]
   (when (seq fields)
-    (writing-section id
+    (writing-section secid
       (write-vec write fields))))
 
 (def ^Charset utf8 StandardCharsets/UTF_8)
@@ -148,7 +150,7 @@
   (write-opcode op)
   (case (get-in inst/by-name [op :shape])
     :nullary nil
-    ;TODO :body
+    ;TODO :block
     ;TODO: :if
     ;TODO: :label
     ;TODO: :br_table

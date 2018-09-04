@@ -3,7 +3,7 @@
   (:require [wasm-clj.values :as val]
             [wasm-clj.inst :as inst]))
 
-;;;; See https://webassembly.github.io/spec/core/text/index.html
+;;;; See <https://webassembly.github.io/spec/core/text/index.html>.
 
 (defn bad-syntax [form message]
   (fail (str "syntax error: " message)
@@ -41,7 +41,10 @@
                      :index index)]
     (change! *module* update :fields conj [section :fields index])
     (when-let [id (:id field)]
-      (change! *module* assoc-in [section :env id] index))
+      (let [path [section :env id]]
+        (when (get-in *module* path)
+          (fail (str "Redefinition of " id " in " section)))
+        (change! *module* assoc-in path index)))
     (change! *module* update-in [section :fields] conj field)
     index))
 
@@ -242,7 +245,8 @@
         [body op]
         (recur (conj body inst))))))
 
-(def scan-label scan-id)
+(defn scan-label []
+  {:id scan-id})
 
 (defn scan-block []
   (let [label (scan-label)
@@ -282,14 +286,14 @@
   (let [op (scan-op)
         args (case (get-in inst/by-name [op :shape])
                :nullary {}
-               :body (scan-block)
+               :block (scan-block)
                :if (scan-then+else)
                :label {:label (scan-label)}
                :br_table (scan-branches)
                :call {:func (scan-id)}
                :call_indirect {:type (scan-typeuse)}
-               :local {:local (scan-id)}
-               :global {:global (scan-id)}
+               :local {:local {:id (scan-id)}}
+               :global {:global {:id (scan-id) :section :globals}}
                :mem (scan-memarg)
                :i32 {:value (scan-pred val/i32?)}
                :i64 {:value (scan-pred val/i64?)}
@@ -426,6 +430,7 @@
                       :types empty-vecsec
                       :funcs empty-vecsec
                       :imports empty-vecsec
-                      :exports empty-vecsec}]
+                      :exports empty-vecsec
+                      :data empty-vecsec}]
     (run! parse-modulefield tail)
     *module*))

@@ -7,7 +7,7 @@
 (defn analyze-module [form]
   (-> form
       parse-module
-      ;(tap #(fipp.edn/pprint (list 'parsed= %)))
+      (tap #(fipp.edn/pprint (list 'parsed= %)))
       xref-module
       (tap #(fipp.edn/pprint (list 'xrefed= %)))
       validate-module))

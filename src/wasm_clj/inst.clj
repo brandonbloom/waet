@@ -8,8 +8,8 @@
   0x00 unreachable    :nullary
   0x01 nop            :nullary
 
-  0x02 block          :body
-  0x03 loop           :body
+  0x02 block          :block
+  0x03 loop           :block
   0x04 if             :if
   0x0B end            :nullary
 
