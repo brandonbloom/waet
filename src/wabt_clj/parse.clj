@@ -420,10 +420,10 @@
 
 (def empty-vecsec {:env {} :fields []})
 
-(defn parse-module [[head & tail :as form]]
-  {:pre [(has-head? 'module form)]}
+(defn parse-module* [[head & tail :as form]]
   (binding [*module* {:sort :toplevel
                       :head head
+                      :form form
                       :counter 0
                       :signatures {}
                       :fields []
@@ -431,6 +431,14 @@
                       :funcs empty-vecsec
                       :imports empty-vecsec
                       :exports empty-vecsec
-                      :data empty-vecsec}]
-    (run! parse-modulefield tail)
-    *module*))
+                      :data empty-vecsec
+                      :start nil}]
+      (run! parse-modulefield tail)
+      *module*))
+
+(defn parse-module [forms]
+  (if (has-head? 'module (first forms))
+    (if (next forms)
+      (fail "unexpected form after module")
+      (parse-module* (first forms)))
+    (parse-module* (list* 'module forms))))

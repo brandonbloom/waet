@@ -205,7 +205,6 @@
   (write-index index))
 
 (defn write-funcsec [funcs]
-  (prn 'funcsec-types= (map :type funcs))
   (write-vecsec 3 write-type (map :type funcs)))
 
 ;;; Tables.

@@ -6,6 +6,7 @@
 (def ^:dynamic *module*)
 
 (defn resolve-id [section id]
+  {:pre [(keyword? section)]}
   (or (get-in *module* [section :env id])
       (fail (str id " undefined in " section) {:section section :id id})))
 
@@ -80,4 +81,6 @@
     (change! *module* xref-vecsec xref-func :funcs)
     (change! *module* xref-vecsec xref-elem :elems)
     (change! *module* xref-vecsec xref-data :data)
-    (change! *module* update-in [:start :func] resolved)))
+    (when (:start *module*)
+      (change! *module* update-in [:start :func] resolved))
+    *module*))

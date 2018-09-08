@@ -4,10 +4,10 @@
             [wabt-clj.xref :refer [xref-module]]
             [wabt-clj.validate :refer [validate-module]]))
 
-(defn analyze-module [form]
-  (-> form
+(defn analyze-module [forms]
+  (-> forms
       parse-module
-      (tap #(fipp.edn/pprint (list 'parsed= %)))
+      ;(tap #(fipp.edn/pprint (list 'parsed= %)))
       xref-module
-      (tap #(fipp.edn/pprint (list 'xrefed= %)))
+      ;(tap #(fipp.edn/pprint (list 'xrefed= %)))
       validate-module))

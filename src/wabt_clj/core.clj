@@ -3,16 +3,18 @@
             [wabt-clj.encode :refer [encode-module]]
             [wabt-clj.io :as io]))
 
+(defn edn->wasm [r w]
+  (let [module (analyze-module (io/edn-seq r))]
+    (encode-module w module)))
+
 (comment
 
-  (let [form '(module
-                (func (export "the_answer") (result i32)
+  (let [forms '[(func (export "the_answer") (result i32)
                   i32.const 42)
                 (func $main (result i32)
                   i32.const 123)
-                (start $main))
-        ast (analyze-module form)]
+                (start $main)]]
     (with-open [^java.io.Closeable w (io/open-file-writer "/tmp/scratch.wasm")]
-      (encode-module w ast)))
+      (edn->wasm forms w)))
 
 )
