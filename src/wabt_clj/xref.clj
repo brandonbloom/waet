@@ -22,7 +22,7 @@
 (def ^:dynamic *labels*)
 
 (defn resolved-local [{:keys [id]}]
-  (or (get-in *locals* [:locals id])
+  (or (*locals* id)
       (fail (str "undefined local: " id))))
 
 (declare xref-inst)
@@ -30,22 +30,22 @@
 (defn xref-body [body]
   (mapv xref-inst body))
 
-(defn xref-block [{:keys [label body] :as block}]
+(defn xref-bodies [{:keys [label body] :as ast} keys]
   (if label
     (let [label (assoc label :index (count *labels*))]
       (binding [*labels* (assoc *labels* (:id label) label)]
-        (-> block
-            (assoc :label label)
-            (update :body xref-body))))
+        (let [ast (assoc ast :label label)]
+          (reduce (fn [ast key]
+                    (update ast key xref-body))
+                  ast
+                  keys))))
     (update :body xref-body)))
 
 (defn xref-inst [inst]
   (case (get-in inst/by-name [(:op inst) :shape])
     :nullary inst
-    :block (xref-block inst)
-    :if (-> inst
-            (update :then xref-block)
-            (update :else xref-block))
+    :block (xref-bodies inst [:body])
+    :if (xref-bodies inst [:then :else])
     :label (update inst :label resolved)
     ;XXX :br_table
     :call (update inst :func resolved)
@@ -60,7 +60,15 @@
     ))
 
 (defn xref-func [func]
-  (binding [*locals* (into {} (map (juxt :id identity)) (:locals func))
+  (binding [*locals* (into {}
+                       (mapcat (fn [{:keys [id] :as local} index]
+                                 (let [local (assoc local :index index)]
+                                   (cons [index local]
+                                         (when id
+                                           [[id local]]))))
+                               (concat (-> func :type :params)
+                                       (:locals func))
+                               (range)))
             *labels* {}]
     (-> func
         (update :type resolved)

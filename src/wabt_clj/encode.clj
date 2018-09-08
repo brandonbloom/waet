@@ -3,7 +3,8 @@
   (:require [wabt-clj.values :refer [u32?]]
             [wabt-clj.inst :as inst]
             [wabt-clj.io :as io])
-  (:import [java.nio.charset Charset StandardCharsets]))
+  (:import [java.nio.charset Charset StandardCharsets]
+           [java.nio ByteBuffer]))
 
 ;;;; See <https://webassembly.github.io/spec/core/binary/index.html>.
 
@@ -56,6 +57,16 @@
 (def write-index write-u32-leb128)
 
 (def max-u32-leb128-size 5)
+
+(defn write-f32 [value]
+  (let [bs (byte-array 4)]
+    (.putFloat (ByteBuffer/wrap bs) value)
+    (write-bytes bs)))
+
+(defn write-f64 [value]
+  (let [bs (byte-array 8)]
+    (.putDouble (ByteBuffer/wrap bs) value)
+    (write-bytes bs)))
 
 ;;; Composites.
 
@@ -146,36 +157,56 @@
 (defn write-opcode [op]
   (write-byte (opcode op)))
 
+(defn write-blocktype [results]
+  {:pre [(vector? results)]}
+  (cond
+    (= results []) (write-byte 0x40)
+    (= (count results) 1) (write-valtype (-> results first :type))
+    :else (fail "multiple-return blocktype is unsupported")))
+
+(declare write-inst)
+
+(defn write-expr [body]
+  (run! write-inst body)
+  (write-opcode 'end))
+
+(defn write-block [{:keys [results body] :as block}]
+  (write-blocktype results)
+  (write-expr body))
+
+(defn write-then+else [{:keys [results then else]}]
+  (write-blocktype results)
+  (run! write-inst then)
+  (when else
+    (write-opcode 'else)
+    (run! write-inst else))
+  (write-opcode 'end))
+
 (defn write-inst [{:keys [op] :as inst}]
   (write-opcode op)
   (case (get-in inst/by-name [op :shape])
     :nullary nil
-    ;TODO :block
-    ;TODO: :if
-    ;TODO: :label
+    :block (write-block inst)
+    :if (write-then+else inst)
+    :label (write-index (-> inst :label :index))
     ;TODO: :br_table
-    ;TODO: :call
-    ;TODO: :call_indirect
-    ;TODO: :local
-    ;TODO: :global
+    :call (write-index (-> inst :func :index))
+    :call_indirect (write-index (-> inst :type :index))
+    :local (write-index (-> inst :local :index))
+    :global (write-index (-> inst :global :index))
     ;TODO: :mem
     :i32 (write-signed-leb128 (:value inst))
     :i64 (write-signed-leb128 (:value inst))
-    ;TODO: :f32
-    ;TODO: :f64
+    :f32 (write-f32 (:value inst))
+    :f64 (write-f64 (:value inst))
     ))
-
-(defn write-expr [body]
-  (prn 'body= body)
-  (run! write-inst body)
-  (write-opcode 'end))
 
 ;;; Types.
 
 (defn write-functype [{:keys [params results]}]
   (write-byte 0x60)
-  (write-vec write-valtype params)
-  (write-vec write-valtype results))
+  (write-vec write-valtype (map :type params))
+  (write-vec write-valtype (map :type results)))
 
 (defn write-typesec [types]
   (write-vecsec 1 write-functype types))

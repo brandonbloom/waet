@@ -11,6 +11,7 @@
   0x02 block          :block
   0x03 loop           :block
   0x04 if             :if
+  0x05 else           :nullary
   0x0B end            :nullary
 
   0x0C br             :label

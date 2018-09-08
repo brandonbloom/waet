@@ -28,20 +28,20 @@
          (remove #(.isDirectory ^File %))
          (filter #(str/ends-with? (.getPath ^File %) ".txt"))))
 
-  (doseq [^File file (take 10 test-files) ;XXX remove take
+  (doseq [^File file (take 9 test-files) ;XXX remove take
           :let [_ (println)
                 path (.getPath file)
                 [tool-line args-line] (line-seq (io/reader file))]
           :when (or (= tool-line ";;; TOOL: run-interp")
-                    (println "Skipping" path "with unknown TOOL:" tool-line))
+                    #_(println "Skipping" path "with unknown TOOL:" tool-line))
           :when (or (not (re-find #"ARG" args-line))
-                    (println "Skipping" path "with unsupported args:" args-line))
+                    #_(println "Skipping" path "with unsupported args:" args-line))
           :let [_ (println "Running test:" path)
                 content (slurp file)
                 ;; Gather input; strip WAT-style comments.
                 source (str/replace content #"(?s)\(;.*;\)" "")
-                _ (do (println "Source:")
-                      (println source))
+                ;_ (do (println "Source:")
+                ;      (println source))
                 ;; Gather expected output.
                 output (->> content
                             (re-find #"(?s)\(;; STDOUT ;;;\n(.*);;; STDOUT ;;\)")

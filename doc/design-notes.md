@@ -4,14 +4,14 @@
 
 ### Indices & Type Uses
 
-Unlike WAT, wabt-clj's Sexpr syntax does not support numeric indices. Symbolic
-ids are required everwhere an index is expected.
+Unlike WAT, wabt-clj's Sexpr syntax does not support numeric indices wherever
+symbolic ids are allowed. Only funcs and locals permit referencing by index.
 
-With respect to `typeuse` forms, the spec describes a sort of hash-cons scheme
-for types without an accompanying index. It says that "the smallest existing
-type index whose definition in the current module is the function type" is
-used as the associated index. It also says that "If no such index exists, then
-a new type definition [...] is inserted at the end of the module."
+In describing `typeuse` forms, the spec requires a sort of hash-cons scheme
+for implicitly defined types. It says that "the smallest existing type index
+whose definition in the current module is the function type" is used as the
+associated index. It also says that "If no such index exists, then a new type
+definition [...] is inserted at the end of the module."
 
 This design forces an additional AST pass (WABT calls it `ResolveFuncTypes`)
 to find these types and append their definitions. Since wabt-clj disallows
