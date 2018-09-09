@@ -28,7 +28,7 @@
 
 (comment
 
-  (doseq [^File file (take 19 test-files) ;XXX remove take
+  (doseq [^File file (take 20 test-files) ;XXX remove take
           :let [_ (println)
                 path (.getPath file)
                 [tool-line args-line] (line-seq (io/reader file))]

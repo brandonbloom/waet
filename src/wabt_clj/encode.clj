@@ -3,7 +3,7 @@
   (:require [wabt-clj.values :refer [u32?]]
             [wabt-clj.inst :as inst]
             [wabt-clj.io :as io])
-  (:import [java.nio ByteBuffer]))
+  (:import [java.nio ByteBuffer ByteOrder]))
 
 ;;;; See <https://webassembly.github.io/spec/core/binary/index.html>.
 
@@ -58,13 +58,17 @@
 (def max-u32-leb128-size 5)
 
 (defn write-f32 [value]
-  (let [bs (byte-array 4)]
-    (.putFloat (ByteBuffer/wrap bs) value)
+  (let [bs (byte-array 4)
+        buf (ByteBuffer/wrap bs)]
+    (.order buf ByteOrder/LITTLE_ENDIAN)
+    (.putFloat buf value)
     (write-bytes bs)))
 
 (defn write-f64 [value]
-  (let [bs (byte-array 8)]
-    (.putDouble (ByteBuffer/wrap bs) value)
+  (let [bs (byte-array 8)
+        buf (ByteBuffer/wrap bs)]
+    (.order buf ByteOrder/LITTLE_ENDIAN)
+    (.putDouble buf value)
     (write-bytes bs)))
 
 ;;; Composites.
