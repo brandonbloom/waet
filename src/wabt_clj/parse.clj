@@ -1,7 +1,8 @@
 (ns wabt-clj.parse
   (:use [wabt-clj.util])
   (:require [wabt-clj.values :as val]
-            [wabt-clj.inst :as inst]))
+            [wabt-clj.inst :as inst]
+            [wabt-clj.io :as io]))
 
 ;;;; See <https://webassembly.github.io/spec/core/text/index.html>.
 
@@ -396,12 +397,14 @@
 (defmethod -parse-modulefield 'memory [[head & tail :as form]]
   (scanning tail
     (let [id (scanning-opt (scan-id))
+          ;;TODO: Abbreivation: inline data.
           type (scan-memtype)
-          mem {:head 'memory
-               :form form
-               :id id
-               :type type}]
-      (emit-field :mems mem))))
+          memory {:head 'memory
+                  :form form
+                  :id id
+                  :type type}
+          index (emit-field :mems memory)]
+      (bind! :mems index index))))
 
 (defmethod -parse-modulefield 'global [form]
   (fail "cannot parse/-modulefield 'global"))
@@ -442,11 +445,55 @@
                    :form form}))]
     (change! *module* assoc :start start)))
 
-(defmethod -parse-modulefield 'elem [form]
-  (fail "cannot parse/-modulefield 'elem"))
+(defn scan-offset []
+  (if-let [[_ & tail :as form] (scanning-opt (scan-phrase 'offset))]
+    (let [expr (scanning tail
+                 (scan-all scan-inst))]
+      {:head 'offset
+       :expr expr
+       :form form})
+    (let [inst (scanning (scan-phrase)
+                 (scan-inst))]
+      {:head 'offset
+       :expr [inst]
+       :form (:form inst)})))
 
-(defmethod -parse-modulefield 'data [form]
-  (fail "cannot parse/-modulefield 'data"))
+(defmethod -parse-modulefield 'elem [[head & tail :as form]]
+  (scanning tail
+    (let [table {:id (or (scanning-opt (scan-index)) 0)
+                 :section :tables}
+          offset (scan-offset)
+          init (scan-all scan-index)
+          element {:head head
+                   :table table
+                   :offset offset
+                   :init init
+                   :form form}]
+      (emit-field :elements element))))
+
+(defn scan-datastring []
+  (scan-pred #(or (string? %) (vector? %))))
+
+(defn scan-bytes []
+  (let [w (io/new-array-writer)]
+    (doseq [s (scan-all scan-datastring)]
+      (if (vector? s)
+        (run! #(io/write-byte w %) s)
+        (io/write-bytes w (io/utf-8-bytes s))))
+    (io/array-writer-bytes w)))
+
+(defmethod -parse-modulefield 'data [[head & tail :as form]]
+  (scanning tail
+    (let [memory {:id (or (scanning-opt (scan-index)) 0)
+                  :section :mems}
+          offset (scan-offset)
+          init (scan-bytes)
+          data {:head head
+                :memory memory
+                :offset offset
+                :init init
+                :form form}]
+      (emit-field :data data))))
 
 ;;; Modules.
 
@@ -463,6 +510,7 @@
                       :funcs empty-vecsec
                       :imports empty-vecsec
                       :exports empty-vecsec
+                      :mems empty-vecsec
                       :data empty-vecsec
                       :start nil}]
       (run! parse-modulefield tail)

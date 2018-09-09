@@ -2,7 +2,8 @@
   (:require [clojure.core :as clj]
             [clojure.edn :as edn])
   (:import [java.io RandomAccessFile Closeable]
-           [java.util Arrays]))
+           [java.util Arrays]
+           [java.nio.charset Charset StandardCharsets]))
 
 
 (defn ubyte [value]
@@ -54,9 +55,6 @@
     (FileWriter. f)))
 
 
-;;TODO: Is this array writer used?
-;;^^^^^ Unfortunately, wasm-interp needs to seek on input files.
-
 (defn -ensure-size [^bytes bytes, ^long size]
   (if (<= size (alength bytes))
     bytes
@@ -66,6 +64,7 @@
   (array-writer-bytes [self]))
 
 (deftype ArrayWriter [^:unsynchronized-mutable ^long pos,
+                      ^:unsynchronized-mutable ^long end,
                       ^:unsynchronized-mutable ^bytes bs]
   IWriteSeeker
   (position [self]
@@ -78,21 +77,29 @@
       (let [size (inc pos)]
         (set! bs (-ensure-size bs size))
         (aset bs pos ^byte (ubyte value))
-        (set! pos size))))
+        (set! pos size)
+        (set! end (max pos end)))))
   (write-bytes [self value]
     (locking self
       (let [n (alength ^bytes value)
             size (+ pos n)]
         (set! bs (-ensure-size bs size))
         (System/arraycopy value 0 bs pos n)
-        (set! pos size))))
+        (set! pos size)
+        (set! end (max pos end)))))
   Closeable
   (close [self]
     (set! bs nil)
     nil)
   IArrayWriter
   (array-writer-bytes [self]
-    bs))
+    (Arrays/copyOf bs end)))
 
 (defn new-array-writer []
-  (ArrayWriter. 0 (byte-array 1024)))
+  (ArrayWriter. 0 0 (byte-array 1024)))
+
+
+(def ^Charset utf8 StandardCharsets/UTF_8)
+
+(defn utf-8-bytes [^String s]
+  (.getBytes s utf8))

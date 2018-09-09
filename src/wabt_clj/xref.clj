@@ -74,11 +74,11 @@
         (update :type resolved)
         (update :body xref-body))))
 
-(defn xref-elem [module elem]
+(defn xref-elem [elem]
   (update elem :table resolved))
 
-(defn xref-data [module data]
-  (update data :mem resolved))
+(defn xref-data [data]
+  (update data :memory resolved))
 
 (defn xref-vecsec [module xref section]
   (update-in module [section :fields] #(mapv xref %)))

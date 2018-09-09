@@ -28,7 +28,7 @@
          (remove #(.isDirectory ^File %))
          (filter #(str/ends-with? (.getPath ^File %) ".txt"))))
 
-  (doseq [^File file (take 17 test-files) ;XXX remove take
+  (doseq [^File file (take 18 test-files) ;XXX remove take
           :let [_ (println)
                 path (.getPath file)
                 [tool-line args-line] (line-seq (io/reader file))]
@@ -38,8 +38,13 @@
                     #_(println "Skipping" path "with unsupported args:" args-line))
           :let [_ (println "Running test:" path)
                 content (slurp file)
-                ;; Gather input; strip WAT-style comments.
-                source (str/replace content #"(?s)\(;.*;\)" "")
+                source (-> content
+                           ;; Strip WAT-style comments.
+                           (str/replace #"(?s)\(;.*;\)" "")
+                           ;; Rewrite hex strings in to byte vectors.
+                           (str/replace #"(?i)\"(\\[0-9a-f]{2})" "[$1")
+                           (str/replace #"(?i)(\\[0-9a-f]{2})\"" "$1]")
+                           (str/replace #"(?i)\\([0-9a-f][0-9a-f])" "0x$1,"))
                 ;_ (do (println "Source:")
                 ;      (println source))
                 ;; Gather expected output.
@@ -60,7 +65,11 @@
       (println "STDERR:" (:err res)))
     (when (not= (:out res) output)
       (println "OUTPUT DID NOT MATCH")
-      (println "expected:" (pr-str output))
-      (println "actual:" (pr-str (:out res)))))
+      (println)
+      (println "expected:")
+      (println output)
+      (println)
+      (println "actual:")
+      (println (:out res))))
 
 )

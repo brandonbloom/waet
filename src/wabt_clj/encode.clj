@@ -3,8 +3,7 @@
   (:require [wabt-clj.values :refer [u32?]]
             [wabt-clj.inst :as inst]
             [wabt-clj.io :as io])
-  (:import [java.nio.charset Charset StandardCharsets]
-           [java.nio ByteBuffer]))
+  (:import [java.nio ByteBuffer]))
 
 ;;;; See <https://webassembly.github.io/spec/core/binary/index.html>.
 
@@ -120,10 +119,8 @@
     (writing-section secid
       (write-vec write fields))))
 
-(def ^Charset utf8 StandardCharsets/UTF_8)
-
-(defn write-utf8 [^String s]
-  (let [^bytes bs (.getBytes s utf8)
+(defn write-utf8 [s]
+  (let [^bytes bs (io/utf-8-bytes s)
         n (count bs)]
     (write-u32-leb128 n)
     (write-bytes bs)))
@@ -259,7 +256,7 @@
 
 (def write-memtype write-limits)
 
-(defn write-mem [{:keys [type]}]
+(defn write-mem [{:keys [type] :as mem}]
   (write-memtype type))
 
 (defn write-memsec [mems]
@@ -309,7 +306,7 @@
 
 (defn write-elem [{:keys [table offset init]}]
   (write-index (:index table))
-  (write-expr offset)
+  (write-expr (:expr offset))
   (write-vec write-index (map :index init)))
 
 (defn write-elemsec [elems]
@@ -338,8 +335,9 @@
 
 (defn write-data [{:keys [memory offset init]}]
   (write-index (:index memory))
-  (write-expr offset)
-  (write-vec write-byte init))
+  (write-expr (:expr offset))
+  (write-u32-leb128 (count init))
+  (write-bytes init))
 
 (defn write-datasec [data]
   (write-vecsec 11 write-data data))
