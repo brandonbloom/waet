@@ -28,7 +28,7 @@
          (remove #(.isDirectory ^File %))
          (filter #(str/ends-with? (.getPath ^File %) ".txt"))))
 
-  (doseq [^File file (take 9 test-files) ;XXX remove take
+  (doseq [^File file (take 17 test-files) ;XXX remove take
           :let [_ (println)
                 path (.getPath file)
                 [tool-line args-line] (line-seq (io/reader file))]

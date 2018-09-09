@@ -141,10 +141,10 @@
 (defn write-limits [{:keys [min max]}]
   (if (= min max)
     (do (write-byte 0x00)
-        (write-u32-leb128 min)
-        (write-u32-leb128 max))
+        (write-u32-leb128 min))
     (do (write-byte 0x01)
-        (write-u32-leb128 min))))
+        (write-u32-leb128 min)
+        (write-u32-leb128 max))))
 
 ;;; Instructions.
 
@@ -182,6 +182,10 @@
     (run! write-inst else))
   (write-opcode 'end))
 
+(defn write-memarg [{:keys [align offset]}]
+  (write-u32-leb128 align)
+  (write-u32-leb128 offset))
+
 (defn write-inst [{:keys [op] :as inst}]
   (write-opcode op)
   (case (get-in inst/by-name [op :shape])
@@ -194,7 +198,7 @@
     :call_indirect (write-index (-> inst :type :index))
     :local (write-index (-> inst :local :index))
     :global (write-index (-> inst :global :index))
-    ;TODO: :mem
+    :mem (write-memarg inst)
     :i32 (write-signed-leb128 (:value inst))
     :i64 (write-signed-leb128 (:value inst))
     :f32 (write-f32 (:value inst))
@@ -255,7 +259,8 @@
 
 (def write-memtype write-limits)
 
-(def write-mem write-memtype)
+(defn write-mem [{:keys [type]}]
+  (write-memtype type))
 
 (defn write-memsec [mems]
   (write-vecsec 5 write-mem mems))

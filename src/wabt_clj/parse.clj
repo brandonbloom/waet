@@ -289,8 +289,15 @@
 (defn scan-branches []
   (fail "TODO: scan-branches")) ;XXX
 
+(defn scan-kwarg [key scan-arg default]
+  (let [value (if (scanning-opt (scan-pred #{(symbol (str key "="))}))
+                (scan-arg)
+                default)]
+    {key value}))
+
 (defn scan-memarg []
-  (fail "TODO: scan-memags")) ;XXX
+  (merge (scan-kwarg :offset scan-u32 0)
+         (scan-kwarg :align scan-u32 0)))
 
 (defn scan-op []
   (scan-pred op?))
@@ -383,8 +390,18 @@
 (defmethod -parse-modulefield 'table [form]
   (fail "cannot parse/-modulefield 'table"))
 
-(defmethod -parse-modulefield 'mem [form]
-  (fail "cannot parse/-modulefield 'mem"))
+(defn scan-memtype []
+  (scan-limits))
+
+(defmethod -parse-modulefield 'memory [[head & tail :as form]]
+  (scanning tail
+    (let [id (scanning-opt (scan-id))
+          type (scan-memtype)
+          mem {:head 'memory
+               :form form
+               :id id
+               :type type}]
+      (emit-field :mems mem))))
 
 (defmethod -parse-modulefield 'global [form]
   (fail "cannot parse/-modulefield 'global"))
