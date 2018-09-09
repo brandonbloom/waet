@@ -25,6 +25,11 @@
   (or (*locals* id)
       (fail (str "undefined local: " id))))
 
+(defn resolved-label [{:keys [id]}]
+  (if-let [label (*labels* id)]
+    (assoc label :depth (- (count *labels*) (:index label) 1))
+    (fail (str "undefined label: " id))))
+
 (declare xref-inst)
 
 (defn xref-body [body]
@@ -39,15 +44,17 @@
                     (update ast key xref-body))
                   ast
                   keys))))
-    (update :body xref-body)))
+    (update ast :body xref-body)))
 
 (defn xref-inst [inst]
   (case (get-in inst/by-name [(:op inst) :shape])
     :nullary inst
     :block (xref-bodies inst [:body])
     :if (xref-bodies inst [:then :else])
-    :label (update inst :label resolved)
-    ;XXX :br_table
+    :label (update inst :label resolved-label)
+    :br_table (-> inst
+                  (update :branches #(mapv resolved-label %))
+                  (update :default resolved-label))
     :call (update inst :func resolved)
     :call_indirect (update inst :type resolved)
     :local (update inst :local resolved-local)

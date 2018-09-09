@@ -258,7 +258,8 @@
         (recur (conj body inst))))))
 
 (defn scan-label []
-  {:id scan-id})
+  (when-let [id (scanning-opt (scan-id))]
+    {:id id}))
 
 (defn scan-block []
   (let [label (scan-label)
@@ -288,7 +289,9 @@
     (assoc blocks :else else)))
 
 (defn scan-branches []
-  (fail "TODO: scan-branches")) ;XXX
+  (let [labels (scan-all scan-label)]
+    {:branches (vec (butlast labels))
+     :default (last labels)}))
 
 (defn scan-kwarg [key scan-arg default]
   (let [value (if (scanning-opt (scan-pred #{(symbol (str key "="))}))

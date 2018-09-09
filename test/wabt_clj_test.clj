@@ -20,15 +20,15 @@
 ;  (testing "FIXME, I fail."
 ;    (is (= 0 1))))
 
+(def test-files
+  (->> interp-tests-dir ;TODO: Others?
+       file-seq
+       (remove #(.isDirectory ^File %))
+       (filter #(str/ends-with? (.getPath ^File %) ".txt"))))
+
 (comment
 
-  (def test-files
-    (->> interp-tests-dir ;TODO: Others?
-         file-seq
-         (remove #(.isDirectory ^File %))
-         (filter #(str/ends-with? (.getPath ^File %) ".txt"))))
-
-  (doseq [^File file (take 18 test-files) ;XXX remove take
+  (doseq [^File file (take 19 test-files) ;XXX remove take
           :let [_ (println)
                 path (.getPath file)
                 [tool-line args-line] (line-seq (io/reader file))]

@@ -7,7 +7,7 @@
 
 ;;;; See <https://webassembly.github.io/spec/core/binary/index.html>.
 
-(def ^:dynamic ^io/WriteSeeker *w*)
+(def ^:dynamic *w*)
 
 (defn pos ^long []
   (io/position *w*))
@@ -179,6 +179,13 @@
     (run! write-inst else))
   (write-opcode 'end))
 
+(defn write-label [{:keys [depth]}]
+  (write-index depth))
+
+(defn write-branches [{:keys [branches default]}]
+  (write-vec write-label branches)
+  (write-label default))
+
 (defn write-memarg [{:keys [align offset]}]
   (write-u32-leb128 align)
   (write-u32-leb128 offset))
@@ -190,7 +197,7 @@
     :block (write-block inst)
     :if (write-then+else inst)
     :label (write-index (-> inst :label :index))
-    ;TODO: :br_table
+    :br_table (write-branches inst)
     :call (write-index (-> inst :func :index))
     :call_indirect (write-index (-> inst :type :index))
     :local (write-index (-> inst :local :index))
