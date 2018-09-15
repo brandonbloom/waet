@@ -40,7 +40,6 @@
   {:pre [(u32? n)]}
   (write-unsigned-leb128 n))
 
-;;XXX unused?
 (defn write-signed-leb128 [^long n]
   (leb128-write-loop
     bit-shift-right
@@ -52,6 +51,15 @@
         (and (zero? ^long n)
              (not (bit-test b 6)))))
     n))
+
+(defn write-s32-leb128 [^long n]
+  (write-signed-leb128 n))
+
+(defn write-s64-leb128 [n]
+  (write-signed-leb128
+    (if (>= n 9223372036854775807)
+      (- n 18446744073709551616N)
+      n)))
 
 (def write-index write-u32-leb128)
 
@@ -214,8 +222,8 @@
     :local (write-index (-> inst :local :index))
     :global (write-index (-> inst :global :index))
     :mem (write-memarg inst)
-    :i32 (write-signed-leb128 (:value inst))
-    :i64 (write-signed-leb128 (io/u64 (:value inst)))
+    :i32 (write-s32-leb128 (:value inst))
+    :i64 (write-s64-leb128 (:value inst))
     :f32 (write-f32 (:value inst))
     :f64 (write-f64 (:value inst))
     ))

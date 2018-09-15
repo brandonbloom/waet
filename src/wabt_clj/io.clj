@@ -6,14 +6,9 @@
            [java.nio.charset Charset StandardCharsets]))
 
 
-(defn u8 [value]
+(defn ubyte [value]
   (byte (if (>= value 128)
           (- value 256)
-          value)))
-
-(defn u64 [value]
-  (long (if (>= value 9223372036854775807)
-          (- value 18446744073709551614N)
           value)))
 
 
@@ -47,7 +42,7 @@
   (seek [self pos]
     (.seek f pos))
   (write-byte [self value]
-    (.writeByte f (u8 value)))
+    (.writeByte f (ubyte value)))
   (write-bytes [self value]
     (.write f ^bytes value))
   Closeable
@@ -81,7 +76,7 @@
     (locking self
       (let [size (inc pos)]
         (set! bs (-ensure-size bs size))
-        (aset bs pos ^byte (u8 value))
+        (aset bs pos ^byte (ubyte value))
         (set! pos size)
         (set! end (max pos end)))))
   (write-bytes [self value]
