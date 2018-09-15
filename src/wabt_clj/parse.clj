@@ -59,7 +59,7 @@
 
 (defmacro scanning [input & body]
   `(binding [*input* ~input]
-     (let [res# ~@body]
+     (let [res# (do ~@body)]
        (when-first [x# (seq *input*)]
          (bad-syntax x# "expected end of sequence"))
        res#)))
@@ -73,7 +73,8 @@
 
 (defn no-match []
   ;; Uncomment exception allocation to get stacktraces for debugging.
-  (throw (ex-info "no match" {::no-match true}))
+  (throw (ex-info "no match" {::no-match true
+                              :form (first *input*)}))
   (throw no-match-exception))
 
 (defn no-match? [ex]
@@ -248,17 +249,17 @@
 
 (def op? symbol?)
 
-(declare scan-inst)
+(declare scan-inst unfold)
 
 (defn scan-body []
   (loop [body []]
     (let [{:keys [op] :as inst} (scan-inst)]
       (if ('#{end else} op)
         [body op]
-        (recur (conj body inst))))))
+        (recur (into body (unfold inst)))))))
 
 (defn scan-label []
-  (when-let [id (scanning-opt (scan-id))]
+  (when-let [id (scanning-opt (scan-index))]
     {:id id}))
 
 (defn scan-block []
@@ -284,7 +285,7 @@
                    (assoc :then (:body block))
                    (dissoc :body :terminator))
         else (case (:terminator block)
-               end nil
+               end []
                else (scan-end-body))]
     (assoc blocks :else else)))
 
@@ -306,7 +307,7 @@
 (defn scan-op []
   (scan-pred op?))
 
-(defn scan-inst []
+(defn scan-inst* []
   (let [op (scan-op)
         args (case (get-in inst/by-name [op :shape])
                :nullary {}
@@ -325,6 +326,61 @@
                :f64 {:value (scan-pred val/f64?)}
                (fail (str "Can't scan " op)))]
     (assoc args :op op)))
+
+(defn scan-inst []
+  (if-let [[op & _ :as form] (scanning-opt (scan-phrase))]
+    {:form form}
+    (scan-inst*)))
+
+(defn scan-expr []
+  (vec (mapcat unfold (scan-all scan-inst))))
+
+(defn parse-body [[head & tail :as form]]
+  (scanning tail
+    (let [label (scan-label)
+          results (scan-results)
+          body (scan-expr)]
+      {:op head
+       :id nil
+       :label label
+       :results results
+       :body body
+       :form form})))
+
+(defn unfold-block [form]
+  [(parse-body form)])
+
+(defn unfold-if [form]
+  (scanning form
+    (scan #{'if})
+    (let [label (scan-label)
+          results (scan-results)
+          then (-> (scan-phrase 'then)
+                   parse-body)
+          else (-> (scanning-opt (scan-phrase 'else))
+                   (or (list 'else))
+                   parse-body)]
+      [{:op 'if
+        :id nil
+        :label label
+        :results results
+        :then then
+        :else else
+        :form form}])))
+
+(defn unfold-plain [{:keys [form] :as inst}]
+  (scanning form
+    (let [inst (scan-inst*)]
+      (concat (scan-expr) [inst]))))
+
+(defn unfold [{:keys [op form] :as inst}]
+  (if op
+    [inst]
+    (case (first form)
+      block (unfold-block form)
+      loop (unfold-block form)
+      if (unfold-if form)
+      (unfold-plain inst))))
 
 ;;; Module Fields.
 
@@ -381,7 +437,7 @@
             (parse-modulefield (list* 'func id tail)))
           (let [type (scan-typeuse)
                 locals (scan-locals)
-                body (scan-all scan-inst)
+                body (scan-expr)
                 func {:head 'func
                       :form form
                       :id id
@@ -451,15 +507,13 @@
 (defn scan-offset []
   (if-let [[_ & tail :as form] (scanning-opt (scan-phrase 'offset))]
     (let [expr (scanning tail
-                 (scan-all scan-inst))]
+                 (scan-expr))]
       {:head 'offset
        :expr expr
        :form form})
-    (let [inst (scanning (scan-phrase)
-                 (scan-inst))]
+    (let [expr (scan-expr)]
       {:head 'offset
-       :expr [inst]
-       :form (:form inst)})))
+       :expr expr})))
 
 (defmethod -parse-modulefield 'elem [[head & tail :as form]]
   (scanning tail

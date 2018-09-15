@@ -26,27 +26,31 @@
       (fail (str "undefined local: " id))))
 
 (defn resolved-label [{:keys [id]}]
-  (if-let [label (*labels* id)]
-    (assoc label :depth (- (count *labels*) (:index label) 1))
-    (fail (str "undefined label: " id))))
+  (let [key (if (int? id)
+              (- (count *labels*) id) ; depth->index.
+              id)]
+    (if-let [label (*labels* key)]
+      (assoc label :depth (- (count *labels*) (:index label) 1))
+      (fail (str "undefined label: " id)))))
 
 (declare xref-inst)
 
 (defn xref-body [body]
+  {:pre [(vector? body)]}
   (mapv xref-inst body))
 
 (defn xref-bodies [{:keys [label body] :as ast} keys]
-  (if label
-    (let [label (assoc label :index (count *labels*))]
-      (binding [*labels* (assoc *labels* (:id label) label)]
-        (let [ast (assoc ast :label label)]
-          (reduce (fn [ast key]
-                    (update ast key xref-body))
-                  ast
-                  keys))))
-    (update ast :body xref-body)))
+  (let [index (count *labels*)
+        {:keys [id] :as label} (assoc label :index index)
+        ast (assoc ast :label label)]
+    (binding [*labels* (cond-> (assoc *labels* index label)
+                         id (assoc id label))]
+      (reduce (fn [ast key]
+                (update ast key xref-body))
+              ast
+              keys))))
 
-(defn xref-inst [inst]
+(defn xref-inst [{:keys [op] :as inst}]
   (case (get-in inst/by-name [(:op inst) :shape])
     :nullary inst
     :block (xref-bodies inst [:body])

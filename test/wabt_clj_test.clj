@@ -28,7 +28,11 @@
 
 (comment
 
-  (doseq [^File file (take 20 test-files) ;XXX remove take
+  (doseq [^File file (->> test-files
+                          ;;XXX remove drop/take
+                          (take 29)
+                          ;(drop 29) (take 1)
+                          )
           :let [_ (println)
                 path (.getPath file)
                 [tool-line args-line] (line-seq (io/reader file))]
@@ -65,6 +69,9 @@
       (println "STDERR:" (:err res)))
     (when (not= (:out res) output)
       (println "OUTPUT DID NOT MATCH")
+      (println)
+      (println "source:")
+      (println source)
       (println)
       (println "expected:")
       (println output)

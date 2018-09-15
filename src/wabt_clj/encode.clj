@@ -178,7 +178,7 @@
 (defn write-then+else [{:keys [results then else]}]
   (write-blocktype results)
   (run! write-inst then)
-  (when else
+  (when (seq else)
     (write-opcode 'else)
     (run! write-inst else))
   (write-opcode 'end))
