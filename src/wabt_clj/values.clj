@@ -9,24 +9,24 @@
        (= (first (str x)) \$)))
 
 (defn value? [x]
-  (or (int? x)
+  (or (integer? x)
       (float? x)
       (string? x) ; Includes names.
       (id? x)))
 
 (defn u32? [x]
-  (and (int? x)
+  (and (integer? x)
        (<= 0 x))) ;TODO: check max.
 
 (defn u64? [x]
-  (and (int? x)
+  (and (integer? x)
        (<= 0 x))) ;TODO: check max.
 
 (defn i32? [x]
-  (int? x)) ;TODO: check min/max
+  (integer? x)) ;TODO: check min/max
 
 (defn i64? [x]
-  (int? x)) ;TODO: check min/max
+  (integer? x)) ;TODO: check min/max
 
 (defn f32? [x]
   (float? x)) ;TODO: check min/max

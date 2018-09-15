@@ -208,7 +208,7 @@
     :global (write-index (-> inst :global :index))
     :mem (write-memarg inst)
     :i32 (write-signed-leb128 (:value inst))
-    :i64 (write-signed-leb128 (:value inst))
+    :i64 (write-signed-leb128 (io/u64 (:value inst)))
     :f32 (write-f32 (:value inst))
     :f64 (write-f64 (:value inst))
     ))
