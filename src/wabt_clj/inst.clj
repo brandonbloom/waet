@@ -36,29 +36,29 @@
 
   ;;; Memory Instructions
 
-  0x28 i32.load       :mem
-  0x29 i64.load       :mem
-  0x2A f32.load       :mem
-  0x2B f64.load       :mem
-  0x2C i32.load8_s    :mem
-  0x2D i32.load8_u    :mem
-  0x2E i32.load16_s   :mem
-  0x2F i32.load16_u   :mem
-  0x30 i64.load8_s    :mem
-  0x31 i64.load8_u    :mem
-  0x32 i64.load16_s   :mem
-  0x33 i64.load16_u   :mem
-  0x34 i64.load32_s   :mem
-  0x35 i64.load32_u   :mem
-  0x36 i32.store      :mem
-  0x37 i64.store      :mem
-  0x38 f32.store      :mem
-  0x39 f64.store      :mem
-  0x3A i32.store8     :mem
-  0x3B i32.store16    :mem
-  0x3C i64.store8     :mem
-  0x3D i64.store16    :mem
-  0x3E i64.store32    :mem
+  0x28 i32.load       [:mem 4]
+  0x29 i64.load       [:mem 8]
+  0x2A f32.load       [:mem 4]
+  0x2B f64.load       [:mem 8]
+  0x2C i32.load8_s    [:mem 1]
+  0x2D i32.load8_u    [:mem 1]
+  0x2E i32.load16_s   [:mem 2]
+  0x2F i32.load16_u   [:mem 2]
+  0x30 i64.load8_s    [:mem 1]
+  0x31 i64.load8_u    [:mem 1]
+  0x32 i64.load16_s   [:mem 2]
+  0x33 i64.load16_u   [:mem 2]
+  0x34 i64.load32_s   [:mem 4]
+  0x35 i64.load32_u   [:mem 4]
+  0x36 i32.store      [:mem 4]
+  0x37 i64.store      [:mem 8]
+  0x38 f32.store      [:mem 4]
+  0x39 f64.store      [:mem 8]
+  0x3A i32.store8     [:mem 1]
+  0x3B i32.store16    [:mem 2]
+  0x3C i64.store8     [:mem 1]
+  0x3D i64.store16    [:mem 2]
+  0x3E i64.store32    [:mem 4]
   0x3F memory.size    :nullary
   0x40 memory.grow    :nullary
 
@@ -203,9 +203,15 @@
 
 ])
 
+(defn parse-row [row]
+  (let [{:keys [shape] :as operation} (into {} (mapv vector header row))]
+    (if (vector? shape)
+      (assoc operation :shape (first shape) :align (last shape))
+      operation)))
+
 (def operations
   (->> (partition (count header) table)
-       (mapv #(into {} (mapv vector header %)))))
+       (mapv parse-row)))
 
 (def by-name
   (into {} (map (juxt :name identity)) operations))

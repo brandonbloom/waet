@@ -190,8 +190,15 @@
   (write-vec write-label branches)
   (write-label default))
 
+(defn log2 [n]
+  (loop [n n
+         i 0]
+    (if (> n 1)
+      (recur (unsigned-bit-shift-right n 1) (inc i))
+      i)))
+
 (defn write-memarg [{:keys [align offset]}]
-  (write-u32-leb128 align)
+  (write-u32-leb128 (log2 align))
   (write-u32-leb128 offset))
 
 (defn write-inst [{:keys [op] :as inst}]

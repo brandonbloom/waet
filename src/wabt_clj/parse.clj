@@ -300,16 +300,17 @@
                 default)]
     {key value}))
 
-(defn scan-memarg []
+(defn scan-memarg [align]
   (merge (scan-kwarg :offset scan-u32 0)
-         (scan-kwarg :align scan-u32 0)))
+         (scan-kwarg :align scan-u32 align)))
 
 (defn scan-op []
   (scan-pred op?))
 
 (defn scan-inst* []
   (let [op (scan-op)
-        args (case (get-in inst/by-name [op :shape])
+        info (inst/by-name op)
+        args (case (:shape info)
                :nullary {}
                :block (scan-block)
                :if (scan-then+else)
@@ -319,7 +320,7 @@
                :call_indirect {:type (scan-typeuse)}
                :local {:local {:id (scan-index)}}
                :global {:global {:id (scan-id) :section :globals}}
-               :mem (scan-memarg)
+               :mem (scan-memarg (:align info))
                :i32 {:value (scan-pred val/i32?)}
                :i64 {:value (scan-pred val/i64?)}
                :f32 {:value (scan-pred val/f32?)}
