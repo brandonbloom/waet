@@ -19,19 +19,19 @@
   (update export :desc resolved))
 
 (def ^:dynamic *locals*)
-(def ^:dynamic *labels*)
+(def ^:dynamic *labels*) ; name->index.
+(def ^:dynamic *frames*) ; index->label.
 
 (defn resolved-local [{:keys [id]}]
   (or (*locals* id)
       (fail (str "undefined local: " id))))
 
 (defn resolved-label [{:keys [id]}]
-  (let [key (if (int? id)
-              (- (count *labels*) id) ; depth->index.
-              id)]
-    (if-let [label (*labels* key)]
-      (assoc label :depth (- (count *labels*) (:index label) 1))
-      (fail (str "undefined label: " id)))))
+  (if-let [index (if (int? id)
+                   (- (count *frames*) id)
+                   (*labels* id))]
+    (assoc (*frames* index) :depth (- (count *frames*) index 1))
+    (fail (str "undefined label: " id))))
 
 (declare xref-inst)
 
@@ -40,11 +40,12 @@
   (mapv xref-inst body))
 
 (defn xref-bodies [{:keys [label body] :as ast} keys]
-  (let [index (count *labels*)
+  (let [index (count *frames*)
         {:keys [id] :as label} (assoc label :index index)
         ast (assoc ast :label label)]
-    (binding [*labels* (cond-> (assoc *labels* index label)
-                         id (assoc id label))]
+    (binding [*labels* (cond-> *labels*
+                         id (assoc id index))
+              *frames* (conj *frames* label)]
       (reduce (fn [ast key]
                 (update ast key xref-body))
               ast
@@ -80,7 +81,8 @@
                                (concat (-> func :type :params)
                                        (:locals func))
                                (range)))
-            *labels* {}]
+            *labels* {}
+            *frames* []]
     (-> func
         (update :type resolved)
         (update :body xref-body))))
