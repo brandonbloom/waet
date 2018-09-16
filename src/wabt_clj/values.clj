@@ -29,9 +29,9 @@
   (integer? x)) ;TODO: check min/max
 
 (defn f32? [x]
-  (float? x)) ;TODO: check min/max
+  (number? x)) ;TODO: check min/max
 
 (defn f64? [x]
-  (float? x)) ;TODO: check min/max
+  (number? x)) ;TODO: check min/max
 
 (def index? u32?)
