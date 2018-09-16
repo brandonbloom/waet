@@ -6,9 +6,15 @@
 
 ;;;; See <https://webassembly.github.io/spec/core/text/index.html>.
 
+(def ^:dynamic *pos* nil)
+
+(defn origin [x]
+  (some-> (meta x)
+    (select-keys [:line :column])))
+
 (defn bad-syntax [form message]
   (fail (str "syntax error: " message)
-        {:form form}))
+        (assoc *pos* :form form)))
 
 ;;; Utils.
 
@@ -60,7 +66,8 @@
 (def ^:dynamic *input*)
 
 (defmacro scanning [input & body]
-  `(binding [*input* ~input]
+  `(binding [*input* ~input
+             *pos* *pos*]
      (let [res# (do ~@body)]
        (when-first [x# (seq *input*)]
          (bad-syntax x# "expected end of sequence"))
@@ -76,7 +83,8 @@
 (defn no-match []
   ;; Uncomment exception allocation to get stacktraces for debugging.
   (throw (ex-info "no match" {::no-match true
-                              :form (first *input*)}))
+                              :form (first *input*)
+                              :near *pos*}))
   (throw no-match-exception))
 
 (defn no-match? [ex]
@@ -94,6 +102,8 @@
   (let [[x & xs] *input*]
     (if (pred x)
       (do (set! *input* xs)
+          (when-let [pos (origin x)]
+            (set! *pos* pos))
           x)
       (no-match))))
 
@@ -112,9 +122,16 @@
 (defn scan-id []
   (scan-pred val/id?))
 
-(defn scan-index []
-  ;; Either symbolic or numeric index.
-  (scan-pred #(or (val/id? %) (val/index? %))))
+(defn scan-index
+  ([]
+   ;; Either symbolic or numeric index.
+   (scan-pred #(or (val/id? %) (val/index? %))))
+  ([section]
+   (let [id (scan-index)]
+     {:id id
+      :section section
+      :near *pos*})))
+
 
 (defn scan-name []
   (scan-pred val/name?))
@@ -133,6 +150,7 @@
     (scanning tail
       (let [id (scan-id)]
         {:head 'type
+         :near *pos*
          :id id}))))
 
 (defn scan-valtype []
@@ -147,6 +165,7 @@
                          [nil (scan-all scan-valtype)])]
         (mapv (fn [type]
                 {:head head
+                 :near *pos*
                  :id id
                  :type type
                  :form form})
@@ -266,8 +285,7 @@
         (recur (into body (unfold inst)))))))
 
 (defn scan-label []
-  (when-let [id (scanning-opt (scan-index))]
-    {:id id}))
+  (scanning-opt (scan-index :labels)))
 
 (defn scan-block []
   (let [label (scan-label)
@@ -323,10 +341,10 @@
                :if (scan-then+else)
                :label {:label (scan-label)}
                :br_table (scan-branches)
-               :call {:func {:id (scan-index) :section :funcs}}
+               :call {:func (scan-index :funcs)}
                :call_indirect {:type (scan-typeuse)}
-               :local {:local {:id (scan-index)}}
-               :global {:global {:id (scan-id) :section :globals}}
+               :local {:local (scan-index :locals)}
+               :global {:global (scan-index :globals)}
                :mem (scan-memarg (:align info))
                :i32 {:value (scan-pred val/i32?)}
                :i64 {:value (scan-pred val/i64?)}
@@ -396,6 +414,8 @@
 
 (defn parse-modulefield [form]
   (check-phrase form)
+  (when-let [pos (origin form)]
+    (set! *pos* pos))
   (-parse-modulefield form))
 
 (defmethod -parse-modulefield 'type [[head & tail :as form]]
@@ -546,7 +566,9 @@
 
 (defmethod -parse-modulefield 'elem [[head & tail :as form]]
   (scanning tail
-    (let [table {:id (or (scanning-opt (scan-index)) 0)
+    (let [id (or (scanning-opt (scan-index)) 0)
+          table {:id id
+                 :near *pos*
                  :section :tables}
           offset (scan-offset)
           init (scan-all scan-index)
@@ -570,7 +592,9 @@
 
 (defmethod -parse-modulefield 'data [[head & tail :as form]]
   (scanning tail
-    (let [memory {:id (or (scanning-opt (scan-index)) 0)
+    (let [id (or (scanning-opt (scan-index)) 0)
+          memory {:id id
+                  :near *pos*
                   :section :mems}
           offset (scan-offset)
           init (scan-bytes)
@@ -586,7 +610,8 @@
 (def empty-vecsec {:env {} :fields []})
 
 (defn parse-module* [[head & tail :as form]]
-  (binding [*module* {:sort :toplevel
+  (binding [*pos* nil
+            *module* {:sort :toplevel
                       :head head
                       :form form
                       :counter 0

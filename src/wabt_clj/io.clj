@@ -1,6 +1,5 @@
 (ns wabt-clj.io
-  (:require [clojure.core :as clj]
-            [clojure.edn :as edn])
+  (:require [clojure.core :as clj])
   (:import [java.io RandomAccessFile Closeable]
            [java.util Arrays]
            [java.nio.charset Charset StandardCharsets]))
@@ -24,8 +23,8 @@
   (cond
     (string? in) (recur (string-reader in))
     (sequential? in) (seq in)
-    :else (let [r (java.io.PushbackReader. in)]
-            (->> (repeatedly #(edn/read {:eof ::eof} r))
+    :else (let [r (clojure.lang.LineNumberingPushbackReader. in)]
+            (->> (repeatedly #(read {:eof ::eof} r))
                  (take-while #(not= % ::eof))))))
 
 

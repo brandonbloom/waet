@@ -22,18 +22,18 @@
 (def ^:dynamic *labels*) ; name->index.
 (def ^:dynamic *frames*) ; index->label.
 
-(defn resolved-local [{:keys [id]}]
+(defn resolved-local [{:keys [id] :as local}]
   (or (*locals* id)
       (fail (str "undefined local: " id)
-            {:id id :locals *locals*})))
+            {:local local :env *locals*})))
 
-(defn resolved-label [{:keys [id]}]
+(defn resolved-label [{:keys [id] :as label}]
   (if-let [index (if (int? id)
                    (- (count *frames*) id 1)
                    (*labels* id))]
     (assoc (*frames* index) :depth (- (count *frames*) index 1))
     (fail (str "undefined label: " id
-               {:labels *frames*}))))
+               {:label label :env *frames*}))))
 
 (declare xref-inst)
 
