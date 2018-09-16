@@ -136,47 +136,34 @@
 (defn scan-valtype []
   (scan-pred '#{i32 i64 f32 f64}))
 
-(defn scan-local []
-  (let [[_ & tail :as form] (scan-phrase 'local)]
+(defn scan-local* [head]
+  (let [[_ & tail :as form] (scan-phrase head)]
     (scanning tail
       (let [[id types] (if-let [id (scanning-opt (scan-id))]
                          (let [type (scan-valtype)]
                            [id [type]])
                          [nil (scan-all scan-valtype)])]
         (mapv (fn [type]
-                {:head 'local
+                {:head head
                  :id id
                  :type type
                  :form form})
               types)))))
 
-(defn scan-locals []
+(defn scan-locals* [head]
   (loop [v []]
-    (if-let [x (scanning-opt (scan-local))]
+    (if-let [x (scanning-opt (scan-local* head))]
       (recur (into v x))
       v)))
 
-(defn scan-param []
-  (let [[_ & tail :as form] (scan-phrase 'param)]
-    (scanning tail
-      (let [type (scan-valtype)]
-        {:head 'param
-         :type type
-         :form form}))))
+(defn scan-locals []
+  (scan-locals* 'local))
 
 (defn scan-params []
-  (scan-all scan-param))
-
-(defn scan-result []
-  (let [[_ & tail :as form] (scan-phrase 'result)]
-    (scanning tail
-      (let [type (scan-valtype)]
-        {:head 'param
-         :type type
-         :form form}))))
+  (scan-locals* 'param))
 
 (defn scan-results []
-  (scan-all scan-result))
+  (scan-locals* 'result))
 
 (defn ensure-type [{:keys [params results] :as type}]
   (let [signature [(mapv :type params)
@@ -409,7 +396,6 @@
   (-parse-modulefield form))
 
 (defmethod -parse-modulefield 'type [[head & tail :as form]]
-  (prn 'parsing-type form)
   (scanning tail
     (let [id (scanning-opt (scan-id))
           type (scan-type)]
