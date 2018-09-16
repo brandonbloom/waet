@@ -178,6 +178,15 @@
 (defn scan-results []
   (scan-all scan-result))
 
+(defn ensure-type [{:keys [params results] :as type}]
+  (let [signature [(mapv :type params)
+                   (mapv :type results)]
+        index (or (get-in *module* [:signatures signature])
+                  (let [index (emit-field :types type)]
+                    (change! *module* assoc-in [:signatures signature] index)
+                    index))]
+    (get-in *module* [:types :fields index])))
+
 (defn scan-typeuse []
   (let [typeid (scanning-opt (scan-typeid))
         params (scan-params)
@@ -186,19 +195,24 @@
                         [(:form typeid)])
                       (map :form params)
                       (map :form results))
-        signature [(mapv :type params)
-                   (mapv :type results)]
-        type {:id (:id typeid)
-              :typeid typeid
+        type {:head 'func
+              :id (:id typeid)
               :params params
-              :results results}
-        index (or (get-in *module* [:signatures signature])
-                  (let [index (emit-field :types type)]
-                    (change! *module* assoc-in [:signatures signature] index)
-                    index))]
-    (assoc type
-           :index index
-           :forms (vec forms))))
+              :results results
+              :forms (vec forms)}]
+    (ensure-type type)))
+
+(defn scan-functype []
+  (let [[_ & tail :as form] (scan-phrase 'func)
+        params (scan-params)
+        results (scan-results)]
+    {:head 'func
+     :params params
+     :results results
+     :form form}))
+
+(def scan-type scan-functype)
+
 
 (defn scan-limits []
   (let [n (scan-u32)
@@ -394,8 +408,12 @@
   (check-phrase form)
   (-parse-modulefield form))
 
-(defmethod -parse-modulefield 'type [form]
-  (fail "cannot parse/-modulefield 'type"))
+(defmethod -parse-modulefield 'type [[head & tail :as form]]
+  (prn 'parsing-type form)
+  (scanning tail
+    (let [id (scanning-opt (scan-id))
+          type (scan-type)]
+      (ensure-type type))))
 
 (defn scan-importdesc []
   (let [[head & tail :as form] (scan-phrase)
