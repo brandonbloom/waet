@@ -215,7 +215,7 @@
     :nullary nil
     :block (write-block inst)
     :if (write-then+else inst)
-    :label (write-index (-> inst :label :index))
+    :label (write-label (:label inst))
     :br_table (write-branches inst)
     :call (write-index (-> inst :func :index))
     :call_indirect (write-index (-> inst :type :index))

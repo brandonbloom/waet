@@ -29,7 +29,7 @@
 
 (defn resolved-label [{:keys [id]}]
   (if-let [index (if (int? id)
-                   (- (count *frames*) id)
+                   (- (count *frames*) id 1)
                    (*labels* id))]
     (assoc (*frames* index) :depth (- (count *frames*) index 1))
     (fail (str "undefined label: " id

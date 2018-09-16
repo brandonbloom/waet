@@ -28,10 +28,12 @@
 
 (comment
 
+  (count test-files)
+
   (doseq [^File file (->> test-files
                           ;;XXX remove drop/take
-                          (take 29)
-                          ;(drop 29) (take 1)
+                          (take 37)
+                          ;(drop 34) (take 3)
                           )
           :let [_ (println)
                 path (.getPath file)
@@ -49,8 +51,8 @@
                            (str/replace #"(?i)\"(\\[0-9a-f]{2})" "[$1")
                            (str/replace #"(?i)(\\[0-9a-f]{2})\"" "$1]")
                            (str/replace #"(?i)\\([0-9a-f][0-9a-f])" "0x$1,"))
-                ;_ (do (println "Source:")
-                ;      (println source))
+                ;_ (println "source:")
+                ;_ (println source)
                 ;; Gather expected output.
                 output (->> content
                             (re-find #"(?s)\(;; STDOUT ;;;\n(.*);;; STDOUT ;;\)")
