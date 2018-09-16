@@ -139,19 +139,22 @@
 (defn scan-local []
   (let [[_ & tail :as form] (scan-phrase 'local)]
     (scanning tail
-      (if-let [id (scanning-opt (scan-id))]
-        (let [type (scan-valtype)]
-          {:head 'local
-           :id id
-           :type type
-           :form form})
-        (let [types (scan-all scan-valtype)]
-          {:head 'local
-           :types types
-           :form form})))))
+      (let [[id types] (if-let [id (scanning-opt (scan-id))]
+                         (let [type (scan-valtype)]
+                           [id [type]])
+                         [nil (scan-all scan-valtype)])]
+        (mapv (fn [type]
+                {:head 'local
+                 :id id
+                 :type type
+                 :form form})
+              types)))))
 
 (defn scan-locals []
-  (scan-all scan-local))
+  (loop [v []]
+    (if-let [x (scanning-opt (scan-local))]
+      (recur (into v x))
+      v)))
 
 (defn scan-param []
   (let [[_ & tail :as form] (scan-phrase 'param)]

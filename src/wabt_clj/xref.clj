@@ -24,14 +24,16 @@
 
 (defn resolved-local [{:keys [id]}]
   (or (*locals* id)
-      (fail (str "undefined local: " id))))
+      (fail (str "undefined local: " id)
+            {:id id :locals *locals*})))
 
 (defn resolved-label [{:keys [id]}]
   (if-let [index (if (int? id)
                    (- (count *frames*) id)
                    (*labels* id))]
     (assoc (*frames* index) :depth (- (count *frames*) index 1))
-    (fail (str "undefined label: " id))))
+    (fail (str "undefined label: " id
+               {:labels *frames*}))))
 
 (declare xref-inst)
 
