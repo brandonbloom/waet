@@ -30,10 +30,12 @@
 
 (def ^:dynamic *module*)
 
-(defn fresh-id [name]
-  (let [n (:counter *module*)]
-    (change! *module* update :counter inc)
-    (symbol (str "$" name "__" n)))) ;TODO: Something less likely to collide.
+(defn fresh-id
+  ([] (fresh-id ""))
+  ([name]
+   (let [n (:counter *module*)]
+     (change! *module* update :counter inc)
+     (symbol (str "$" name "__" n))))) ;TODO: Something less likely to collide.
 
 (defn bind! [section id index]
   (let [path [section :env id]]
@@ -185,8 +187,7 @@
         type {:head 'func
               :id (:id typeid)
               :params params
-              :results results
-              :forms (vec forms)}]
+              :results results}]
     (ensure-type type)))
 
 (defn scan-functype []
@@ -251,7 +252,9 @@
 
 ;;; Instructions.
 
-(def op? symbol?)
+(defn op? [x]
+  (and (symbol? x)
+       (not (val/id? x))))
 
 (declare scan-inst unfold)
 
@@ -329,7 +332,7 @@
                :i64 {:value (scan-pred val/i64?)}
                :f32 {:value (scan-pred val/f32?)}
                :f64 {:value (scan-pred val/f64?)}
-               (fail (str "Can't scan " op)))]
+               (fail (str "Can't scan " op) {:input *input*}))]
     (assoc args :op op)))
 
 (defn scan-inst []
@@ -428,35 +431,53 @@
                :desc desc}]
       (emit-field :imports ast))))
 
-(defmethod -parse-modulefield 'func [[head & tail :as form]]
+(defn parse-named [[head & tail :as form] scan-and-emit]
   (scanning tail
     (let [id (scanning-opt (scan-id))
           import (scanning-opt (scan-inline-import))]
       (if-let [{:keys [module name]} import]
-        (let [type (scan-typeuse)]
+        (let [forms (scan-rest)]
           (parse-modulefield (list 'import module name
                                    (concat ['func]
                                            (when id [id])
-                                           (:forms type)))))
+                                           forms))))
         (if-let [{:keys [name]} (scanning-opt (scan-inline-export))]
           (let [tail (scan-rest)
                 id (fresh-id name)]
-            (parse-modulefield (list 'export name (list 'func id)))
-            (parse-modulefield (list* 'func id tail)))
-          (let [type (scan-typeuse)
-                locals (scan-locals)
-                body (scan-expr)
-                func {:head 'func
-                      :form form
-                      :id id
-                      :type type
-                      :locals locals
-                      :body body}
-                index (emit-field :funcs func)]
-            (bind! :funcs index index)))))))
+            (parse-modulefield (list 'export name (list head id)))
+            (parse-modulefield (list* head id tail)))
+          (scan-and-emit id))))))
 
-(defmethod -parse-modulefield 'table [form]
-  (fail "cannot parse/-modulefield 'table"))
+(defmethod -parse-modulefield 'func [form]
+  (parse-named form
+    (fn [id]
+      (let [type (scan-typeuse)
+            locals (scan-locals)
+            body (scan-expr)
+            func {:head 'func
+                  :form form
+                  :id id
+                  :type type
+                  :locals locals
+                  :body body}
+            index (emit-field :funcs func)]
+        (bind! :funcs index index)))))
+
+(defmethod -parse-modulefield 'table [[head & tail :as form]]
+  (parse-named form
+    (fn [id]
+      (if-let [elemtype (scanning-opt (scan-elemtype))]
+        (let [[_ & elems] (scan-phrase 'elem)
+              n (count elems)
+              id (or id (fresh-id))]
+          (parse-modulefield (list 'table id n n elemtype))
+          (parse-modulefield (list* 'elem id (list 'i32.const 0) elems)))
+        (let [type (scan-tabletype)
+              table {:head head
+                     :type type
+                     :form form}
+              index (emit-field :tables table)]
+          (bind! :tables index index))))))
 
 (defn scan-memtype []
   (scan-limits))
