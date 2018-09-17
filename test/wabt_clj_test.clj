@@ -32,8 +32,9 @@
 
   (doseq [^File file (->> test-files
                           ;;XXX remove drop/take
-                          (take 37)
-                          ;(drop 34) (take 3)
+                          ;(take 37)
+                          (drop 37) (take 1)
+                          ;(drop 7) (take 1)
                           )
           :let [_ (println)
                 path (.getPath file)

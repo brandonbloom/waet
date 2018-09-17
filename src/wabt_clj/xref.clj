@@ -11,9 +11,10 @@
       (fail (str id " undefined in " section) {:section section :id id})))
 
 (defn resolved [{:keys [section id index] :as ast}]
+  {:pre [(keyword? section)]}
   (if index
     ast
-    (assoc ast :index (resolve-id section id))))
+    (resolve-id section id)))
 
 (defn xref-export [export]
   (update export :desc resolved))
@@ -74,20 +75,19 @@
     ))
 
 (defn xref-func [func]
-  (binding [*locals* (into {}
-                       (mapcat (fn [{:keys [id] :as local} index]
-                                 (let [local (assoc local :index index)]
-                                   (cons [index local]
-                                         (when id
-                                           [[id local]]))))
-                               (concat (-> func :type :params)
-                                       (:locals func))
-                               (range)))
-            *labels* {}
-            *frames* []]
-    (-> func
-        (update :type resolved)
-        (update :body xref-body))))
+  (let [func (update func :type resolved)]
+    (binding [*locals* (into {}
+                         (mapcat (fn [{:keys [id] :as local} index]
+                                   (let [local (assoc local :index index)]
+                                     (cons [index local]
+                                           (when id
+                                             [[id local]]))))
+                                 (concat (-> func :type :params)
+                                         (:locals func))
+                                 (range)))
+              *labels* {}
+              *frames* []]
+      (update func :body xref-body))))
 
 (defn xref-elem [elem]
   (update elem :table resolved))

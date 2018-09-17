@@ -58,6 +58,7 @@
     (change! *module* update :fields conj [section :fields index])
     (when-let [id (:id field)]
       (bind! section id index))
+    (bind! section index index)
     (change! *module* update-in [section :fields] conj field)
     index))
 
@@ -148,7 +149,7 @@
 (defn scan-typeid []
   (let [[_ & tail :as form] (scan-phrase 'type)]
     (scanning tail
-      (let [id (scan-id)]
+      (let [id (scan-index)]
         {:head 'type
          :near *pos*
          :id id}))))
@@ -186,14 +187,16 @@
 (defn scan-results []
   (scan-locals* 'result))
 
-(defn ensure-type [{:keys [params results] :as type}]
-  (let [signature [(mapv :type params)
-                   (mapv :type results)]
-        index (or (get-in *module* [:signatures signature])
-                  (let [index (emit-field :types type)]
-                    (change! *module* assoc-in [:signatures signature] index)
-                    index))]
-    (get-in *module* [:types :fields index])))
+(defn unify-type [{:keys [signature] :as t}]
+  (let [u (or (when (index? id)
+                (get-in *module* [:types :fields id]))
+              (when (id? id)
+                (get-in *module* [:types :env id]))
+              (when (:signature t)
+                (get-in *module* [:types :sigs signature])
+                ))]
+      (change! *module* assoc-in [:types :sigs] (:signature type) id)
+    [t u])) ;XXX
 
 (defn scan-typeuse []
   (let [typeid (scanning-opt (scan-typeid))
@@ -203,20 +206,30 @@
                         [(:form typeid)])
                       (map :form params)
                       (map :form results))
+        id (or (:id typeid) (fresh-id))
+        signature (when (or (seq params) (seq results))
+                    [(mapv :type params)
+                     (mapv :type results)])
         type {:head 'func
-              :id (:id typeid)
+              :id id
               :params params
-              :results results}]
-    (ensure-type type)))
+              :results results
+              :signature signature}]
+    (unify-type type)
+    {:id id
+     :section :types}))
 
-(defn scan-functype []
-  (let [[_ & tail :as form] (scan-phrase 'func)
-        params (scan-params)
-        results (scan-results)]
-    {:head 'func
-     :params params
-     :results results
-     :form form}))
+(defn scan-functype [id]
+  (let [[_ & tail :as form] (scan-phrase 'func)]
+    (scanning tail
+      (let [params (scan-params)
+            results (scan-results)]
+        {:head 'func
+         :params params
+         :results results
+         :signature [(mapv :type params)
+                     (mapv :type results)]
+         :form form}))))
 
 (def scan-type scan-functype)
 
@@ -421,8 +434,9 @@
 (defmethod -parse-modulefield 'type [[head & tail :as form]]
   (scanning tail
     (let [id (scanning-opt (scan-id))
-          type (scan-type)]
-      (ensure-type type))))
+          type (scan-type id)]
+      (unify-type type)
+      (emit-field :types type))))
 
 (defn scan-importdesc []
   (let [[head & tail :as form] (scan-phrase)
@@ -479,9 +493,8 @@
                   :id id
                   :type type
                   :locals locals
-                  :body body}
-            index (emit-field :funcs func)]
-        (bind! :funcs index index)))))
+                  :body body}]
+        (emit-field :funcs func)))))
 
 (defmethod -parse-modulefield 'table [[head & tail :as form]]
   (parse-named form
@@ -495,9 +508,8 @@
         (let [type (scan-tabletype)
               table {:head head
                      :type type
-                     :form form}
-              index (emit-field :tables table)]
-          (bind! :tables index index))))))
+                     :form form}]
+          (emit-field :tables table))))))
 
 (defn scan-memtype []
   (scan-limits))
@@ -510,9 +522,8 @@
           memory {:head 'memory
                   :form form
                   :id id
-                  :type type}
-          index (emit-field :mems memory)]
-      (bind! :mems index index))))
+                  :type type}]
+      (emit-field :mems memory))))
 
 (defmethod -parse-modulefield 'global [form]
   (fail "cannot parse/-modulefield 'global"))
@@ -615,9 +626,8 @@
                       :head head
                       :form form
                       :counter 0
-                      :signatures {}
                       :fields []
-                      :types empty-vecsec
+                      :types (assoc empty-vecsec :defs {} :sigs {})
                       :funcs empty-vecsec
                       :imports empty-vecsec
                       :exports empty-vecsec
@@ -625,6 +635,14 @@
                       :data empty-vecsec
                       :start nil}]
       (run! parse-modulefield tail)
+      (change! *module* update [:types :fields]
+               #(mapv (fn [t]
+                        (let [u (get-in *module* [:types :defs (:id t)])]
+                          (merge t u)))
+                      %))
+        (cond
+          (index? k) (
+        )
       *module*))
 
 (defn parse-module [forms]

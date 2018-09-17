@@ -58,7 +58,7 @@
 (defn write-s64-leb128 [n]
   (write-signed-leb128
     (if (>= n 9223372036854775807)
-      (- n 18446744073709551616N)
+      (- n 18446744073709551616N) ;XXX Off by 2?
       n)))
 
 (def write-index write-u32-leb128)
