@@ -5,4 +5,5 @@
                 #_#_*unchecked-math* :warn-on-boxed}
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.10.0-alpha6"]])
+  :dependencies [[org.clojure/clojure "1.10.0-alpha6"]
+[instaparse "1.4.14"]])

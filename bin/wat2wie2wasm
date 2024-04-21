@@ -3,4 +3,4 @@
 ;;;; Emulates WABT's wat2wasm tool, but takes an intermediate
 ;;;; step through WIE (Wat In Edn) for the sake of testing.
 
-(println "TODO")
+(println "TODO wat2wie2wasm")
