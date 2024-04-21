@@ -7,11 +7,18 @@
     "" '[]
     "   " '[]
     "abc" '[abc]
+    "x.y" '[x.y]
     "a b c" '[a b c]
     "(a (b c))" '[(a (b c))]
     ";" '[]
-    "; comment" []
+    "; comment" '[]
+
     "; comment
     " []
+    "; comment
+    abc" '[abc]
+
+    "123" '[123]
+    "1.5" '[1.5]
 
     ))

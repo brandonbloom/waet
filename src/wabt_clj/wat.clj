@@ -4,13 +4,16 @@
 
 (def grammar "
   file = expressions?
-  <expression> = symbol | list
-  <expressions> = <ws>? (expression (<ws> expression)*)? <ws>?
-  symbol = #'[a-zA-Z][a-zA-Z0-9]*'
+  <expression> = symbol | list | number
+  <expressions> = <ws>* (expression (<ws> expression)*)? <ws>*
+  symbol = #'[a-zA-Z][a-zA-Z0-9.]*'
   list = <'('> expressions? <')'>
+  <number> = float | integer
+  float = #'[0-9]+\\.[0-9]+'
+  integer = #'[0-9]+'
   ws = (space | comment)
   space = #'\\s+'
-  comment = #';[^\n]*'
+  comment = #';[^\\n]*'
 ")
 
 (def parser (insta/parser grammar))
@@ -22,7 +25,9 @@
 (def transformers
   {:file vector
    :list list
-   :symbol munged-symbol})
+   :symbol munged-symbol
+   :float #(Double/parseDouble %)
+   :integer #(Long/parseLong %)})
 
 (defn wat->wie [s]
   (->> (parser s)
@@ -30,6 +35,7 @@
 
 (comment
 
-  (wat->wie "x")
+  (wat->wie ";commnet
+  ab.c")
 
 )
