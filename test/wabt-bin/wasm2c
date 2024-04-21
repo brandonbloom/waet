@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# TODO: Determine if this tool should be modified for testing.
+exec wasm2c "$@"

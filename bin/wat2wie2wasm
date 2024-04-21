@@ -1,0 +1,6 @@
+#!/usr/bin/env bb
+
+;;;; Emulates WABT's wat2wasm tool, but takes an intermediate
+;;;; step through WIE (Wat In Edn) for the sake of testing.
+
+(println "TODO")
