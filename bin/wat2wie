@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ -z $WABT_HOME ]]; then
+if [[ -z $WAET_HOME ]]; then
   echo 'WAET_HOME is not set' > /dev/stderr
   exit 1
 fi

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-if [[ -z $WABT_HOME ]]; then
+if [[ -z $WAET_HOME ]]; then
   echo 'WAET_HOME is not set' > /dev/stderr
   exit 1
 fi
 
 bb \
   --config "$WAET_HOME/bb.edn" \
-  "$WAET_HOME/src/wat2wasm.bb" \
+  "$WAET_HOME/src/wie2wasm.bb" \
   "$@"

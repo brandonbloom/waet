@@ -42,6 +42,10 @@ Investigation required.
 See `waet.core`. There will be two modes: Compile an entire module, or
 compile modulefield-by-modulefield.
 
+## Testing
+
+Use `./test.sh`, which delegates to `$WABT_HOME/run-tests.sh` and injects Waet's toolchain.
+
 ## License
 
 Copyright © 2024 Brandon Bloom
