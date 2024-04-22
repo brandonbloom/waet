@@ -11,7 +11,7 @@
   <number> = float | integer
   float = #'[0-9]+\\.[0-9]+'
   integer = #'[0-9]+'
-  ws = (space | comment)
+  ws = (space | comment)+
   space = #'\\s+'
   comment = line-comment | block-comment
   line-comment = #';[^\\n]*'

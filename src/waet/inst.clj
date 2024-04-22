@@ -28,11 +28,11 @@
 
   ;;; Variable Instructions.
 
-  0x20 get_local   :local
-  0x21 set_local   :local
-  0x22 tee_local   :local
-  0x23 get_global  :global
-  0x24 set_global  :global
+  0x20 local.get   :local
+  0x21 local.set   :local
+  0x22 local.tee   :local
+  0x23 global.get  :global
+  0x24 global.set  :global
 
   ;;; Memory Instructions
 
