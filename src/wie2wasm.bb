@@ -5,6 +5,8 @@
 (require '[clojure.tools.cli :refer [parse-opts]])
 (require '[clojure.java.io :as io])
 (require '[docopt.core :refer [docopt]])
+(require '[docopt.core :refer [docopt]])
+(require '[instaparse.core :as insta])
 (require '[waet.wat :refer [wat->wie]])
 (require '[waet.core :refer [wie->wasm]])
 (require '[waet.io :as io])
@@ -70,18 +72,22 @@ options:
   (swap! used-args conj name)
   (parsed-args name))
 
-(def filename (get-arg "<filename>"))
+(defn fatal [& message]
+  (binding [*out* *err*]
+    (apply println message)
+    (System/exit 1)))
 
-(defn read-all [r]
-  (let [reader  (java.io.PushbackReader. r)]
-    (take-while #(not (identical? ::eof %))
-                (repeatedly #(edn/read {:eof ::eof} reader)))))
+;; Ignore some options.
+(get-arg "--enable-threads")
 
 ;; Read and translate input.
+(def filename (get-arg "<filename>"))
 (def wie
   (if (get-arg "--wat")
     (-> filename slurp wat->wie)
     (-> filename clojure.java.io/reader)))
+(if (insta/failure? wie)
+  (fatal wie))
 
 ;; Resolve output stream.
 (def out
@@ -92,9 +98,7 @@ options:
 ;; Check for unsupported arguments.
 (doseq [[k v] parsed-args]
   (when (and v (not (@used-args k)))
-    (binding [*err* *out*]
-      (println "unsupported argument: " k))
-    (System/exit 1)))
+    (fatal "unsupported argument: " k)))
 
 ;; Assemble and write output.
 (def aw (io/new-array-writer))

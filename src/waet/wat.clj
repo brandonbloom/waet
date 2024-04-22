@@ -6,7 +6,7 @@
   file = expressions?
   <expression> = symbol | list | number
   <expressions> = <ws>* (expression (<ws> expression)*)? <ws>*
-  symbol = #'[a-zA-Z][a-zA-Z0-9.]*'
+  symbol = #'[a-zA-Z][a-zA-Z0-9._]*'
   list = <'('> !';' expressions? <')'>
   <number> = float | integer
   float = #'[0-9]+\\.[0-9]+'
