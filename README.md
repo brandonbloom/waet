@@ -1,7 +1,7 @@
 # WAET: The WebAssembly Edn Toolkit
 
-WAET (prounced "weight") is the Clojure-equivilent of WABT, the WebAssembly
-Binary Toolkit.
+WAET (prounced "weight") is the Clojure-equivilent of [WABT, the WebAssembly
+Binary Toolkit](https://github.com/WebAssembly/wabt).
 
 The WebAssembly Edn Toolkit provides a collection of Babashka scripts in the
 style of WABT's C++ programs for manipulating various WebAssembly file formats.
