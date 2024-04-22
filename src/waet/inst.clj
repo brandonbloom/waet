@@ -74,12 +74,12 @@
   0x47 i32.ne    :nullary
   0x48 i32.lt_s  :nullary
   0x49 i32.lt_u  :nullary
-  0x4a i32.gt_s  :nullary
-  0x4b i32.gt_u  :nullary
-  0x4c i32.le_s  :nullary
-  0x4d i32.le_u  :nullary
-  0x4e i32.ge_s  :nullary
-  0x4f i32.ge_u  :nullary
+  0x4A i32.gt_s  :nullary
+  0x4B i32.gt_u  :nullary
+  0x4C i32.le_s  :nullary
+  0x4D i32.le_u  :nullary
+  0x4E i32.ge_s  :nullary
+  0x4F i32.ge_u  :nullary
 
   0x50 i64.eqz   :nullary
   0x51 i64.eq    :nullary
@@ -91,13 +91,13 @@
   0x57 i64.le_s  :nullary
   0x58 i64.le_u  :nullary
   0x59 i64.ge_s  :nullary
-  0x5a i64.ge_u  :nullary
+  0x5A i64.ge_u  :nullary
 
-  0x5b f32.eq  :nullary
-  0x5c f32.ne  :nullary
-  0x5d f32.lt  :nullary
-  0x5e f32.gt  :nullary
-  0x5f f32.le  :nullary
+  0x5B f32.eq  :nullary
+  0x5C f32.ne  :nullary
+  0x5D f32.lt  :nullary
+  0x5E f32.gt  :nullary
+  0x5F f32.le  :nullary
   0x60 f32.ge  :nullary
 
   0x61 f64.eq  :nullary
@@ -110,12 +110,12 @@
   0x67 i32.clz     :nullary
   0x68 i32.ctz     :nullary
   0x69 i32.popcnt  :nullary
-  0x6a i32.add     :nullary
-  0x6b i32.sub     :nullary
-  0x6c i32.mul     :nullary
-  0x6d i32.div_s   :nullary
-  0x6e i32.div_u   :nullary
-  0x6f i32.rem_s   :nullary
+  0x6A i32.add     :nullary
+  0x6B i32.sub     :nullary
+  0x6C i32.mul     :nullary
+  0x6D i32.div_s   :nullary
+  0x6E i32.div_u   :nullary
+  0x6F i32.rem_s   :nullary
   0x70 i32.rem_u   :nullary
   0x71 i32.and     :nullary
   0x72 i32.or      :nullary
@@ -127,12 +127,12 @@
   0x78 i32.rotr    :nullary
 
   0x79 i64.clz     :nullary
-  0x7a i64.ctz     :nullary
-  0x7b i64.popcnt  :nullary
-  0x7c i64.add     :nullary
-  0x7d i64.sub     :nullary
-  0x7e i64.mul     :nullary
-  0x7f i64.div_s   :nullary
+  0x7A i64.ctz     :nullary
+  0x7B i64.popcnt  :nullary
+  0x7C i64.add     :nullary
+  0x7D i64.sub     :nullary
+  0x7E i64.mul     :nullary
+  0x7F i64.div_s   :nullary
   0x80 i64.div_u   :nullary
   0x81 i64.rem_s   :nullary
   0x82 i64.rem_u   :nullary
@@ -143,13 +143,13 @@
   0x87 i64.shr_s   :nullary
   0x88 i64.shr_u   :nullary
   0x89 i64.rotl    :nullary
-  0x8a i64.rotr    :nullary
+  0x8A i64.rotr    :nullary
 
-  0x8b f32.abs       :nullary
-  0x8c f32.neg       :nullary
-  0x8d f32.ceil      :nullary
-  0x8e f32.floor     :nullary
-  0x8f f32.trunc     :nullary
+  0x8B f32.abs       :nullary
+  0x8C f32.neg       :nullary
+  0x8D f32.ceil      :nullary
+  0x8E f32.floor     :nullary
+  0x8F f32.trunc     :nullary
   0x90 f32.nearest   :nullary
   0x91 f32.sqrt      :nullary
   0x92 f32.add       :nullary
@@ -161,45 +161,124 @@
   0x98 f32.copysign  :nullary
 
   0x99 f64.abs       :nullary
-  0x9a f64.neg       :nullary
-  0x9b f64.ceil      :nullary
-  0x9c f64.floor     :nullary
-  0x9d f64.trunc     :nullary
-  0x9e f64.nearest   :nullary
-  0x9f f64.sqrt      :nullary
-  0xa0 f64.add       :nullary
-  0xa1 f64.sub       :nullary
-  0xa2 f64.mul       :nullary
-  0xa3 f64.div       :nullary
-  0xa4 f64.fmin      :nullary
-  0xa5 f64.fmax      :nullary
-  0xa6 f64.copysign  :nullary
+  0x9A f64.neg       :nullary
+  0x9B f64.ceil      :nullary
+  0x9C f64.floor     :nullary
+  0x9D f64.trunc     :nullary
+  0x9E f64.nearest   :nullary
+  0x9F f64.sqrt      :nullary
+  0xA0 f64.add       :nullary
+  0xA1 f64.sub       :nullary
+  0xA2 f64.mul       :nullary
+  0xA3 f64.div       :nullary
+  0xA4 f64.fmin      :nullary
+  0xA5 f64.fmax      :nullary
+  0xA6 f64.copysign  :nullary
 
-  0xa7 i32.wrap/i64         :nullary
-  0xa8 i32.trunc_s/f32      :nullary
-  0xa9 i32.trunc_u/f32      :nullary
-  0xaa i32.trunc_s/f64      :nullary
-  0xab i32.trunc_u/f64      :nullary
-  0xac i64.extend_s/i32     :nullary
-  0xad i64.extend_u/i32     :nullary
-  0xae i64.trunc_s/f32      :nullary
-  0xaf i64.trunc_u/f32      :nullary
-  0xb0 i64.trunc_s/f64      :nullary
-  0xb1 i64.trunc_u/f64      :nullary
-  0xb2 f32.convert_s/i32    :nullary
-  0xb3 f32.convert_u/i32    :nullary
-  0xb4 f32.convert_s/i64    :nullary
-  0xb5 f32.convert_u/i64    :nullary
-  0xb6 f32.demote/f64       :nullary
-  0xb7 f64.convert_s/i32    :nullary
-  0xb8 f64.convert_u/i32    :nullary
-  0xb9 f64.convert_s/i64    :nullary
-  0xba f64.convert_u/i64    :nullary
-  0xbb f64.promote/f32      :nullary
-  0xbc i32.reinterpret/f32  :nullary
-  0xbd i64.reinterpret/f64  :nullary
-  0xbe f32.reinterpret/i32  :nullary
-  0xbf f64.reinterpret/i64  :nullary
+  0xA7 i32.wrap/i64         :nullary
+  0xA8 i32.trunc_s/f32      :nullary
+  0xA9 i32.trunc_u/f32      :nullary
+  0xAA i32.trunc_s/f64      :nullary
+  0xAB i32.trunc_u/f64      :nullary
+  0xAC i64.extend_s/i32     :nullary
+  0xAD i64.extend_u/i32     :nullary
+  0xAE i64.trunc_s/f32      :nullary
+  0xAF i64.trunc_u/f32      :nullary
+  0xB0 i64.trunc_s/f64      :nullary
+  0xB1 i64.trunc_u/f64      :nullary
+  0xB2 f32.convert_s/i32    :nullary
+  0xB3 f32.convert_u/i32    :nullary
+  0xB4 f32.convert_s/i64    :nullary
+  0xB5 f32.convert_u/i64    :nullary
+  0xB6 f32.demote/f64       :nullary
+  0xB7 f64.convert_s/i32    :nullary
+  0xB8 f64.convert_u/i32    :nullary
+  0xB9 f64.convert_s/i64    :nullary
+  0xBA f64.convert_u/i64    :nullary
+  0xBB f64.promote/f32      :nullary
+  0xBC i32.reinterpret/f32  :nullary
+  0xBD i64.reinterpret/f64  :nullary
+  0xBE f32.reinterpret/i32  :nullary
+  0xBF f64.reinterpret/i64  :nullary
+
+  ;;; Threading.
+
+  0xFE00 memory.atomic.notify [:mem 4]
+  0xFE01 memory.atomic.wait32 [:mem 4]
+  0xFE02 memory.atomic.wait64 [:mem 8]
+
+  0xFE0300 atomic.fence :nullary
+
+  0xFE10   i32.atomic.load     [:mem 4]
+  0xFE11   i64.atomic.load     [:mem 8]
+  0xFE12   i32.atomic.load8_u  [:mem 1]
+  0xFE13   i32.atomic.load16_u [:mem 2]
+  0xFE14   i64.atomic.load8_u  [:mem 1]
+  0xFE15   i64.atomic.load16_u [:mem 2]
+  0xFE16   i64.atomic.load32_u [:mem 4]
+  0xFE17   i32.atomic.store    [:mem 4]
+  0xFE18   i64.atomic.store    [:mem 8]
+  0xFE19   i32.atomic.store8   [:mem 1]
+  0xFE1A   i32.atomic.store16  [:mem 2]
+  0xFE1B   i64.atomic.store8   [:mem 1]
+  0xFE1C   i64.atomic.store16  [:mem 2]
+  0xFE1D   i64.atomic.store32  [:mem 4]
+
+  0xFE1E   i32.atomic.rmw.add     [:mem 4]
+  0xFE1F   i64.atomic.rmw.add     [:mem 8]
+  0xFE20   i32.atomic.rmw8.add_u  [:mem 1]
+  0xFE21   i32.atomic.rmw16.add_u [:mem 2]
+  0xFE22   i64.atomic.rmw8.add_u  [:mem 1]
+  0xFE23   i64.atomic.rmw16.add_u [:mem 2]
+  0xFE24   i64.atomic.rmw32.add_u [:mem 4]
+
+  0xFE25   i32.atomic.rmw.sub     [:mem 4]
+  0xFE26   i64.atomic.rmw.sub     [:mem 8]
+  0xFE27   i32.atomic.rmw8.sub_u  [:mem 1]
+  0xFE28   i32.atomic.rmw16.sub_u [:mem 2]
+  0xFE29   i64.atomic.rmw8.sub_u  [:mem 1]
+  0xFE2A   i64.atomic.rmw16.sub_u [:mem 2]
+  0xFE2B   i64.atomic.rmw32.sub_u [:mem 4]
+
+  0xFE2C   i32.atomic.rmw.and     [:mem 4]
+  0xFE2D   i64.atomic.rmw.and     [:mem 8]
+  0xFE2E   i32.atomic.rmw8.and_u  [:mem 1]
+  0xFE2F   i32.atomic.rmw16.and_u [:mem 2]
+  0xFE30   i64.atomic.rmw8.and_u  [:mem 1]
+  0xFE31   i64.atomic.rmw16.and_u [:mem 2]
+  0xFE32   i64.atomic.rmw32.and_u [:mem 4]
+
+  0xFE33   i32.atomic.rmw.or     [:mem 4]
+  0xFE34   i64.atomic.rmw.or     [:mem 8]
+  0xFE35   i32.atomic.rmw8.or_u  [:mem 1]
+  0xFE36   i32.atomic.rmw16.or_u [:mem 2]
+  0xFE37   i64.atomic.rmw8.or_u  [:mem 1]
+  0xFE38   i64.atomic.rmw16.or_u [:mem 2]
+  0xFE39   i64.atomic.rmw32.or_u [:mem 4]
+
+  0xFE3A   i32.atomic.rmw.xor     [:mem 4]
+  0xFE3B   i64.atomic.rmw.xor     [:mem 8]
+  0xFE3C   i32.atomic.rmw8.xor_u  [:mem 1]
+  0xFE3D   i32.atomic.rmw16.xor_u [:mem 2]
+  0xFE3E   i64.atomic.rmw8.xor_u  [:mem 1]
+  0xFE3F   i64.atomic.rmw16.xor_u [:mem 2]
+  0xFE40   i64.atomic.rmw32.xor_u [:mem 4]
+
+  0xFE41   i32.atomic.rmw.xchg     [:mem 4]
+  0xFE42   i64.atomic.rmw.xchg     [:mem 8]
+  0xFE43   i32.atomic.rmw8.xchg_u  [:mem 1]
+  0xFE44   i32.atomic.rmw16.xchg_u [:mem 2]
+  0xFE45   i64.atomic.rmw8.xchg_u  [:mem 1]
+  0xFE46   i64.atomic.rmw16.xchg_u [:mem 2]
+  0xFE47   i64.atomic.rmw32.xchg_u [:mem 4]
+
+  0xFE48   i32.atomic.rmw.cmpxchg     [:mem 4]
+  0xFE49   i64.atomic.rmw.cmpxchg     [:mem 8]
+  0xFE4A   i32.atomic.rmw8.cmpxchg_u  [:mem 1]
+  0xFE4B   i32.atomic.rmw16.cmpxchg_u [:mem 2]
+  0xFE4C   i64.atomic.rmw8.cmpxchg_u  [:mem 1]
+  0xFE4D   i64.atomic.rmw16.cmpxchg_u [:mem 2]
+  0xFE4E   i64.atomic.rmw32.cmpxchg_u [:mem 4]
 
 ])
 

@@ -164,7 +164,17 @@
        (fail (str "unknown operation: " op#) {:op op#}))))
 
 (defn write-opcode [op]
-  (write-byte (opcode op)))
+  (let [bits (opcode op)]
+    (cond
+      ;; 3-byte opcode.
+      (pos? (bit-and bits 0xFE0000)) (do (write-byte 0xFE)
+                                         (write-byte (bit-shift-right (bit-and bits 0xFF00) 8))
+                                         (write-byte (bit-and bits 0xFF)))
+      ;; 2-byte opcode.
+      (pos? (bit-and bits 0xFE00)) (do (write-byte 0xFE)
+                                       (write-byte (bit-and bits 0xFF)))
+      ;; 1-byte opcode.
+      :else (write-byte bits ))))
 
 (defn write-blocktype [results]
   {:pre [(vector? results)]}
