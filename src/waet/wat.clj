@@ -1,5 +1,5 @@
-(ns wabt-clj.wat
-  (:use [wabt-clj.util])
+(ns waet.wat
+  (:use [waet.util])
   (:require [instaparse.core :as insta]))
 
 (def grammar "
@@ -7,13 +7,15 @@
   <expression> = symbol | list | number
   <expressions> = <ws>* (expression (<ws> expression)*)? <ws>*
   symbol = #'[a-zA-Z][a-zA-Z0-9.]*'
-  list = <'('> expressions? <')'>
+  list = <'('> !';' expressions? <')'>
   <number> = float | integer
   float = #'[0-9]+\\.[0-9]+'
   integer = #'[0-9]+'
   ws = (space | comment)
   space = #'\\s+'
-  comment = #';[^\\n]*'
+  comment = line-comment | block-comment
+  line-comment = #';[^\\n]*'
+  block-comment = '(;' (#'[^;]*' | ';' !')')* ';)'
 ")
 
 (def parser (insta/parser grammar))

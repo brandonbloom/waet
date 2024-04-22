@@ -1,13 +1,29 @@
-# The WebAssembly Binary Toolkit in Clojure
+# WAET: The WebAssembly Edn Toolkit
 
-The WebAssembly Binary Toolkit, or WABT, is a collection of C++ programs for
-working with WebAssembly. This partial port provides mainly a "wat2wasm" equivilent
-where WebAssembly text format (WAT) programs are encoded in Edn. Since WAT is already
-an s-expr language, WAT programs are mostly valid Edn. It should be possible to
-port a WAT program to Wat-In-Edn (WIE) with minimal local text fixups.
+WAET (prounced "weight") is the Clojure-equivilent of WABT, the WebAssembly
+Binary Toolkit.
 
-Primarily, this project aims to provide a pleasant interface for compilers written
-in Clojure to target WebAssembly as a backend.
+The WebAssembly Edn Toolkit provides a collection of Babashka scripts in the
+style of WABT's C++ programs for manipulating various WebAssembly file formats.
+
+**Provided Tools:**
+
+- `wat2wie` -- Converts WebAssembly Text into WebAssembly In Edn.
+- `wie2wasm` -- Converts WebAssembly In Edn to binary WebAssembly. Accepts the
+  same options as `wat2wasm`.
+- `wat2wie2wasm` -- Behaves as `wat2wasm`, but detours through WIE for testing
+  purposes.
+
+Additionally -- and perhaps most importantly -- WAET provides the above
+functionality as a Clojure library for the purpose of being a pleasant
+compilation toolkit for compilers targeting WebAssembly.
+
+## WIE: WebAssembly In Edn
+
+WAT (WebAssembly Text) is already an sexpression language and so has a great
+deal of common syntax with EDN (Clojure's Extensible Data Notation).
+
+*TODO: Document differences/translation.
 
 ## Status
 
@@ -16,18 +32,18 @@ Very much a work-in-progress. I'll make an announcement if/when things stablize.
 Right now, most of the interesting bits of parsing, id resolution, and encoding
 work. Not all section types or instructions are fully-implemented.
 
-Practically nothing is tested.
+Practically nothing is tested, but will eventually use the full wabt test suite.
 
 It's not yet clear what subset of WAT code is reasonably WIE code.
 Investigation required.
 
 ## Usage
 
-See `wabt-clj.core`. There will be two modes: Compile an entire module, or
+See `waet.core`. There will be two modes: Compile an entire module, or
 compile modulefield-by-modulefield.
 
 ## License
 
-Copyright © 2018 Brandon Bloom
+Copyright © 2024 Brandon Bloom
 
 Distributed under the Eclipse Public License 1.0.

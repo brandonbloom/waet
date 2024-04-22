@@ -1,8 +1,8 @@
-(ns wabt-clj.encode
-  (:use [wabt-clj.util])
-  (:require [wabt-clj.values :refer [u32?]]
-            [wabt-clj.inst :as inst]
-            [wabt-clj.io :as io])
+(ns waet.encode
+  (:use [waet.util])
+  (:require [waet.values :refer [u32?]]
+            [waet.inst :as inst]
+            [waet.io :as io])
   (:import [java.nio ByteBuffer ByteOrder]))
 
 ;;;; See <https://webassembly.github.io/spec/core/binary/index.html>.

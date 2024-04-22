@@ -1,4 +1,4 @@
-(ns wabt-clj.values)
+(ns waet.values)
 
 (defn name? [x]
   ;;TODO: Tighter validation.

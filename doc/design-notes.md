@@ -7,7 +7,7 @@ valid WIE. However, there are some differences, which are documented here.
 
 ### Indices & Type Uses
 
-Unlike WAT, wabt-clj's Sexpr syntax does not support numeric indices wherever
+Unlike WAT, waet's Sexpr syntax does not support numeric indices wherever
 symbolic ids are allowed. Only funcs, locals, and mems permit referencing by
 index.
 
@@ -18,7 +18,7 @@ associated index. It also says that "If no such index exists, then a new type
 definition [...] is inserted at the end of the module."
 
 This design forces an additional AST pass (WABT calls it `ResolveFuncTypes`)
-to find these types and append their definitions. Since wabt-clj disallows
+to find these types and append their definitions. Since waet disallows
 non-symbolic references, it's safe to _insert_ these definitions immediately
 upon discovery that they are needed. If numeric references were allowed, this
 would cause subsequent indices to need to be shifted. But since they are not,

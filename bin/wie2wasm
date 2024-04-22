@@ -7,5 +7,5 @@ fi
 
 bb \
   --config "$WAET_HOME/bb.edn" \
-  "$WAET_HOME/src/wat2wie.bb" \
+  "$WAET_HOME/src/wat2wasm.bb" \
   "$@"

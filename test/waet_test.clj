@@ -1,10 +1,10 @@
-(ns wabt-clj-test
+(ns waet-test
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.java.shell :refer [sh]]
-            [wabt-clj.core :refer :all]
-            [wabt-clj.io :as wabt-io])
+            [waet.core :refer :all]
+            [waet.io :as wabt-io])
   (:import [java.io File Closeable]))
 
 (def wabt-root
@@ -61,7 +61,7 @@
                 ;; Compile WIE to Wasm.
                 tempfile (.getPath (File/createTempFile "output" ".wasm"))
                 _ (with-open [^Closeable w (wabt-io/open-file-writer tempfile)]
-                    (edn->wasm source w))
+                    (wie->wasm source w))
                 _ (println "Wrote" tempfile)
                 ;; Run WASM.
                 res (sh (.getPath ^File wasm-interp)

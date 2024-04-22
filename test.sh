@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Behaves the same as WABT's run-tests.sh script, but overrides
-# the tools to test wabt-clj.
+# the tools to test waet.
 
 set -e
 
@@ -10,9 +10,10 @@ if [[ -z $WABT_HOME ]]; then
   exit 1
 fi
 
-project_dir="$PWD"
+#./build.sh
+
 cd $WABT_HOME
 
 ./test/run-tests.py \
-  --bindir="${project_dir}/test/wabt-bin" \
+  --bindir="$WAET_HOME/test/wabt-bin" \
   "$@"

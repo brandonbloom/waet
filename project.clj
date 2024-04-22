@@ -1,4 +1,4 @@
-(defproject wabt-clj "0.1.0-SNAPSHOT"
+(defproject waet "0.1.0-SNAPSHOT"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :global-vars {*warn-on-reflection* true

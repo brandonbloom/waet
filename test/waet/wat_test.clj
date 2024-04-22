@@ -1,8 +1,8 @@
-(ns wabt-clj.wat-test
+(ns waet.wat-test
   (:require [clojure.test :refer :all]
-            [wabt-clj.wat :refer [wat->wie]]))
+            [waet.wat :refer [wat->wie]]))
 
-(deftest wat->edn
+(deftest wat->wie-test
   (are [wat wie] (= (wat->wie wat) wie)
     "" '[]
     "   " '[]
@@ -12,6 +12,8 @@
     "(a (b c))" '[(a (b c))]
     ";" '[]
     "; comment" '[]
+    "x(;;)y" '[x y]
+    "x(;;;)y" '[x y]
 
     "; comment
     " []

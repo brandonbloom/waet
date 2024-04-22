@@ -1,6 +1,11 @@
-#!/usr/bin/env bb
+#!/bin/bash
 
-;;;; Emulates WABT's wat2wasm tool, but takes an intermediate
-;;;; step through WIE (Wat In Edn) for the sake of testing.
+if [[ -z $WABT_HOME ]]; then
+  echo 'WAET_HOME is not set' > /dev/stderr
+  exit 1
+fi
 
-(println "TODO wat2wie2wasm")
+bb \
+  --config "$WAET_HOME/bb.edn" \
+  "$WAET_HOME/src/wat2wie2wasm.bb" \
+  "$@"

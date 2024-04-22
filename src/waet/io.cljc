@@ -1,4 +1,4 @@
-(ns wabt-clj.io
+(ns waet.io
   (:require [clojure.core :as clj])
   (:import [java.io RandomAccessFile Closeable]
            [java.util Arrays]
@@ -30,9 +30,18 @@
 
 (defprotocol IWriteSeeker
   (^long position [self])
-  (seek [self pos])
+  (seek [self ^long pos])
   (write-byte [self, value])
   (write-bytes [self, ^bytes value]))
+
+(do #?@(
+
+:bb [
+(defprotocol Closeable
+  (close [this]))
+]
+
+:clj [
 
 (deftype FileWriter [^RandomAccessFile f]
   IWriteSeeker
@@ -53,6 +62,7 @@
     (.setLength f 0)
     (FileWriter. f)))
 
+]))
 
 (defn -ensure-size [^bytes bytes, ^long size]
   (if (<= size (alength bytes))
@@ -60,7 +70,8 @@
     (Arrays/copyOf bytes (* size 2))))
 
 (defprotocol IArrayWriter
-  (array-writer-bytes [self]))
+  (bytes-copy [self])
+  (write-to [self out]))
 
 (deftype ArrayWriter [^:unsynchronized-mutable ^long pos,
                       ^:unsynchronized-mutable ^long end,
@@ -68,9 +79,9 @@
   IWriteSeeker
   (position [self]
     pos)
-  (seek [self pos]
+  (seek [self new-pos]
     (locking self
-      (set! (.pos self) pos)))
+      (set! pos (long new-pos))))
   (write-byte [self value]
     (locking self
       (let [size (inc pos)]
@@ -91,8 +102,11 @@
     (set! bs nil)
     nil)
   IArrayWriter
-  (array-writer-bytes [self]
-    (Arrays/copyOf bs end)))
+  (bytes-copy [self]
+    (Arrays/copyOf bs end))
+  (write-to [self w]
+    (.write w bs 0 end))
+  )
 
 (defn new-array-writer []
   (ArrayWriter. 0 0 (byte-array 1024)))

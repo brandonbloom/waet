@@ -1,8 +1,8 @@
-(ns wabt-clj.parse
-  (:use [wabt-clj.util])
-  (:require [wabt-clj.values :as val]
-            [wabt-clj.inst :as inst]
-            [wabt-clj.io :as io]))
+(ns waet.parse
+  (:use [waet.util])
+  (:require [waet.values :as val]
+            [waet.inst :as inst]
+            [waet.io :as io]))
 
 ;;;; See <https://webassembly.github.io/spec/core/text/index.html>.
 
@@ -588,7 +588,7 @@
       (if (vector? s)
         (run! #(io/write-byte w %) s)
         (io/write-bytes w (io/utf-8-bytes s))))
-    (io/array-writer-bytes w)))
+    (io/bytes-copy w)))
 
 (defmethod -parse-modulefield 'data [[head & tail :as form]]
   (scanning tail
