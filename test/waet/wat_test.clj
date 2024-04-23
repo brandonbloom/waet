@@ -25,3 +25,15 @@
     "1.5" '[1.5]
 
     ))
+
+(deftest metadata-test
+  (are [wat line column] (= (-> wat wat->wie first meta (select-keys [:line :column]))
+                            {:line line :column column})
+    "x"   1 1
+    "xyz" 1 1
+    "  x" 1 3
+    "
+x"        2 1
+    "()"  1 1
+    "(x)" 1 1
+    ))
