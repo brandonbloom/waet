@@ -220,15 +220,18 @@
 
 (def scan-type scan-functype)
 
+(defn scan-sharing []
+  (scan-pred '#{shared unshared}))
 
 (defn scan-limits []
   (let [n (scan-u32)
-        m (scanning-opt (scan-u32))]
+        m (scanning-opt (scan-u32))
+        sharing (scanning-opt (scan-sharing))]
     {:min n
-     :max (or m n)}))
+     :max (or m n)
+     :shared? (= sharing 'shared)}))
 
-(defn scan-memtype []
-  (scan-limits))
+(def scan-memtype scan-limits)
 
 (defn scan-elemtype []
   (scan-pred #{'anyfunc}))
@@ -498,9 +501,6 @@
                      :form form}
               index (emit-field :tables table)]
           (bind! :tables index index))))))
-
-(defn scan-memtype []
-  (scan-limits))
 
 (defmethod -parse-modulefield 'memory [[head & tail :as form]]
   (scanning tail

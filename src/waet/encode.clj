@@ -147,11 +147,11 @@
                 f32 0x7D
                 f64 0x7C)))
 
-(defn write-limits [{:keys [min max]}]
+(defn write-limits [{:keys [min max shared?]}]
   (if (= min max)
     (do (write-byte 0x00)
         (write-u32-leb128 min))
-    (do (write-byte 0x01)
+    (do (write-byte (if shared? 0x02 0x01))
         (write-u32-leb128 min)
         (write-u32-leb128 max))))
 
@@ -290,7 +290,8 @@
 
 ;;; Memory.
 
-(def write-memtype write-limits)
+(defn write-memtype [x]
+  (write-limits x))
 
 (defn write-mem [{:keys [type] :as mem}]
   (write-memtype type))
