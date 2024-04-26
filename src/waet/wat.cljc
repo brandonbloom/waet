@@ -15,7 +15,9 @@
   integer = #'[0-9]+'
   string = <'\"'> string-char* <'\"'>
   <string-char> = string-escape / #'[^\"\\\\]' (* TODO: Exclude < U+20 and U+7F *)
-  string-escape = '\\\\' (('u{' hexnum '}') / #'[^u]')
+  <string-escape> = <'\\\\'> (string-escape-hex / string-escape-char)
+  string-escape-hex = ('u{' hexnum '}')
+  string-escape-char = #'[^u]'
   hexnum = hexdigit ('_'? hexnum)?
   hexdigit = #'[0-9a-fA-F]'
   ws = (space | comment)+
@@ -40,6 +42,19 @@
         (with-meta y {:line start-line :column start-column})
         y))))
 
+(defn decode-escape-hex [& args]
+  (prn 'hex args)
+  args
+  )
+
+(defn decode-escape-char [c]
+  (case c
+    "t" "\t"
+    "n" "\n"
+    "r" "\r"
+    "\"" "\""
+    "'" "'"))
+
 (def transformers
   {:file (metadata-transformer vector)
    :list (metadata-transformer identity)
@@ -48,7 +63,10 @@
    :-symbol munged-symbol
    :float #(Double/parseDouble %)
    :integer #(Long/parseLong %)
-   :string str})
+   :string str
+   :string-escape-hex decode-escape-hex
+   :string-escape-char decode-escape-char
+   })
 
 (defn wat->wie [s]
   (->> (parser s)
@@ -59,7 +77,7 @@
 (comment
 
 (->
-  (wat->wie "\"\"")
+  (wat->wie "\"\\\"\"")
   first
   meta
   )
