@@ -4,7 +4,7 @@
 
 (def grammar "
   file = expressions?
-  <expression> = symbol | list | number
+  <expression> = symbol | list | number | string
   <expressions> = <ws>* (expression (<ws> expression)*)? <ws>*
   symbol = -symbol                       (* Indirection puts metadata on tag. *)
   -symbol = #'[a-zA-Z][a-zA-Z0-9._]*'    (* Strings can't have metadata. *)
@@ -13,6 +13,11 @@
   <number> = float | integer
   float = #'[0-9]+\\.[0-9]+'
   integer = #'[0-9]+'
+  string = <'\"'> string-char* <'\"'>
+  <string-char> = string-escape / #'[^\"\\\\]' (* TODO: Exclude < U+20 and U+7F *)
+  string-escape = '\\\\' (('u{' hexnum '}') / #'[^u]')
+  hexnum = hexdigit ('_'? hexnum)?
+  hexdigit = #'[0-9a-fA-F]'
   ws = (space | comment)+
   space = #'\\s+'
   comment = line-comment | block-comment
@@ -42,7 +47,8 @@
    :symbol (metadata-transformer identity)
    :-symbol munged-symbol
    :float #(Double/parseDouble %)
-   :integer #(Long/parseLong %)})
+   :integer #(Long/parseLong %)
+   :string str})
 
 (defn wat->wie [s]
   (->> (parser s)
@@ -53,7 +59,7 @@
 (comment
 
 (->
-  (wat->wie "(x)")
+  (wat->wie "\"\"")
   first
   meta
   )
