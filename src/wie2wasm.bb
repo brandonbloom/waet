@@ -5,8 +5,8 @@
 (require '[clojure.tools.cli :refer [parse-opts]])
 (require '[clojure.java.io :as io])
 (require '[docopt.core :refer [docopt]])
-(require '[docopt.core :refer [docopt]])
 (require '[instaparse.core :as insta])
+(require '[fipp.edn :refer [pprint]])
 (require '[waet.wat :refer [wat->wie]])
 (require '[waet.core :refer [wie->wasm]])
 (require '[waet.io :as io])
@@ -77,8 +77,19 @@ options:
     (apply println message)
     (System/exit 1)))
 
-;; Ignore some options.
-(get-arg "--enable-threads") ; Always enabled.
+;; Ignore "enable" options; assume "--enable-all".
+(get-arg "--enable-exceptions")
+(get-arg "--enable-threads")
+(get-arg "--enable-function-references")
+(get-arg "--enable-tail-call")
+(get-arg "--enable-annotations")
+(get-arg "--enable-code-metadata")
+(get-arg "--enable-gc")
+(get-arg "--enable-memory64")
+(get-arg "--enable-multi-memory")
+(get-arg "--enable-extended-const")
+(get-arg "--enable-relaxed-simd")
+(get-arg "--enable-all")
 
 ;; Read and translate input.
 (def filename (get-arg "<filename>"))
@@ -86,7 +97,7 @@ options:
   (if (get-arg "--wat")
     (-> filename slurp wat->wie)
     (-> filename clojure.java.io/reader)))
-(if (insta/failure? wie)
+(when (insta/failure? wie)
   (fatal wie))
 
 ;; Resolve output stream.

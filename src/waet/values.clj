@@ -35,3 +35,5 @@
   (number? x)) ;TODO: check min/max
 
 (def index? u32?)
+
+(defrecord Annotation [head tail])

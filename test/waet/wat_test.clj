@@ -1,5 +1,6 @@
 (ns waet.wat-test
   (:require [clojure.test :refer :all]
+            [waet.values :as val]
             [waet.wat :refer [wat->wie]]))
 
 (deftest wat->wie-test
@@ -29,8 +30,13 @@
     "123"  '[123]
     "1.5"  '[1.5]
 
-    "\"\""   '[""]
-    "\"x\""  '["x"]
+    "\"\""     '[""]
+    "\"x\""    '["x"]
+    "\"\\0\""  '["\0"]
+    "\"\\n\""  '["\n"]
+
+    "(@x)"          [(val/->Annotation 'x 'nil)]
+    "(@abc 1 2 3)"  [(val/->Annotation 'abc '(1 2 3))]
 
     ; other than ASCII control characters, quotation marks (), or backslash (), except when expressed with an escape sequence.
 

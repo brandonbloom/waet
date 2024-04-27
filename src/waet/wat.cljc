@@ -1,30 +1,48 @@
 (ns waet.wat
   (:use [waet.util])
-  (:require [instaparse.core :as insta]))
+  (:require [instaparse.core :as insta]
+            [waet.values :as val]))
 
 (def grammar "
-  file = expressions?
-  <expression> = symbol | list | number | string
-  <expressions> = <ws>* (expression (<ws> expression)*)? <ws>*
-  symbol = -symbol                       (* Indirection puts metadata on tag. *)
-  -symbol = #'[a-zA-Z\\$][a-zA-Z0-9._]*'   (* Strings can't have metadata. *)
-  list = -list                           (* Tag gives location of paren. *)
-  -list = <'('> !';' expressions? <')'>  (* Expressions can be nil; no metadata. *)
-  <number> = float | integer
-  float = #'[0-9]+\\.[0-9]+'
-  integer = #'[0-9]+'
-  string = <'\"'> string-char* <'\"'>
-  <string-char> = string-escape / #'[^\"\\\\]' (* TODO: Exclude < U+20 and U+7F *)
-  <string-escape> = <'\\\\'> (string-escape-hex / string-escape-char)
-  string-escape-hex = ('u{' hexnum '}')
-  string-escape-char = #'[^u]'
-  hexnum = hexdigit ('_'? hexnum)?
-  hexdigit = #'[0-9a-fA-F]'
-  ws = (space | comment)+
-  space = #'\\s+'
-  comment = line-comment | block-comment
-  line-comment = #';[^\\n]*'
-  block-comment = '(;' (#'[^;]*' | ';' !')')* ';)'
+
+  file           =  expressions?
+  <expression>   =  symbol | list | number | string | annotation
+  <expressions>  =  <ws>* (expression (<ws> expression)*)? <ws>*
+
+  (* Indirection puts metadata on tag because string before transform
+     can't have metadata, but symbols can. *)
+  symbol   =  -symbol
+  -symbol  =  #'[a-zA-Z\\$][a-zA-Z0-9._]*'
+
+  (* Indirection gets location information of the paren,
+      instead of the first expression. That expression may not
+      exist (be nil), and so cannot have metadata. *)
+  list   =  -list
+  -list  =  <'('> !#\";@\" expressions? <')'>
+
+  annotation  =  <'(@'> symbol expressions? <')'>
+
+  <number>  =  float | integer
+  float     =  #'[0-9]+\\.[0-9]+'
+  integer   =  #'[0-9]+'
+
+  string         =  <'\"'> string-char* <'\"'>
+  <string-char>  =  string-escape / #'[^\"\\\\]' (* TODO: Exclude < U+20 and U+7F *)
+
+  <string-escape>     =  <'\\\\'> (string-escape-hex / string-escape-char)
+  string-escape-hex   =  ('u{' hexnum '}')
+  string-escape-char  =  #'[^u]'
+
+  hexnum    =  hexdigit ('_'? hexnum)?
+  hexdigit  =  #'[0-9a-fA-F]'
+
+  ws     =  (space | comment)+
+  space  =  #'\\s+'
+
+  comment        =  line-comment | block-comment
+  line-comment   =  #';[^\\n]*'
+  block-comment  =  '(;' (#'[^;]*' | ';' !')')* ';)'
+
 ")
 
 (def parser (insta/parser grammar))
@@ -43,17 +61,21 @@
         y))))
 
 (defn decode-escape-hex [& args]
-  (prn 'hex args)
   args
   )
 
 (defn decode-escape-char [c]
   (case c
+    "0" "\0"
     "t" "\t"
     "n" "\n"
     "r" "\r"
     "\"" "\""
-    "'" "'"))
+    "'" "'"
+    (fail "unknown escape character" {:char c})))
+
+(defn transform-annotation [head & tail]
+  (val/->Annotation head tail))
 
 (def transformers
   {:file (metadata-transformer vector)
@@ -66,6 +88,7 @@
    :string str
    :string-escape-hex decode-escape-hex
    :string-escape-char decode-escape-char
+   :annotation (metadata-transformer transform-annotation)
    })
 
 (defn wat->wie [s]
@@ -76,10 +99,12 @@
 
 (comment
 
-(->
-  (wat->wie "$x")
-  first
-  meta
-  )
+  (->
+    ;"(@x)"
+    (slurp "/Users/brandonbloom/Projects/wabt/test/decompile/code-metadata.txt")
+    wat->wie
+    first
+    ;meta
+    )
 
 )
