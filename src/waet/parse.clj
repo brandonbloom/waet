@@ -9,12 +9,23 @@
 (def ^:dynamic *pos* nil)
 
 (defn origin [x]
-  (some-> (meta x)
-    (select-keys [:line :column])))
+  (let [m (select-keys (meta x) [:line :column])]
+    (when (seq m)
+      m)))
 
-(defn bad-syntax [form message]
-  (fail (str "syntax error: " message)
-        (assoc *pos* :form form)))
+(defn set-pos-from [x]
+  (when-let [pos (origin x)]
+    (set! *pos* pos)))
+
+(defn bad-syntax
+  ([form message]
+   (bad-syntax form message nil))
+  ([form message data]
+   (fail (str "syntax error: " message)
+         (merge {::error :bad-syntax
+                 :form form}
+                *pos*
+                data))))
 
 ;;; Utils.
 
@@ -66,8 +77,7 @@
 (def ^:dynamic *input*)
 
 (defmacro scanning [input & body]
-  `(binding [*input* ~input
-             *pos* *pos*]
+  `(binding [*input* ~input]
      (let [res# (do ~@body)]
        (when-first [x# (seq *input*)]
          (bad-syntax x# "expected end of sequence"))
@@ -84,14 +94,14 @@
 
 (defn no-match []
   (when debug-no-match?
-    (throw (ex-info "no match" {::no-match true
+    (throw (ex-info "no match" {::error :no-match
                                 :form (first *input*)
                                 :near *pos*})))
   (throw no-match-exception))
 
 (defn no-match? [ex]
-  (or (identical? ex no-match-exception) ; Fast path (preallocated).
-      (::no-match (ex-data ex))))        ; Slow path (with stacktrace).
+  (or (identical? ex no-match-exception)      ; Fast path (preallocated).
+      (-> ex ex-data ::error (= :no-match)))) ; Slow path (with stacktrace).
 
 (defmacro scanning-opt [& body]
   `(try
@@ -104,8 +114,7 @@
   (let [[x & xs] *input*]
     (if (pred x)
       (do (set! *input* xs)
-          (when-let [pos (origin x)]
-            (set! *pos* pos))
+          (set-pos-from x)
           x)
       (no-match))))
 
@@ -118,8 +127,18 @@
       (recur (conj v x))
       v)))
 
-(defn scan-u32 []
-  (scan-pred val/u32?))
+(defn scan-i8  [] (scan-pred val/i8?))
+(defn scan-i16 [] (scan-pred val/i16?))
+(defn scan-i32 [] (scan-pred val/i32?))
+(defn scan-i64 [] (scan-pred val/i64?))
+
+(defn scan-u8  [] (scan-pred val/u8?))
+(defn scan-u16 [] (scan-pred val/u16?))
+(defn scan-u32 [] (scan-pred val/u32?))
+(defn scan-u64 [] (scan-pred val/u64?))
+
+(defn scan-f32 [] (scan-pred val/f32?))
+(defn scan-f64 [] (scan-pred val/f64?))
 
 (defn scan-id []
   (scan-pred val/id?))
@@ -334,13 +353,37 @@
   (merge (scan-kwarg :offset scan-u32 0)
          (scan-kwarg :align scan-u32 align)))
 
+(defn scan-f32-bits []
+  (Float/floatToIntBits (scan-f32)))
+
+(defn scan-f64-bits []
+  (Double/doubleToLongBits (scan-f64)))
+
+(defn -scan-v128 [scan-lane bits lanes]
+  (reduce (fn [acc n]
+            (+ (.shiftLeft (biginteger acc) bits) n))
+          0N
+          (repeatedly lanes scan-lane)))
+
+(defn scan-v128 []
+  (let [format (scan)]
+    (case format
+      i8x16 (-scan-v128 scan-i8 8 16)
+      i16x8 (-scan-v128 scan-i16 16 8)
+      i32x4 (-scan-v128 scan-i32 32 4)
+      i64x2 (-scan-v128 scan-i64 64 2)
+      f32x4 (-scan-v128 scan-f32-bits 32 4)
+      f64x2 (-scan-v128 scan-f64-bits 64 2)
+      (bad-syntax format "unsupported simd format" {:format format}))))
+
 (defn scan-op []
-  (scan-pred op?))
+  (let [id (scan-pred op?)]
+    (or (inst/by-name id)
+        (bad-syntax id "unknown instruction" {:op id}))))
 
 (defn scan-inst* []
-  (let [op (scan-op)
-        info (inst/by-name op)
-        args (case (:immediates info)
+  (let [{:keys [opcode immediates] :as op} (scan-op)
+        args (case immediates
                :none {}
                :block (scan-block)
                :if (scan-then+else)
@@ -350,14 +393,16 @@
                :call_indirect {:type (scan-typeuse)}
                :local {:local (scan-index :locals)}
                :global {:global (scan-index :globals)}
-               :mem (scan-memarg (:align info))
+               :mem (scan-memarg (:align op))
                :tag {:tag (scan-index :tags)}
-               :i32 {:value (scan-pred val/i32?)}
-               :i64 {:value (scan-pred val/i64?)}
-               :f32 {:value (scan-pred val/f32?)}
-               :f64 {:value (scan-pred val/f64?)}
-               (fail (str "Can't scan " op) {:input *input*}))]
-    (assoc args :op op)))
+               :i32 {:value (scan-i32)}
+               :i64 {:value (scan-i64)}
+               :f32 {:value (scan-f32)}
+               :f64 {:value (scan-f64)}
+               :v128 {:value (scan-v128)}
+               (fail (str "Unsupported immediates") {:input *input*
+                                                     :immediates immediates}))]
+    (assoc args :op opcode)))
 
 (defn scan-inst []
   (if-let [[op & _ :as form] (scanning-opt (scan-phrase))]
@@ -420,8 +465,7 @@
 
 (defn parse-modulefield [form]
   (check-phrase form)
-  (when-let [pos (origin form)]
-    (set! *pos* pos))
+  (set-pos-from form)
   (-parse-modulefield form))
 
 (defmethod -parse-modulefield 'type [[head & tail :as form]]

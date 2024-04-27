@@ -1,4 +1,5 @@
-(ns waet.values)
+(ns waet.values
+  (:require [waet.util :refer :all]))
 
 (defn name? [x]
   ;;TODO: Tighter validation.
@@ -14,25 +15,20 @@
       (string? x) ; Includes names.
       (id? x)))
 
-(defn u32? [x]
-  (and (integer? x)
-       (<= 0 x))) ;TODO: check max.
+(defn u8?  [x] (and (int? x) (<= 0 x))) ;TODO: check max.
+(defn u16? [x] (and (int? x) (<= 0 x))) ;TODO: check max.
+(defn u32? [x] (and (int? x) (<= 0 x))) ;TODO: check max.
+(defn u64? [x] (and (int? x) (<= 0 x))) ;TODO: check max.
 
-(defn u64? [x]
-  (and (integer? x)
-       (<= 0 x))) ;TODO: check max.
+(defn i8?  [x] (and (int? x) (<=    Byte/MIN_VALUE  x     Byte/MAX_VALUE)))
+(defn i16? [x] (and (int? x) (<=   Short/MIN_VALUE  x    Short/MAX_VALUE)))
+(defn i32? [x] (and (int? x) (<= Integer/MIN_VALUE  x  Integer/MAX_VALUE)))
+(defn i64? [x] (and (int? x) (<=    Long/MIN_VALUE  x     Long/MAX_VALUE)))
 
-(defn i32? [x]
-  (integer? x)) ;TODO: check min/max
+(defn f32? [x] (number? x)) ;TODO: check min/max
+(defn f64? [x] (number? x)) ;TODO: check min/max
 
-(defn i64? [x]
-  (integer? x)) ;TODO: check min/max
-
-(defn f32? [x]
-  (number? x)) ;TODO: check min/max
-
-(defn f64? [x]
-  (number? x)) ;TODO: check min/max
+(defn v128? [x] (bigint? x)) ;TODO: check min/max
 
 (def index? u32?)
 

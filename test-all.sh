@@ -267,13 +267,15 @@ set -x
 ./test.sh test/interp/brif.txt
 ./test.sh test/interp/run-export-with-invalid-arguments-size.txt
 
+# Skipping exceptions tests; they are still experimental.
 #./test.sh test/interp/throw-across-frame.txt
+#./test.sh test/interp/rethrow-and-br.txt
+
 #./test.sh test/interp/reference-types.txt
 #./test.sh test/interp/atomic-load.txt
-#./test.sh test/interp/return-call-indirect-import.txt
+./test.sh test/interp/return-call-indirect-import.txt
 #./test.sh test/interp/basic-logging.txt
 #./test.sh test/interp/atomic-rmw-xor.txt
-#./test.sh test/interp/rethrow-and-br.txt
 #./test.sh test/interp/return-call.txt
 #./test.sh test/interp/return-call-indirect.txt
 #./test.sh test/interp/simd-splat.txt
@@ -1428,18 +1430,19 @@ set -x
 #./test.sh test/typecheck/bad-assertreturn-type-mismatch.txt
 #./test.sh test/typecheck/br-multi.txt
 
+#./test.sh test/stats/immediates.txt
+#./test.sh test/stats/basic.txt
+#./test.sh test/stats/cutoff.txt
+#./test.sh test/two-commands.txt
+
 # Skip these because WABT's WASI support is incomplete.
-if [[ false ]]; then
 #./test.sh test/wasi/empty.txt
 #./test.sh test/wasi/oob_trap.txt
 #./test.sh test/wasi/write_stdout.txt
 #./test.sh test/wasi/clock.txt
 #./test.sh test/wasi/exit.txt
-fi
 
-#./test.sh test/stats/immediates.txt
-#./test.sh test/stats/basic.txt
-#./test.sh test/stats/cutoff.txt
+# Skip these because our CLI tools have potentially different usage text.
 #./test.sh test/help/wasm-interp.txt
 #./test.sh test/help/wat2wasm.txt
 #./test.sh test/help/wasm-validate.txt
@@ -1449,4 +1452,3 @@ fi
 #./test.sh test/help/wat-desugar.txt
 #./test.sh test/help/spectest-interp.txt
 #./test.sh test/help/wast2json.txt
-#./test.sh test/two-commands.txt

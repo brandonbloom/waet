@@ -11,3 +11,6 @@
 (defn tap [x f]
   (f x)
   x)
+
+(defn bigint? [x]
+  (instance? clojure.lang.BigInt x))

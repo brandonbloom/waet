@@ -51,13 +51,16 @@
     ))
 
 (deftest metadata-test
-  (are [wat line column] (= (-> wat wat->wie first meta (select-keys [:line :column]))
-                            {:line line :column column})
-    "x"   1 1
-    "xyz" 1 1
-    "  x" 1 3
+  (are [wat positions] (= (map #((juxt :line :column) (meta %))
+                               (next (tree-seq sequential? seq (wat->wie wat))))
+                          positions)
+    "x"   [[1 1]]
+    "xyz" [[1 1]]
+    "  x" [[1 3]]
     "
-x"        2 1
-    "()"  1 1
-    "(x)" 1 1
+x"        [[2 1]]
+    "()"  [[1 1]]
+    "(x)" [[1 1] [1 2]]
+    "(  x
+y)" [[1 1] [1 4] [2 1]]
     ))
