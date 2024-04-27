@@ -221,8 +221,8 @@
 
 (defn write-inst [{:keys [op] :as inst}]
   (write-opcode op)
-  (case (get-in inst/by-name [op :shape])
-    :nullary nil
+  (case (get-in inst/by-name [op :immediates])
+    :none nil
     :block (write-block inst)
     :if (write-then+else inst)
     :label (write-label (:label inst))
@@ -298,6 +298,14 @@
 
 (defn write-memsec [mems]
   (write-vecsec 5 write-mem mems))
+
+;;; Tags.
+
+(defn write-tag [tag]
+  (fail "TODO: write-tag" {:tag tag}))
+
+(defn write-tagsec [tags]
+  (write-vecsec 13 write-tag tags))
 
 ;;; Globals.
 
@@ -402,6 +410,7 @@
   (write-funcsec (-> module :funcs :fields))
   (write-tablesec (-> module :tables :fields))
   (write-memsec (-> module :mems :fields))
+  (write-tagsec (-> module :tags :fields))
   (write-globalsec (-> module :globals :fields))
   (write-exportsec (-> module :exports :fields))
   (write-startsec (:start module))

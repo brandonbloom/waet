@@ -340,8 +340,8 @@
 (defn scan-inst* []
   (let [op (scan-op)
         info (inst/by-name op)
-        args (case (:shape info)
-               :nullary {}
+        args (case (:immediates info)
+               :none {}
                :block (scan-block)
                :if (scan-then+else)
                :label {:label (scan-label)}
@@ -351,6 +351,7 @@
                :local {:local (scan-index :locals)}
                :global {:global (scan-index :globals)}
                :mem (scan-memarg (:align info))
+               :tag {:tag (scan-index :tags)}
                :i32 {:value (scan-pred val/i32?)}
                :i64 {:value (scan-pred val/i64?)}
                :f32 {:value (scan-pred val/f32?)}
@@ -484,9 +485,8 @@
                   :id id
                   :type type
                   :locals locals
-                  :body body}
-            index (emit-field :funcs func)]
-        (bind! :funcs index index)))))
+                  :body body}]
+        (emit-field :funcs func)))))
 
 (defmethod -parse-modulefield 'table [[head & tail :as form]]
   (parse-named form
@@ -500,9 +500,8 @@
         (let [type (scan-tabletype)
               table {:head head
                      :type type
-                     :form form}
-              index (emit-field :tables table)]
-          (bind! :tables index index))))))
+                     :form form}]
+          (emit-field :tables table))))))
 
 (defmethod -parse-modulefield 'memory [[head & tail :as form]]
   (parse-named form
@@ -512,9 +511,14 @@
            memory {:head 'memory
                    :form form
                    :id id
-                   :type type}
-           index (emit-field :mems memory)]
-        (bind! :mems index index)))))
+                   :type type}]
+        (emit-field :mems memory)))))
+
+(defmethod -parse-modulefield 'tag [[head & tail :as form]]
+  (parse-named form
+    (fn [id]
+      (let [tag {:id id}]
+        (emit-field :tags tag)))))
 
 (defmethod -parse-modulefield 'global [form]
   (fail "cannot parse/-modulefield 'global"))

@@ -11,9 +11,10 @@
       (fail (str id " undefined in " section) {:section section :id id})))
 
 (defn resolved [{:keys [section id index] :as ast}]
-  (if index
-    ast
-    (assoc ast :index (resolve-id section id))))
+  (cond
+    index ast
+    (number? id) (assoc ast :index id) ; TODO: Validate consistency of id and index.
+    :else (assoc ast :index (resolve-id section id))))
 
 (defn xref-export [export]
   (update export :desc resolved))
@@ -54,8 +55,8 @@
               keys))))
 
 (defn xref-inst [{:keys [op] :as inst}]
-  (case (get-in inst/by-name [(:op inst) :shape])
-    :nullary inst
+  (case (get-in inst/by-name [(:op inst) :immediates])
+    :none inst
     :block (xref-bodies inst [:body])
     :if (xref-bodies inst [:then :else])
     :label (update inst :label resolved-label)
