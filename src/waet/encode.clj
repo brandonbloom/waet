@@ -320,7 +320,7 @@
   (write-byte (case head
                 func   0x00
                 table  0x01
-                mem    0x02
+                memory 0x02
                 global 0x03
                 (fail "Invalid exportdesc head" {:desc desc})))
   (write-u32-leb128 index))

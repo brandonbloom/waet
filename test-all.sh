@@ -1427,11 +1427,16 @@ set -x
 #./test.sh test/typecheck/bad-bulk-memory-invalid-segment.txt
 #./test.sh test/typecheck/bad-assertreturn-type-mismatch.txt
 #./test.sh test/typecheck/br-multi.txt
+
+# Skip these because WABT's WASI support is incomplete.
+if [[ false ]]; then
 #./test.sh test/wasi/empty.txt
 #./test.sh test/wasi/oob_trap.txt
 #./test.sh test/wasi/write_stdout.txt
 #./test.sh test/wasi/clock.txt
 #./test.sh test/wasi/exit.txt
+fi
+
 #./test.sh test/stats/immediates.txt
 #./test.sh test/stats/basic.txt
 #./test.sh test/stats/cutoff.txt

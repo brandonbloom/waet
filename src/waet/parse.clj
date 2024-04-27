@@ -505,16 +505,16 @@
           (bind! :tables index index))))))
 
 (defmethod -parse-modulefield 'memory [[head & tail :as form]]
-  (scanning tail
-    (let [id (scanning-opt (scan-id))
-          ;;TODO: Abbreivation: inline data.
-          type (scan-memtype)
-          memory {:head 'memory
-                  :form form
-                  :id id
-                  :type type}
-          index (emit-field :mems memory)]
-      (bind! :mems index index))))
+  (parse-named form
+    (fn [id]
+      (let [;;TODO: Abbreivation: inline data.
+           type (scan-memtype)
+           memory {:head 'memory
+                   :form form
+                   :id id
+                   :type type}
+           index (emit-field :mems memory)]
+        (bind! :mems index index)))))
 
 (defmethod -parse-modulefield 'global [form]
   (fail "cannot parse/-modulefield 'global"))
