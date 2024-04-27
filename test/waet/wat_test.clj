@@ -4,6 +4,7 @@
             [waet.wat :refer [wat->wie]]))
 
 (deftest wat->wie-test
+  ;; Plural expressions.
   (are [wat wie] (= (wat->wie wat) wie)
     ""     '[]
     "   "  '[]
@@ -19,7 +20,12 @@
     "            '[]
     "; comment
     abc"         '[abc]
+
+    "x=1"      '[x= 1]
+    "x=y"      '[x= y]
+    "x=\"z\""  '[x= "z"]
     )
+  ;; Singular expressions.
   (are [wat wie] (= (wat->wie wat) [wie])
 
     "abc"  'abc
@@ -34,12 +40,10 @@
 
     "\"\""     '""
     "\"x\""    '"x"
-    "\"\\0\""  '"\0"
     "\"\\n\""  '"\n"
 
-    "x=1"      '{x 1}
-    "x=y"      '{x y}
-    "x=\"z\""  '{x "z"}
+    "\"\\00\""  '"\0"
+    "\"\\u{0000}\""  '"\0"
 
     "(@x)"          (val/->Annotation 'x 'nil)
     "(@abc 1 2 3)"  (val/->Annotation 'abc '(1 2 3))

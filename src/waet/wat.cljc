@@ -33,9 +33,10 @@
   string         =  <'\"'> string-char* <'\"'>
   <string-char>  =  string-escape / #'[^\"\\\\]' (* TODO: Exclude < U+20 and U+7F *)
 
-  <string-escape>     =  <'\\\\'> (string-escape-hex / string-escape-char)
-  string-escape-hex   =  ('u{' hexnum '}')
-  string-escape-char  =  #'[^u]'
+  <string-escape>          =  <'\\\\'> (string-escape-codepoint / string-escape-hex / string-escape-char)
+  string-escape-codepoint  =  <'u{'> hexnum <'}'>
+  string-escape-hex        =  hexdigit hexdigit
+  string-escape-char       =  #'[^u0-9a-fA-F]'
 
   hexnum    =  hexdigit ('_'? hexnum)?
   hexdigit  =  #'[0-9a-fA-F]'
@@ -64,13 +65,8 @@
         (with-meta y {:line start-line :column start-column})
         y))))
 
-(defn decode-escape-hex [& args]
-  args
-  )
-
-(defn decode-escape-char [c]
+(defn transform-escape-char [c]
   (case c
-    "0" "\0"
     "t" "\t"
     "n" "\n"
     "r" "\r"
@@ -81,19 +77,46 @@
 (defn transform-annotation [head & tail]
   (val/->Annotation head tail))
 
+(defn transform-codepoint [n]
+  (String. (-> n biginteger .toByteArray)
+           java.nio.charset.StandardCharsets/UTF_8))
+
+(defn transform-hexnum [& digits]
+  (reduce (fn [acc d] (+ (* acc 16) d))
+          (bigint 0)
+          digits))
+
+(defn transform-hexdigit [d]
+  (let [i (-> d first int)]
+    (cond
+      (<= (int \0) i (int \9))  (- i (int \0))
+      (<= (int \a) i (int \f))  (- i (int \a) -10)
+      (<= (int \A) i (int \F))  (- i (int \A) -10)
+      :else (fail "invalid hexdigit" {:digit d}))))
+
 (def transformers
   {:file (metadata-transformer vector)
+
    :list (metadata-transformer identity)
    :-list list
+
    :symbol (metadata-transformer identity)
    :-symbol munged-symbol
+
    :float #(Double/parseDouble %)
    :integer #(Long/parseLong %)
+
    :string str
-   :string-escape-hex decode-escape-hex
-   :string-escape-char decode-escape-char
+   :string-escape-codepoint transform-codepoint
+   :string-escape-hex (comp char transform-hexnum)
+   :string-escape-char transform-escape-char
+
    :annotation (metadata-transformer transform-annotation)
+
    :attribute-key (metadata-transformer #(munged-symbol (str % "=")))
+
+   :hexnum transform-hexnum
+   :hexdigit transform-hexdigit
    })
 
 (defn wat->wie [s]
@@ -105,7 +128,7 @@
 (comment
 
   (->
-    "x=1"
+    "\"\\u{0000}\""
     ;(slurp "/Users/brandonbloom/Projects/wabt/test/decompile/code-metadata.txt")
     wat->wie
     ;first
