@@ -80,11 +80,13 @@
 
 (def no-match-exception (Exception. "no match"))
 
+(def debug-no-match? true)
+
 (defn no-match []
-  ;; Uncomment exception allocation to get stacktraces for debugging.
-  (throw (ex-info "no match" {::no-match true
-                              :form (first *input*)
-                              :near *pos*}))
+  (when debug-no-match?
+    (throw (ex-info "no match" {::no-match true
+                                :form (first *input*)
+                                :near *pos*})))
   (throw no-match-exception))
 
 (defn no-match? [ex]
@@ -526,12 +528,12 @@
                   global :globals
                   (fail (str "cannot export " head)))]
     (scanning tail
-      (let [id (scan-id)]
+      (let [index (scan-index)]
         {:sort :exportdesc
          :head head
          :form form
          :section section
-         :id id}))))
+         :id index})))) ; TODO [index->id].
 
 (defmethod -parse-modulefield 'export [[head & tail :as form]]
   (scanning tail

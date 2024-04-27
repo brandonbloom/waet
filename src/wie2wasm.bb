@@ -78,7 +78,7 @@ options:
     (System/exit 1)))
 
 ;; Ignore some options.
-(get-arg "--enable-threads")
+(get-arg "--enable-threads") ; Always enabled.
 
 ;; Read and translate input.
 (def filename (get-arg "<filename>"))

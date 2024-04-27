@@ -6,6 +6,7 @@ if [[ -z $WAET_HOME ]]; then
 fi
 
 bb \
+  --debug \
   --config "$WAET_HOME/bb.edn" \
   "$WAET_HOME/src/wie2wasm.bb" \
   "$@"
