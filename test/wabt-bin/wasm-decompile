@@ -1,4 +1,11 @@
 #!/bin/bash
 
-# TODO: Determine if this tool should be modified for testing.
-exec wasm-decompile "$@"
+set -e
+
+if [[ -z $WABT_HOME ]]; then
+  echo 'WABT_HOME is not set' > /dev/stderr
+  exit 1
+fi
+
+# Converts .wasm binaries to .dcmp dump files; no WAET impact.
+exec $WABT_HOME/bin/wasm-decompile "$@"

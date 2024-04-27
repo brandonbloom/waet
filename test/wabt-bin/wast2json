@@ -1,4 +1,11 @@
 #!/bin/bash
 
+set -e
+
+if [[ -z $WABT_HOME ]]; then
+  echo 'WABT_HOME is not set' > /dev/stderr
+  exit 1
+fi
+
 # TODO: Determine if this tool should be modified for testing.
-exec wast2json "$@"
+exec $WABT_HOME/bin/wast2json "$@"
