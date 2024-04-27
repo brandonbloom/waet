@@ -5,31 +5,32 @@
 (deftest wat->wie-test
   (are [wat wie] (= (wat->wie wat) wie)
 
-    "" '[]
-    "   " '[]
+    ""     '[]
+    "   "  '[]
 
-    "abc" '[abc]
-    "x.y" '[x.y]
-    "x_y" '[x_y]
+    "abc"  '[abc]
+    "x.y"  '[x.y]
+    "x_y"  '[x_y]
+    "$x"   '[$x]
 
-    "a b c" '[a b c]
-    "(a (b c))" '[(a (b c))]
+    "a b c"      '[a b c]
+    "(a (b c))"  '[(a (b c))]
 
-    ";" '[]
-    "; comment" '[]
-    "x(;;)y" '[x y]
-    "x(;;;)y" '[x y]
+    ";"          '[]
+    "; comment"  '[]
+    "x(;;)y"     '[x y]
+    "x(;;;)y"    '[x y]
 
     "; comment
-    " '[]
+    "            '[]
     "; comment
-    abc" '[abc]
+    abc"         '[abc]
 
-    "123" '[123]
-    "1.5" '[1.5]
+    "123"  '[123]
+    "1.5"  '[1.5]
 
-    "\"\"" '[""]
-    "\"x\"" '["x"]
+    "\"\""   '[""]
+    "\"x\""  '["x"]
 
     ; other than ASCII control characters, quotation marks (), or backslash (), except when expressed with an escape sequence.
 

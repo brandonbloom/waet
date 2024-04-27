@@ -7,7 +7,7 @@
   <expression> = symbol | list | number | string
   <expressions> = <ws>* (expression (<ws> expression)*)? <ws>*
   symbol = -symbol                       (* Indirection puts metadata on tag. *)
-  -symbol = #'[a-zA-Z][a-zA-Z0-9._]*'    (* Strings can't have metadata. *)
+  -symbol = #'[a-zA-Z\\$][a-zA-Z0-9._]*'   (* Strings can't have metadata. *)
   list = -list                           (* Tag gives location of paren. *)
   -list = <'('> !';' expressions? <')'>  (* Expressions can be nil; no metadata. *)
   <number> = float | integer
@@ -77,7 +77,7 @@
 (comment
 
 (->
-  (wat->wie "\"\\\"\"")
+  (wat->wie "$x")
   first
   meta
   )
