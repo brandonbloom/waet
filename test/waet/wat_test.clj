@@ -5,17 +5,10 @@
 
 (deftest wat->wie-test
   (are [wat wie] (= (wat->wie wat) wie)
-
     ""     '[]
     "   "  '[]
 
-    "abc"  '[abc]
-    "x.y"  '[x.y]
-    "x_y"  '[x_y]
-    "$x"   '[$x]
-
     "a b c"      '[a b c]
-    "(a (b c))"  '[(a (b c))]
 
     ";"          '[]
     "; comment"  '[]
@@ -26,19 +19,30 @@
     "            '[]
     "; comment
     abc"         '[abc]
+    )
+  (are [wat wie] (= (wat->wie wat) [wie])
 
-    "123"  '[123]
-    "1.5"  '[1.5]
+    "abc"  'abc
+    "x.y"  'x.y
+    "x_y"  'x_y
+    "$x"   '$x
 
-    "\"\""     '[""]
-    "\"x\""    '["x"]
-    "\"\\0\""  '["\0"]
-    "\"\\n\""  '["\n"]
+    "(a (b c))"  '(a (b c))
 
-    "(@x)"          [(val/->Annotation 'x 'nil)]
-    "(@abc 1 2 3)"  [(val/->Annotation 'abc '(1 2 3))]
+    "123"  '123
+    "1.5"  '1.5
 
-    ; other than ASCII control characters, quotation marks (), or backslash (), except when expressed with an escape sequence.
+    "\"\""     '""
+    "\"x\""    '"x"
+    "\"\\0\""  '"\0"
+    "\"\\n\""  '"\n"
+
+    "x=1"      '{x 1}
+    "x=y"      '{x y}
+    "x=\"z\""  '{x "z"}
+
+    "(@x)"          (val/->Annotation 'x 'nil)
+    "(@abc 1 2 3)"  (val/->Annotation 'abc '(1 2 3))
 
     ))
 

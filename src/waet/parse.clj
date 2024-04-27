@@ -325,7 +325,7 @@
      :default (last labels)}))
 
 (defn scan-kwarg [key scan-arg default]
-  (let [value (if (scanning-opt (scan-pred #{(symbol (str key "="))}))
+  (let [value (if (scanning-opt (scan-pred #{(symbol (str (name key) "="))}))
                 (scan-arg)
                 default)]
     {key value}))

@@ -7,7 +7,8 @@
 
   file           =  expressions?
   <expression>   =  symbol | list | number | string | annotation
-  <expressions>  =  <ws>* (expression (<ws> expression)*)? <ws>*
+  <expressions>  =  <ws>* (-expressions (<ws> -expressions)*)? <ws>*
+  <-expressions> =  expression | attribute
 
   (* Indirection puts metadata on tag because string before transform
      can't have metadata, but symbols can. *)
@@ -21,6 +22,9 @@
   -list  =  <'('> !#\";@\" expressions? <')'>
 
   annotation  =  <'(@'> symbol expressions? <')'>
+
+  <attribute>    =  attribute-key (symbol | number | string)
+  attribute-key  =  symbol <'='>
 
   <number>  =  float | integer
   float     =  #'[0-9]+\\.[0-9]+'
@@ -48,7 +52,7 @@
 (def parser (insta/parser grammar))
 
 (defn munged-symbol [s]
-  ;; TODO: Escape/replace problematic characters in s.
+  ;; TODO: Escape/replace problematic characters in s. -- Especially handle slash.
   (symbol s))
 
 (defn metadata-transformer [f]
@@ -89,6 +93,7 @@
    :string-escape-hex decode-escape-hex
    :string-escape-char decode-escape-char
    :annotation (metadata-transformer transform-annotation)
+   :attribute-key (metadata-transformer #(munged-symbol (str % "=")))
    })
 
 (defn wat->wie [s]
@@ -100,10 +105,10 @@
 (comment
 
   (->
-    ;"(@x)"
-    (slurp "/Users/brandonbloom/Projects/wabt/test/decompile/code-metadata.txt")
+    "x=1"
+    ;(slurp "/Users/brandonbloom/Projects/wabt/test/decompile/code-metadata.txt")
     wat->wie
-    first
+    ;first
     ;meta
     )
 
