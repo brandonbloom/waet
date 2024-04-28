@@ -1,5 +1,5 @@
 (ns waet.util
-  (:require [fipp.edn :refer [pprint]]))
+  (:require [fipp.edn]))
 
 (defn fail
   ([msg] (fail msg {}))
@@ -15,6 +15,8 @@
 
 (defn bigint? [x]
   (instance? clojure.lang.BigInt x))
+
+(def pprint fipp.edn/pprint)
 
 (defn pprint-str [x]
   (with-out-str

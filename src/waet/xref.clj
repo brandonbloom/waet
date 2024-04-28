@@ -55,24 +55,21 @@
               keys))))
 
 (defn xref-inst [{:keys [op] :as inst}]
-  (case (get-in inst/by-name [(:op inst) :immediates])
-    :none inst
-    :block (xref-bodies inst [:body])
-    :if (xref-bodies inst [:then :else])
-    :label (update inst :label resolved-label)
-    :br_table (-> inst
-                  (update :branches #(mapv resolved-label %))
-                  (update :default resolved-label))
-    :call (update inst :func resolved)
-    :call_indirect (update inst :type resolved)
-    :local (update inst :local resolved-local)
-    :global (update inst :global resolved)
-    :mem inst
-    :i32 inst
-    :i64 inst
-    :f32 inst
-    :f64 inst
-    ))
+  (reduce (fn [inst immediate]
+            (case immediate
+              :block (xref-bodies inst [:body])
+              :if (xref-bodies inst [:then :else])
+              :label (update inst :label resolved-label)
+              :br_table (-> inst
+                            (update :branches #(mapv resolved-label %))
+                            (update :default resolved-label))
+              :call (update inst :func resolved)
+              :call_indirect (update inst :type resolved)
+              :local (update inst :local resolved-local)
+              :global (update inst :global resolved)
+              inst))
+          inst
+          (get-in inst/by-name [(:op inst) :immediates])))
 
 (defn xref-func [func]
   (binding [*locals* (into {}

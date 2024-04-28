@@ -219,10 +219,8 @@
   (write-u32-leb128 (log2 align))
   (write-u32-leb128 offset))
 
-(defn write-inst [{:keys [op] :as inst}]
-  (write-opcode op)
-  (case (get-in inst/by-name [op :immediates])
-    :none nil
+(defn write-immediate [immediate inst]
+  (case immediate
     :block (write-block inst)
     :if (write-then+else inst)
     :label (write-label (:label inst))
@@ -231,12 +229,17 @@
     :call_indirect (write-index (-> inst :type :index))
     :local (write-index (-> inst :local :index))
     :global (write-index (-> inst :global :index))
-    :mem (write-memarg inst)
+    (:mem1 :mem2 :mem4 :mem8 :mem16 :mem32 :mem64) (write-memarg inst)
     :i32 (write-s32-leb128 (:value inst))
     :i64 (write-s64-leb128 (:value inst))
     :f32 (write-f32 (:value inst))
     :f64 (write-f64 (:value inst))
     ))
+
+(defn write-inst [{:keys [op] :as inst}]
+  (write-opcode op)
+  (doseq [immediate (get-in inst/by-name [op :immediates])]
+    (write-immediate immediate inst)))
 
 ;;; Types.
 

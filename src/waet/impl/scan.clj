@@ -26,7 +26,8 @@
 (def ^:dynamic *input*)
 
 (defmacro from [input & body]
-  `(binding [*input* ~input]
+  `(binding [*input* ~input
+             *pos* (or (origin *input*) *pos*)]
      (let [res# (do ~@body)]
        (when-first [x# (seq *input*)]
          (bad-syntax x# "expected end of sequence"))

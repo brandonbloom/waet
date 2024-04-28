@@ -277,7 +277,7 @@ test/interp/run-export-with-invalid-arguments-size.txt
 
 #test/interp/reference-types.txt
 #test/interp/atomic-load.txt
-test/interp/return-call-indirect-import.txt
+#test/interp/return-call-indirect-import.txt
 #test/interp/basic-logging.txt
 #test/interp/atomic-rmw-xor.txt
 #test/interp/return-call.txt

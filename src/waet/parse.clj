@@ -308,29 +308,54 @@
     (or (inst/by-name id)
         (bad-syntax id "unknown instruction" {:op id}))))
 
+(defn scan-immediate [immediate]
+  (case immediate
+
+    :block (scan-block)
+    :if (scan-then+else)
+    :label {:label (scan-label)}
+    :br_table (scan-branches)
+
+    :call {:func (scan-index :funcs)}
+    :call_indirect {:type (scan-typeuse)}
+
+    :local  {:local (scan-index :locals)}
+    :global {:global (scan-index :globals)}
+
+    :mem1  (scan-memarg 1)
+    :mem2  (scan-memarg 2)
+    :mem4  (scan-memarg 4)
+    :mem8  (scan-memarg 8)
+    :mem16 (scan-memarg 16)
+    :mem32 (scan-memarg 32)
+    :mem64 (scan-memarg 64)
+
+    :tag {:tag (scan-index :tags)}
+
+    :i32 {:value (scan-i32)}
+    :i64 {:value (scan-i64)}
+    :f32 {:value (scan-f32)}
+    :f64 {:value (scan-f64)}
+    :v128 {:value (scan-v128)}
+
+    (fail "Unsupported immediate" {:immediate immediate})))
+
 (defn scan-inst* []
-  (let [{:keys [opcode immediates] :as op} (scan-op)
-        _ (fail "TODO: handle immediates, it's now a sequence")
-        args (case immediates
-               :none {}
-               :block (scan-block)
-               :if (scan-then+else)
-               :label {:label (scan-label)}
-               :br_table (scan-branches)
-               :call {:func (scan-index :funcs)}
-               :call_indirect {:type (scan-typeuse)}
-               :local {:local (scan-index :locals)}
-               :global {:global (scan-index :globals)}
-               :mem (scan-memarg (:align op))
-               :tag {:tag (scan-index :tags)}
-               :i32 {:value (scan-i32)}
-               :i64 {:value (scan-i64)}
-               :f32 {:value (scan-f32)}
-               :f64 {:value (scan-f64)}
-               :v128 {:value (scan-v128)}
-               (fail (str "Unsupported immediates") {:op opcode
-                                                     :immediates immediates}))]
-    (assoc args :op opcode)))
+  (let [{:keys [immediates] op :name} (scan-op)]
+    (reduce (fn [instruction immediate]
+              (let [args (scan-immediate immediate)]
+                (doseq [k (keys args)]
+                  ;; Previously, only a single immediate argument was supported,
+                  ;; so parameter names were baked into the immediate type.
+                  ;; Now that multiple immediates are supported, continue to
+                  ;; assume the names are distinct... until they aren't and
+                  ;; this check fails. This delays refactoring downstream
+                  ;; consumers of instructions.
+                  (when (contains? instruction k)
+                    (fail "duplicate arg key" {:key k})))
+                (merge instruction args)))
+              {:op op}
+              immediates)))
 
 (defn scan-inst []
   (if-let [[op & _ :as form] (scan/optional (scan-phrase))]

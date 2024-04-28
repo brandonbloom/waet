@@ -4,7 +4,7 @@
 
 (def db
   (atom {:names {}      ; name -> opcode
-         :opcodes []})) ; opcode -> instruction
+         :opcodes {}})) ; opcode -> instruction
 
 (defn scan-instruction []
   (let [opcode (scan/pred int?)
@@ -19,17 +19,6 @@
     ;; TODO: Use the docstring for something?
     (scan/zom scan-instruction)))
 
-(defn vec-extend [v n]
-  {:pre [(vector? v)
-         (int? n)]}
-  (some #(when (<= n (count %)) %)
-        (iterate #(conj % nil) v)))
-
-(defn vec-extend-assoc [v i e]
-  {:pre [(vector? v)
-         (int? i)]}
-  (assoc (vec-extend v i) i e))
-
 (defn install-instructions [form]
   (doseq [{:keys [opcode name] :as instruction} (scan/from form (scan-instructions))]
     (when (get-in @db [:names name])
@@ -37,10 +26,10 @@
     (when (get-in @db [:opcodes opcode])
       (fail "redefining opcode" {:opcode opcode}))
     (swap! db assoc-in [:names name] opcode)
-    (swap! db update :opcodes vec-extend-assoc opcode instruction)))
+    (swap! db update :opcodes assoc opcode instruction)))
 
 (defmacro definstructions [description & body]
-  `(install-instructions '~body))
+  `(install-instructions '~(with-meta body (meta &form))))
 
 (definstructions "Control"
 
@@ -344,153 +333,152 @@
 (definstructions "SIMD"
 
   ;;; Memory instructions.
-  0x00    v128.load          :mem16
-  0x01    v128.load8x8_s     :mem16
-  0x02    v128.load8x8_u     :mem16
-  0x03    v128.load16x4_s    :mem16
-  0x04    v128.load16x4_u    :mem16
-  0x05    v128.load32x2_s    :mem16
-  0x06    v128.load32x2_u    :mem16
-  0x07    v128.load8_splat   :mem16
-  0x08    v128.load16_splat  :mem16
-  0x09    v128.load32_splat  :mem16
-  0x0a    v128.load64_splat  :mem16
-  0x0b    v128.store         :mem16
+  0xFD00  v128.load          :mem16
+  0xFD01  v128.load8x8_s     :mem16
+  0xFD02  v128.load8x8_u     :mem16
+  0xFD03  v128.load16x4_s    :mem16
+  0xFD04  v128.load16x4_u    :mem16
+  0xFD05  v128.load32x2_s    :mem16
+  0xFD06  v128.load32x2_u    :mem16
+  0xFD07  v128.load8_splat   :mem16
+  0xFD08  v128.load16_splat  :mem16
+  0xFD09  v128.load32_splat  :mem16
+  0xFD0A  v128.load64_splat  :mem16
+  0xFD0B  v128.store         :mem16
 
   ;;; Basic operations.
-  0x0c    v128.const      :v128
-  ;0x0d    i8x16.shuffle :XXX
-  0x0e    i8x16.swizzle
+  0xFD0C  v128.const      :v128
+  0xFD0D  i8x16.shuffle   :lane32x16
+  0xFD0E  i8x16.swizzle
 
-   ;;; Splat operations.
-   0x0f   i8x16.splat
-   0x10   i16x8.splat
-   0x11   i32x4.splat
-   0x12   i64x2.splat
-   0x13   f32x4.splat
-   0x14   f64x2.splat
+  ;;; Splat operations.
+  0xFD0F  i8x16.splat
+  0xFD10  i16x8.splat
+  0xFD11  i32x4.splat
+  0xFD12  i64x2.splat
+  0xFD13  f32x4.splat
+  0xFD14  f64x2.splat
 
   ;;; Lane operations.
-  ; 0x15  i8x16.extract_lane_s i:ImmLaneIdx16
-  ; 0x16  i8x16.extract_lane_u  .... https://github.com/WebAssembly/spec/blob/main/proposals/simd/BinarySIMD.md
-  ; 0x17  i8x16.replace_lane
-  ; 0x18  i16x8.extract_lane_s
-  ; 0x19  i16x8.extract_lane_u
-  ; 0x1a  i16x8.replace_lane
-  ; 0x1b  i32x4.extract_lane
-  ; 0x1c  i32x4.replace_lane
-  ; 0x1d  i64x2.extract_lane
-  ; 0x1e  i64x2.replace_lane
-  ; 0x1f  f32x4.extract_lane
-  ; 0x20  f32x4.replace_lane
-  ; 0x21  f64x2.extract_lane
-  ; 0x22  f64x2.replace_lane
+  0xFD15  i8x16.extract_lane_s  :lane16
+  0xFD16  i8x16.extract_lane_u  :lane16
+  0xFD17  i8x16.replace_lane    :lane16
+  0xFD18  i16x8.extract_lane_s  :lane8
+  0xFD19  i16x8.extract_lane_u  :lane8
+  0xFD1A  i16x8.replace_lane    :lane8
+  0xFD1B  i32x4.extract_lane    :lane4
+  0xFD1C  i32x4.replace_lane    :lane4
+  0xFD1D  i64x2.extract_lane    :lane2
+  0xFD1E  i64x2.replace_lane    :lane2
+  0xFD1F  f32x4.extract_lane    :lane4
+  0xFD20  f32x4.replace_lane    :lane4
+  0xFD21  f64x2.extract_lane    :lane2
+  0xFD22  f64x2.replace_lane    :lane2
 
-   0x23  i8x16.eq        0x2d  i16x8.eq            0x37  i32x4.eq
-   0x24  i8x16.ne        0x2e  i16x8.ne            0x38  i32x4.ne
-   0x25  i8x16.lt_s      0x2f  i16x8.lt_s          0x39  i32x4.lt_s
-   0x26  i8x16.lt_u      0x30  i16x8.lt_u          0x3a  i32x4.lt_u
-   0x27  i8x16.gt_s      0x31  i16x8.gt_s          0x3b  i32x4.gt_s
-   0x28  i8x16.gt_u      0x32  i16x8.gt_u          0x3c  i32x4.gt_u
-   0x29  i8x16.le_s      0x33  i16x8.le_s          0x3d  i32x4.le_s
-   0x2a  i8x16.le_u      0x34  i16x8.le_u          0x3e  i32x4.le_u
-   0x2b  i8x16.ge_s      0x35  i16x8.ge_s          0x3f  i32x4.ge_s
-   0x2c  i8x16.ge_u      0x36  i16x8.ge_u          0x40  i32x4.ge_u
+   0xFD23  i8x16.eq        0xFD2D  i16x8.eq         0xFD37  i32x4.eq
+   0xFD24  i8x16.ne        0xFD2E  i16x8.ne         0xFD38  i32x4.ne
+   0xFD25  i8x16.lt_s      0xFD2F  i16x8.lt_s       0xFD39  i32x4.lt_s
+   0xFD26  i8x16.lt_u      0xFD30  i16x8.lt_u       0xFD3A  i32x4.lt_u
+   0xFD27  i8x16.gt_s      0xFD31  i16x8.gt_s       0xFD3B  i32x4.gt_s
+   0xFD28  i8x16.gt_u      0xFD32  i16x8.gt_u       0xFD3C  i32x4.gt_u
+   0xFD29  i8x16.le_s      0xFD33  i16x8.le_s       0xFD3D  i32x4.le_s
+   0xFD2A  i8x16.le_u      0xFD34  i16x8.le_u       0xFD3E  i32x4.le_u
+   0xFD2B  i8x16.ge_s      0xFD35  i16x8.ge_s       0xFD3F  i32x4.ge_s
+   0xFD2C  i8x16.ge_u      0xFD36  i16x8.ge_u       0xFD40  i32x4.ge_u
 
-   0x41  f32x4.eq          0x47  f64x2.eq
-   0x42  f32x4.ne          0x48  f64x2.ne
-   0x43  f32x4.lt          0x49  f64x2.lt
-   0x44  f32x4.gt          0x4a  f64x2.gt
-   0x45  f32x4.le          0x4b  f64x2.le
-   0x46  f32x4.ge          0x4c  f64x2.ge
+   0xFD41  f32x4.eq        0xFD47  f64x2.eq
+   0xFD42  f32x4.ne        0xFD48  f64x2.ne
+   0xFD43  f32x4.lt        0xFD49  f64x2.lt
+   0xFD44  f32x4.gt        0xFD4A  f64x2.gt
+   0xFD45  f32x4.le        0xFD4B  f64x2.le
+   0xFD46  f32x4.ge        0xFD4C  f64x2.ge
 
-   0x4d  v128.not
-   0x4e  v128.and
-   0x4f  v128.andnot
-   0x50  v128.or
-   0x51  v128.xor
-   0x52  v128.bitselect
-   0x53  v128.any_true
+   0xFD4D  v128.not
+   0xFD4E  v128.and
+   0xFD4F  v128.andnot
+   0xFD50  v128.or
+   0xFD51  v128.xor
+   0xFD52  v128.bitselect
+   0xFD53  v128.any_true
 
    ;;; Load Lane Operations.
-   ; TODO: immediates
-   ; 0x54  v128.load8_lane
-   ; 0x55  v128.load16_lane
-   ; 0x56  v128.load32_lane
-   ; 0x57  v128.load64_lane
-   ; 0x58  v128.store8_lane
-   ; 0x59  v128.store16_lane
-   ; 0x5a  v128.store32_lane
-   ; 0x5b  v128.store64_lane
-   0x5c  v128.load32_zero  :mem4
-   0x5d  v128.load64_zero  :mem8
+   0xFD54  v128.load8_lane    :mem8  :lane16
+   0xFD55  v128.load16_lane   :mem16 :lane8
+   0xFD56  v128.load32_lane   :mem32 :lane4
+   0xFD57  v128.load64_lane   :mem64 :lane2
+   0xFD58  v128.store8_lane   :mem8  :lane16
+   0xFD59  v128.store16_lane  :mem16 :lane8
+   0xFD5A  v128.store32_lane  :mem32 :lane4
+   0xFD5B  v128.store64_lane  :mem64 :lane2
+   0xFD5C  v128.load32_zero   :mem4
+   0xFD5D  v128.load64_zero   :mem8
 
   ;;; Float conversion.
-  0x5e  f32x4.demote_f64x2_zero
-  0x5f  f64x2.promote_low_f32x4
+  0xFD5E  f32x4.demote_f64x2_zero
+  0xFD5F  f64x2.promote_low_f32x4
 
-  0x60   i8x16.abs                               0x80  i16x8.abs                           0xa0  i32x4.abs                         0xc0  i64x2.abs
-  0x61   i8x16.neg                               0x81  i16x8.neg                           0xa1  i32x4.neg                         0xc1  i64x2.neg
-  0x62   i8x16.popcnt                            0x82  i16x8.q15mulr_sat_s                 0xa2
-  0x63   i8x16.all_true                          0x83  i16x8.all_true                      0xa3  i32x4.all_true                    0xc3  i64x2.all_true
-  0x64   i8x16.bitmask                           0x84  i16x8.bitmask                       0xa4  i32x4.bitmask                     0xc4  i64x2.bitmask
-  0x65   i8x16.narrow_i16x8_s                    0x85  i16x8.narrow_i32x4_s
-  0x66   i8x16.narrow_i16x8_u                    0x86  i16x8.narrow_i32x4_u
-  0x67   f32x4.ceil                              0x87  i16x8.extend_low_i8x16_s            0xa7  i32x4.extend_low_i16x8_s          0xc7  i64x2.extend_low_i32x4_s
-  0x68   f32x4.floor                             0x88  i16x8.extend_high_i8x16_s           0xa8  i32x4.extend_high_i16x8_s         0xc8  i64x2.extend_high_i32x4_s
-  0x69   f32x4.trunc                             0x89  i16x8.extend_low_i8x16_u            0xa9  i32x4.extend_low_i16x8_u          0xc9  i64x2.extend_low_i32x4_u
-  0x6a   f32x4.nearest                           0x8a  i16x8.extend_high_i8x16_u           0xaa  i32x4.extend_high_i16x8_u         0xca  i64x2.extend_high_i32x4_u
-  0x6b   i8x16.shl                               0x8b  i16x8.shl                           0xab  i32x4.shl                         0xcb  i64x2.shl
-  0x6c   i8x16.shr_s                             0x8c  i16x8.shr_s                         0xac  i32x4.shr_s                       0xcc  i64x2.shr_s
-  0x6d   i8x16.shr_u                             0x8d  i16x8.shr_u                         0xad  i32x4.shr_u                       0xcd  i64x2.shr_u
-  0x6e   i8x16.add                               0x8e  i16x8.add                           0xae  i32x4.add                         0xce  i64x2.add
-  0x6f   i8x16.add_sat_s                         0x8f  i16x8.add_sat_s
-  0x70   i8x16.add_sat_u                         0x90  i16x8.add_sat_u
-  0x71   i8x16.sub                               0x91  i16x8.sub                           0xb1  i32x4.sub                         0xd1  i64x2.sub
-  0x72   i8x16.sub_sat_s                         0x92  i16x8.sub_sat_s
-  0x73   i8x16.sub_sat_u                         0x93  i16x8.sub_sat_u
-  0x74   f64x2.ceil                              0x94  f64x2.nearest
-  0x75   f64x2.floor                             0x95  i16x8.mul                           0xb5  i32x4.mul                         0xd5  i64x2.mul
-  0x76   i8x16.min_s                             0x96  i16x8.min_s                         0xb6  i32x4.min_s                       0xd6  i64x2.eq
-  0x77   i8x16.min_u                             0x97  i16x8.min_u                         0xb7  i32x4.min_u                       0xd7  i64x2.ne
-  0x78   i8x16.max_s                             0x98  i16x8.max_s                         0xb8  i32x4.max_s                       0xd8  i64x2.lt_s
-  0x79   i8x16.max_u                             0x99  i16x8.max_u                         0xb9  i32x4.max_u                       0xd9  i64x2.gt_s
-  0x7a   f64x2.trunc                             0x9a                                      0xba  i32x4.dot_i16x8_s                 0xda  i64x2.le_s
-  0x7b   i8x16.avgr_u                            0x9b  i16x8.avgr_u                                                                0xdb  i64x2.ge_s
-  0x7c   i16x8.extadd_pairwise_i8x16_s           0x9c  i16x8.extmul_low_i8x16_s            0xbc  i32x4.extmul_low_i16x8_s          0xdc  i64x2.extmul_low_i32x4_s
-  0x7d   i16x8.extadd_pairwise_i8x16_u           0x9d  i16x8.extmul_high_i8x16_s           0xbd  i32x4.extmul_high_i16x8_s         0xdd  i64x2.extmul_high_i32x4_s
-  0x7e   i32x4.extadd_pairwise_i16x8_s           0x9e  i16x8.extmul_low_i8x16_u            0xbe  i32x4.extmul_low_i16x8_u          0xde  i64x2.extmul_low_i32x4_u
-  0x7f   i32x4.extadd_pairwise_i16x8_u           0x9f  i16x8.extmul_high_i8x16_u           0xbf  i32x4.extmul_high_i16x8_u         0xdf  i64x2.extmul_high_i32x4_u
+  0xFD60   i8x16.abs                          0xFD80  i16x8.abs                        0xFDA0  i32x4.abs                      0xFDC0  i64x2.abs
+  0xFD61   i8x16.neg                          0xFD81  i16x8.neg                        0xFDA1  i32x4.neg                      0xFDC1  i64x2.neg
+  0xFD62   i8x16.popcnt                       0xFD82  i16x8.q15mulr_sat_s
+  0xFD63   i8x16.all_true                     0xFD83  i16x8.all_true                   0xFDA3  i32x4.all_true                 0xFDC3  i64x2.all_true
+  0xFD64   i8x16.bitmask                      0xFD84  i16x8.bitmask                    0xFDA4  i32x4.bitmask                  0xFDC4  i64x2.bitmask
+  0xFD65   i8x16.narrow_i16x8_s               0xFD85  i16x8.narrow_i32x4_s
+  0xFD66   i8x16.narrow_i16x8_u               0xFD86  i16x8.narrow_i32x4_u
+  0xFD67   f32x4.ceil                         0xFD87  i16x8.extend_low_i8x16_s         0xFDA7  i32x4.extend_low_i16x8_s       0xFDC7  i64x2.extend_low_i32x4_s
+  0xFD68   f32x4.floor                        0xFD88  i16x8.extend_high_i8x16_s        0xFDA8  i32x4.extend_high_i16x8_s      0xFDC8  i64x2.extend_high_i32x4_s
+  0xFD69   f32x4.trunc                        0xFD89  i16x8.extend_low_i8x16_u         0xFDA9  i32x4.extend_low_i16x8_u       0xFDC9  i64x2.extend_low_i32x4_u
+  0xFD6A   f32x4.nearest                      0xFD8A  i16x8.extend_high_i8x16_u        0xFDAA  i32x4.extend_high_i16x8_u      0xFDCA  i64x2.extend_high_i32x4_u
+  0xFD6B   i8x16.shl                          0xFD8B  i16x8.shl                        0xFDAB  i32x4.shl                      0xFDCB  i64x2.shl
+  0xFD6C   i8x16.shr_s                        0xFD8C  i16x8.shr_s                      0xFDAC  i32x4.shr_s                    0xFDCC  i64x2.shr_s
+  0xFD6D   i8x16.shr_u                        0xFD8D  i16x8.shr_u                      0xFDAD  i32x4.shr_u                    0xFDCD  i64x2.shr_u
+  0xFD6E   i8x16.add                          0xFD8E  i16x8.add                        0xFDAE  i32x4.add                      0xFDCE  i64x2.add
+  0xFD6F   i8x16.add_sat_s                    0xFD8F  i16x8.add_sat_s
+  0xFD70   i8x16.add_sat_u                    0xFD90  i16x8.add_sat_u
+  0xFD71   i8x16.sub                          0xFD91  i16x8.sub                        0xFDB1  i32x4.sub                      0xFDD1  i64x2.sub
+  0xFD72   i8x16.sub_sat_s                    0xFD92  i16x8.sub_sat_s
+  0xFD73   i8x16.sub_sat_u                    0xFD93  i16x8.sub_sat_u
+  0xFD74   f64x2.ceil                         0xFD94  f64x2.nearest
+  0xFD75   f64x2.floor                        0xFD95  i16x8.mul                        0xFDB5  i32x4.mul                      0xFDD5  i64x2.mul
+  0xFD76   i8x16.min_s                        0xFD96  i16x8.min_s                      0xFDB6  i32x4.min_s                    0xFDD6  i64x2.eq
+  0xFD77   i8x16.min_u                        0xFD97  i16x8.min_u                      0xFDB7  i32x4.min_u                    0xFDD7  i64x2.ne
+  0xFD78   i8x16.max_s                        0xFD98  i16x8.max_s                      0xFDB8  i32x4.max_s                    0xFDD8  i64x2.lt_s
+  0xFD79   i8x16.max_u                        0xFD99  i16x8.max_u                      0xFDB9  i32x4.max_u                    0xFDD9  i64x2.gt_s
+  0xFD7A   f64x2.trunc                                                                 0xFDBA  i32x4.dot_i16x8_s              0xFDDA  i64x2.le_s
+  0xFD7B   i8x16.avgr_u                       0xFD9B  i16x8.avgr_u                                                            0xFDDB  i64x2.ge_s
+  0xFD7C   i16x8.extadd_pairwise_i8x16_s      0xFD9C  i16x8.extmul_low_i8x16_s         0xFDBC  i32x4.extmul_low_i16x8_s       0xFDDC  i64x2.extmul_low_i32x4_s
+  0xFD7D   i16x8.extadd_pairwise_i8x16_u      0xFD9D  i16x8.extmul_high_i8x16_s        0xFDBD  i32x4.extmul_high_i16x8_s      0xFDDD  i64x2.extmul_high_i32x4_s
+  0xFD7E   i32x4.extadd_pairwise_i16x8_s      0xFD9E  i16x8.extmul_low_i8x16_u         0xFDBE  i32x4.extmul_low_i16x8_u       0xFDDE  i64x2.extmul_low_i32x4_u
+  0xFD7F   i32x4.extadd_pairwise_i16x8_u      0xFD9F  i16x8.extmul_high_i8x16_u        0xFDBF  i32x4.extmul_high_i16x8_u      0xFDDF  i64x2.extmul_high_i32x4_u
 
-  0xe0  f32x4.abs         0xec  f64x2.abs
-  0xe1  f32x4.neg         0xed  f64x2.neg
-  0xe3  f32x4.sqrt        0xef  f64x2.sqrt
-  0xe4  f32x4.add         0xf0  f64x2.add
-  0xe5  f32x4.sub         0xf1  f64x2.sub
-  0xe6  f32x4.mul         0xf2  f64x2.mul
-  0xe7  f32x4.div         0xf3  f64x2.div
-  0xe8  f32x4.min         0xf4  f64x2.min
-  0xe9  f32x4.max         0xf5  f64x2.max
-  0xea  f32x4.pmin        0xf6  f64x2.pmin
-  0xeb  f32x4.pmax        0xf7  f64x2.pmax
+  0xFDE0  f32x4.abs         0xFDEC  f64x2.abs
+  0xFDE1  f32x4.neg         0xFDED  f64x2.neg
+  0xFDE3  f32x4.sqrt        0xFDEF  f64x2.sqrt
+  0xFDE4  f32x4.add         0xFDF0  f64x2.add
+  0xFDE5  f32x4.sub         0xFDF1  f64x2.sub
+  0xFDE6  f32x4.mul         0xFDF2  f64x2.mul
+  0xFDE7  f32x4.div         0xFDF3  f64x2.div
+  0xFDE8  f32x4.min         0xFDF4  f64x2.min
+  0xFDE9  f32x4.max         0xFDF5  f64x2.max
+  0xFDEA  f32x4.pmin        0xFDF6  f64x2.pmin
+  0xFDEB  f32x4.pmax        0xFDF7  f64x2.pmax
 
   ;;; Conversion operations.
-  0xf8  i32x4.trunc_sat_f32x4_s
-  0xf9  i32x4.trunc_sat_f32x4_u
-  0xfa  f32x4.convert_i32x4_s
-  0xfb  f32x4.convert_i32x4_u
-  0xfc  i32x4.trunc_sat_f64x2_s_zero
-  0xfd  i32x4.trunc_sat_f64x2_u_zero
-  0xfe  f64x2.convert_low_i32x4_s
-  0xff  f64x2.convert_low_i32x4_u
+  0xFDF8  i32x4.trunc_sat_f32x4_s
+  0xFDF9  i32x4.trunc_sat_f32x4_u
+  0xFDFA  f32x4.convert_i32x4_s
+  0xFDFB  f32x4.convert_i32x4_u
+  0xFDFC  i32x4.trunc_sat_f64x2_s_zero
+  0xFDFD  i32x4.trunc_sat_f64x2_u_zero
+  0xFDFE  f64x2.convert_low_i32x4_s
+  0xFDFF  f64x2.convert_low_i32x4_u
 
   )
 
 (def by-opcode
-  (into {} (filter some?) (:opcodes @db)))
+  (:opcodes @db))
+
+(def operations
+  (-> by-opcode vals vec))
 
 (def by-name
-  (into {}
-        (fn [[name opcode]]
-          [name (by-opcode opcode)])
-        (:names @db)))
+  (into {} (map (juxt :name identity)) (vals by-opcode)))
