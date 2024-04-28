@@ -6,9 +6,8 @@
 (def grammar "
 
   file           =  expressions?
-  <expression>   =  symbol | list | number | string | annotation
-  <expressions>  =  <ws>* (-expressions (<ws> -expressions)*)? <ws>*
-  <-expressions> =  expression | attribute
+  <expression>   =  <ws>? (attribute / symbol / annotation / list / number / string)
+  <expressions>  =  expression* <ws>?
 
   (* Indirection puts metadata on tag because string before transform
      can't have metadata, but symbols can. *)
@@ -19,9 +18,9 @@
       instead of the first expression. That expression may not
       exist (be nil), and so cannot have metadata. *)
   list   =  -list
-  -list  =  <'('> !#\";@\" expressions? <')'>
+  -list  =  <'('> !#\";@\" expressions <')'>
 
-  annotation  =  <'(@'> symbol expressions? <')'>
+  annotation  =  <'(@'> symbol expressions <')'>
 
   <attribute>    =  attribute-key (symbol | number | string)
   attribute-key  =  symbol <'='>
@@ -127,12 +126,19 @@
 
 (comment
 
+  (defn inspect-ambiguity [s]
+    (pprint (insta/parses parser s :unhide :all)))
+
+  (inspect-ambiguity "()()")
+  (inspect-ambiguity "(x (; y ;))")
+
   (->
-    "\"\\u{0000}\""
+    "x=1"
     ;(slurp "/Users/brandonbloom/Projects/wabt/test/decompile/code-metadata.txt")
     wat->wie
     ;first
     ;meta
+    pprint
     )
 
 )
