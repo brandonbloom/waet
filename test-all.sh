@@ -1,1454 +1,1460 @@
 #!/bin/bash
 
-set -x
+set -e
 
-./test.sh test/pipes.txt
+grep -v '#' <<EOF |xargs ./test.sh
 
-./test.sh test/strip/names.txt
-./test.sh test/strip/remove_section.txt
-./test.sh test/strip/no-custom-sections.txt
-./test.sh test/strip/basic.txt
-./test.sh test/strip/keep_section.txt
-./test.sh test/strip/out_file.txt
+xargs ./test.sh
 
-./test.sh test/decompile/stack-flush.txt
-./test.sh test/decompile/names.txt
-./test.sh test/decompile/loadstore.txt
-./test.sh test/decompile/precedence.txt
+test/pipes.txt
+
+test/strip/names.txt
+test/strip/remove_section.txt
+test/strip/no-custom-sections.txt
+test/strip/basic.txt
+test/strip/keep_section.txt
+test/strip/out_file.txt
+
+test/decompile/stack-flush.txt
+test/decompile/names.txt
+test/decompile/loadstore.txt
+test/decompile/precedence.txt
 
 # Skip tests that rely on validation.
-#./test.sh test/too-many-arguments.txt
+#test/too-many-arguments.txt
 
 # Skip tests that rely on --verbose text dumps.
-#./test.sh test/dump/data-count-section-removed.txt
-#./test.sh test/dump/dedupe-sig.txt
-#./test.sh test/dump/func-exported.txt
-#./test.sh test/dump/br-block-named.txt
-#./test.sh test/dump/elem-mvp-compat.txt
-#./test.sh test/dump/throw.txt
-#./test.sh test/dump/globalset.txt
-#./test.sh test/dump/try-multi.txt
-#./test.sh test/dump/reference-types.txt
-#./test.sh test/dump/tag.txt
-#./test.sh test/dump/localset.txt
-#./test.sh test/dump/unreachable.txt
-#./test.sh test/dump/array.txt
-#./test.sh test/dump/atomic.txt
-#./test.sh test/dump/module-name.txt
-#./test.sh test/dump/elem-mvp-compat-named.txt
-#./test.sh test/dump/result.txt
-#./test.sh test/dump/invalid-init-exprs.txt
-#./test.sh test/dump/relocations-long-func-section.txt
-#./test.sh test/dump/export-multi.txt
-#./test.sh test/dump/hexfloat_f64.txt
-#./test.sh test/dump/invalid-elem-segment-no-table.txt
-#./test.sh test/dump/symbol-tables.txt
-#./test.sh test/dump/symbol-tables-all-features.txt
-#./test.sh test/dump/table-multi.txt
-#./test.sh test/dump/typed_func_refs_params.txt
-#./test.sh test/dump/basic_dump_only.txt
-#./test.sh test/dump/relocations-section-target.txt
-#./test.sh test/dump/simd-splat.txt
-#./test.sh test/dump/global.txt
-#./test.sh test/dump/loop-multi.txt
-#./test.sh test/dump/br-block.txt
-#./test.sh test/dump/localget-param.txt
-#./test.sh test/dump/local-indices.txt
-#./test.sh test/dump/string-escape.txt
-#./test.sh test/dump/section-offsets.txt
-#./test.sh test/dump/simd-shift.txt
-#./test.sh test/dump/call_ref.txt
-#./test.sh test/dump/simd-store-lane.txt
-#./test.sh test/dump/load.txt
-#./test.sh test/dump/invalid-data-segment-no-memory.txt
-#./test.sh test/dump/debug-import-names.txt
-#./test.sh test/dump/brtable.txt
-#./test.sh test/dump/cast.txt
-#./test.sh test/dump/block-257-exprs.txt
-#./test.sh test/dump/brtable-empty.txt
-#./test.sh test/dump/unary-extend.txt
-#./test.sh test/dump/expr-brif.txt
-#./test.sh test/dump/return.txt
-#./test.sh test/dump/invalid-data-segment-offset.txt
-#./test.sh test/dump/nocheck.txt
-#./test.sh test/dump/memory-data-size.txt
-#./test.sh test/dump/const.txt
-#./test.sh test/dump/import.txt
-#./test.sh test/dump/expr-br.txt
-#./test.sh test/dump/string-hex.txt
-#./test.sh test/dump/block-multi.txt
-#./test.sh test/dump/store.txt
-#./test.sh test/dump/if-multi.txt
-#./test.sh test/dump/noncanon-leb128-opcode.txt
-#./test.sh test/dump/if-then-list.txt
-#./test.sh test/dump/code-metadata.txt
-#./test.sh test/dump/memory64.txt
-#./test.sh test/dump/param-multi.txt
-#./test.sh test/dump/func-multi.txt
-#./test.sh test/dump/try.txt
-#./test.sh test/dump/relocations.txt
-#./test.sh test/dump/select.txt
-#./test.sh test/dump/simd-load-lane.txt
-#./test.sh test/dump/bulk-memory64.txt
-#./test.sh test/dump/block-257-exprs-br.txt
-#./test.sh test/dump/loop-257-exprs-br.txt
-#./test.sh test/dump/func-result-multi.txt
-#./test.sh test/dump/local-tee.txt
-#./test.sh test/dump/rethrow.txt
-#./test.sh test/dump/nop.txt
-#./test.sh test/dump/debug-names.txt
-#./test.sh test/dump/localset-param.txt
-#./test.sh test/dump/memory-size.txt
-#./test.sh test/dump/loop.txt
-#./test.sh test/dump/bad-version-logging.txt
-#./test.sh test/dump/relocations-long-func-bodies.txt
-#./test.sh test/dump/typed_func_refs_results.txt
-#./test.sh test/dump/struct.txt
-#./test.sh test/dump/br-loop.txt
-#./test.sh test/dump/memory.txt
-#./test.sh test/dump/br-loop-inner-expr.txt
-#./test.sh test/dump/extended-const.txt
-#./test.sh test/dump/memory-grow.txt
-#./test.sh test/dump/if-then-else-list.txt
-#./test.sh test/dump/basic.txt
-#./test.sh test/dump/callimport.txt
-#./test.sh test/dump/invalid-elem-segment-offset.txt
-#./test.sh test/dump/convert-sat.txt
-#./test.sh test/dump/globalget.txt
-#./test.sh test/dump/convert.txt
-#./test.sh test/dump/callindirect.txt
-#./test.sh test/dump/relocations-all-features.txt
-#./test.sh test/dump/memory-1-byte.txt
-#./test.sh test/dump/localget.txt
-#./test.sh test/dump/locals.txt
-#./test.sh test/dump/simd-load-store.txt
-#./test.sh test/dump/table.txt
-#./test.sh test/dump/tail-call.txt
-#./test.sh test/dump/simd-unary.txt
-#./test.sh test/dump/hexfloat_f32.txt
-#./test.sh test/dump/bulk-memory.txt
-#./test.sh test/dump/store64.txt
-#./test.sh test/dump/signatures.txt
-#./test.sh test/dump/relocations-block-types.txt
-#./test.sh test/dump/try-catch-all.txt
-#./test.sh test/dump/mutable-global.txt
-#./test.sh test/dump/start.txt
-#./test.sh test/dump/store-aligned.txt
-#./test.sh test/dump/compare.txt
-#./test.sh test/dump/brif-loop.txt
-#./test.sh test/dump/simd-lane.txt
-#./test.sh test/dump/simd-bitselect.txt
-#./test.sh test/dump/block.txt
-#./test.sh test/dump/if.txt
-#./test.sh test/dump/simd-basic.txt
-#./test.sh test/dump/simd-compare.txt
-#./test.sh test/dump/unary.txt
-#./test.sh test/dump/load-aligned.txt
-#./test.sh test/dump/loop-257-exprs.txt
-#./test.sh test/dump/try-delegate.txt
-#./test.sh test/dump/extended-names.txt
-#./test.sh test/dump/bad-version.txt
-#./test.sh test/dump/drop.txt
-#./test.sh test/dump/memory-hex.txt
-#./test.sh test/dump/no-canonicalize.txt
-#./test.sh test/dump/brif.txt
-#./test.sh test/dump/func-named.txt
-#./test.sh test/dump/data-count-section.txt
-#./test.sh test/dump/load64.txt
-#./test.sh test/dump/call.txt
-#./test.sh test/dump/bad-directory.txt
-#./test.sh test/dump/br-loop-inner.txt
-#./test.sh test/dump/simd-binary.txt
-#./test.sh test/dump/binary.txt
-#./test.sh test/dump/multi_file.txt
+#test/dump/data-count-section-removed.txt
+#test/dump/dedupe-sig.txt
+#test/dump/func-exported.txt
+#test/dump/br-block-named.txt
+#test/dump/elem-mvp-compat.txt
+#test/dump/throw.txt
+#test/dump/globalset.txt
+#test/dump/try-multi.txt
+#test/dump/reference-types.txt
+#test/dump/tag.txt
+#test/dump/localset.txt
+#test/dump/unreachable.txt
+#test/dump/array.txt
+#test/dump/atomic.txt
+#test/dump/module-name.txt
+#test/dump/elem-mvp-compat-named.txt
+#test/dump/result.txt
+#test/dump/invalid-init-exprs.txt
+#test/dump/relocations-long-func-section.txt
+#test/dump/export-multi.txt
+#test/dump/hexfloat_f64.txt
+#test/dump/invalid-elem-segment-no-table.txt
+#test/dump/symbol-tables.txt
+#test/dump/symbol-tables-all-features.txt
+#test/dump/table-multi.txt
+#test/dump/typed_func_refs_params.txt
+#test/dump/basic_dump_only.txt
+#test/dump/relocations-section-target.txt
+#test/dump/simd-splat.txt
+#test/dump/global.txt
+#test/dump/loop-multi.txt
+#test/dump/br-block.txt
+#test/dump/localget-param.txt
+#test/dump/local-indices.txt
+#test/dump/string-escape.txt
+#test/dump/section-offsets.txt
+#test/dump/simd-shift.txt
+#test/dump/call_ref.txt
+#test/dump/simd-store-lane.txt
+#test/dump/load.txt
+#test/dump/invalid-data-segment-no-memory.txt
+#test/dump/debug-import-names.txt
+#test/dump/brtable.txt
+#test/dump/cast.txt
+#test/dump/block-257-exprs.txt
+#test/dump/brtable-empty.txt
+#test/dump/unary-extend.txt
+#test/dump/expr-brif.txt
+#test/dump/return.txt
+#test/dump/invalid-data-segment-offset.txt
+#test/dump/nocheck.txt
+#test/dump/memory-data-size.txt
+#test/dump/const.txt
+#test/dump/import.txt
+#test/dump/expr-br.txt
+#test/dump/string-hex.txt
+#test/dump/block-multi.txt
+#test/dump/store.txt
+#test/dump/if-multi.txt
+#test/dump/noncanon-leb128-opcode.txt
+#test/dump/if-then-list.txt
+#test/dump/code-metadata.txt
+#test/dump/memory64.txt
+#test/dump/param-multi.txt
+#test/dump/func-multi.txt
+#test/dump/try.txt
+#test/dump/relocations.txt
+#test/dump/select.txt
+#test/dump/simd-load-lane.txt
+#test/dump/bulk-memory64.txt
+#test/dump/block-257-exprs-br.txt
+#test/dump/loop-257-exprs-br.txt
+#test/dump/func-result-multi.txt
+#test/dump/local-tee.txt
+#test/dump/rethrow.txt
+#test/dump/nop.txt
+#test/dump/debug-names.txt
+#test/dump/localset-param.txt
+#test/dump/memory-size.txt
+#test/dump/loop.txt
+#test/dump/bad-version-logging.txt
+#test/dump/relocations-long-func-bodies.txt
+#test/dump/typed_func_refs_results.txt
+#test/dump/struct.txt
+#test/dump/br-loop.txt
+#test/dump/memory.txt
+#test/dump/br-loop-inner-expr.txt
+#test/dump/extended-const.txt
+#test/dump/memory-grow.txt
+#test/dump/if-then-else-list.txt
+#test/dump/basic.txt
+#test/dump/callimport.txt
+#test/dump/invalid-elem-segment-offset.txt
+#test/dump/convert-sat.txt
+#test/dump/globalget.txt
+#test/dump/convert.txt
+#test/dump/callindirect.txt
+#test/dump/relocations-all-features.txt
+#test/dump/memory-1-byte.txt
+#test/dump/localget.txt
+#test/dump/locals.txt
+#test/dump/simd-load-store.txt
+#test/dump/table.txt
+#test/dump/tail-call.txt
+#test/dump/simd-unary.txt
+#test/dump/hexfloat_f32.txt
+#test/dump/bulk-memory.txt
+#test/dump/store64.txt
+#test/dump/signatures.txt
+#test/dump/relocations-block-types.txt
+#test/dump/try-catch-all.txt
+#test/dump/mutable-global.txt
+#test/dump/start.txt
+#test/dump/store-aligned.txt
+#test/dump/compare.txt
+#test/dump/brif-loop.txt
+#test/dump/simd-lane.txt
+#test/dump/simd-bitselect.txt
+#test/dump/block.txt
+#test/dump/if.txt
+#test/dump/simd-basic.txt
+#test/dump/simd-compare.txt
+#test/dump/unary.txt
+#test/dump/load-aligned.txt
+#test/dump/loop-257-exprs.txt
+#test/dump/try-delegate.txt
+#test/dump/extended-names.txt
+#test/dump/bad-version.txt
+#test/dump/drop.txt
+#test/dump/memory-hex.txt
+#test/dump/no-canonicalize.txt
+#test/dump/brif.txt
+#test/dump/func-named.txt
+#test/dump/data-count-section.txt
+#test/dump/load64.txt
+#test/dump/call.txt
+#test/dump/bad-directory.txt
+#test/dump/br-loop-inner.txt
+#test/dump/simd-binary.txt
+#test/dump/binary.txt
+#test/dump/multi_file.txt
 
 # TODO: Implement metadata -> custom sections.
-#./test.sh test/decompile/code-metadata.txt
+#test/decompile/code-metadata.txt
 
 # TODO: Fix these.
-#./test.sh test/decompile/basic.txt
-#./test.sh test/decompile/passive-data.txt
+#test/decompile/basic.txt
+#test/decompile/passive-data.txt
 
 # Skip these gen-spec-js tests... TODO: What do they test exactly?
-#./test.sh test/gen-spec-js/register.txt
-#./test.sh test/gen-spec-js/assert_exhaustion.txt
-#./test.sh test/gen-spec-js/assert_return_nan.txt
-#./test.sh test/gen-spec-js/assert_malformed-quote.txt
-#./test.sh test/gen-spec-js/action.txt
-#./test.sh test/gen-spec-js/assert_return.txt
-#./test.sh test/gen-spec-js/assert_malformed.txt
-#./test.sh test/gen-spec-js/assert_uninstantiable.txt
-#./test.sh test/gen-spec-js/basic.txt
-#./test.sh test/gen-spec-js/assert_trap.txt
-#./test.sh test/gen-spec-js/many-modules.txt
-#./test.sh test/gen-spec-js/assert_unlinkable.txt
+#test/gen-spec-js/register.txt
+#test/gen-spec-js/assert_exhaustion.txt
+#test/gen-spec-js/assert_return_nan.txt
+#test/gen-spec-js/assert_malformed-quote.txt
+#test/gen-spec-js/action.txt
+#test/gen-spec-js/assert_return.txt
+#test/gen-spec-js/assert_malformed.txt
+#test/gen-spec-js/assert_uninstantiable.txt
+#test/gen-spec-js/basic.txt
+#test/gen-spec-js/assert_trap.txt
+#test/gen-spec-js/many-modules.txt
+#test/gen-spec-js/assert_unlinkable.txt
 
-#./test.sh test/regress/regress-22.txt
-#./test.sh test/regress/regress-36.txt
-#./test.sh test/regress/regress-37.txt
-#./test.sh test/regress/regress-23.txt
-#./test.sh test/regress/regress-35.txt
-#./test.sh test/regress/regress-21.txt
-#./test.sh test/regress/regress-20.txt
-#./test.sh test/regress/regress-34.txt
-#./test.sh test/regress/regress-2039.txt
-#./test.sh test/regress/regress-18.txt
-#./test.sh test/regress/regress-30.txt
-#./test.sh test/regress/regress-24.txt
-#./test.sh test/regress/regress-25.txt
-#./test.sh test/regress/regress-31.txt
-#./test.sh test/regress/regress-19.txt
-#./test.sh test/regress/bad-annotation.txt
-#./test.sh test/regress/regress-27.txt
-#./test.sh test/regress/regress-33.txt
-#./test.sh test/regress/regress-32.txt
-#./test.sh test/regress/regress-26.txt
-#./test.sh test/regress/unterminated-annotation.txt
-#./test.sh test/regress/regress-9.txt
-#./test.sh test/regress/unterminated-annotation2.txt
-#./test.sh test/regress/bad-u64-leb128.txt
-#./test.sh test/regress/regress-8.txt
-#./test.sh test/regress/wasm2c-try-br.txt
-#./test.sh test/regress/regress-2110.txt
-#./test.sh test/regress/regress-3.txt
-#./test.sh test/regress/huge-offset.txt
-#./test.sh test/regress/regress-2.txt
-#./test.sh test/regress/regress-1.txt
-#./test.sh test/regress/regress-5.txt
-#./test.sh test/regress/regress-4.txt
-#./test.sh test/regress/regress-6.txt
-#./test.sh test/regress/regress-7.txt
-#./test.sh test/regress/bad-annotation2.txt
-#./test.sh test/regress/regress-17.txt
-#./test.sh test/regress/regress-16.txt
-#./test.sh test/regress/regress-1674.txt
-#./test.sh test/regress/regress-14.txt
-#./test.sh test/regress/regress-28.txt
-#./test.sh test/regress/regress-1924.txt
-#./test.sh test/regress/regress-29.txt
-#./test.sh test/regress/regress-15.txt
-#./test.sh test/regress/regress-2034.txt
-#./test.sh test/regress/regress-11.txt
-#./test.sh test/regress/empty-quoted-module.txt
-#./test.sh test/regress/regress-10.txt
-#./test.sh test/regress/bad-missing-end.txt
-#./test.sh test/regress/regress-12.txt
-#./test.sh test/regress/wasm2c-try-reset.txt
-#./test.sh test/regress/regress-1922.txt
-#./test.sh test/regress/regress-13.txt
+#test/regress/regress-22.txt
+#test/regress/regress-36.txt
+#test/regress/regress-37.txt
+#test/regress/regress-23.txt
+#test/regress/regress-35.txt
+#test/regress/regress-21.txt
+#test/regress/regress-20.txt
+#test/regress/regress-34.txt
+#test/regress/regress-2039.txt
+#test/regress/regress-18.txt
+#test/regress/regress-30.txt
+#test/regress/regress-24.txt
+#test/regress/regress-25.txt
+#test/regress/regress-31.txt
+#test/regress/regress-19.txt
+#test/regress/bad-annotation.txt
+#test/regress/regress-27.txt
+#test/regress/regress-33.txt
+#test/regress/regress-32.txt
+#test/regress/regress-26.txt
+#test/regress/unterminated-annotation.txt
+#test/regress/regress-9.txt
+#test/regress/unterminated-annotation2.txt
+#test/regress/bad-u64-leb128.txt
+#test/regress/regress-8.txt
+#test/regress/wasm2c-try-br.txt
+#test/regress/regress-2110.txt
+#test/regress/regress-3.txt
+#test/regress/huge-offset.txt
+#test/regress/regress-2.txt
+#test/regress/regress-1.txt
+#test/regress/regress-5.txt
+#test/regress/regress-4.txt
+#test/regress/regress-6.txt
+#test/regress/regress-7.txt
+#test/regress/bad-annotation2.txt
+#test/regress/regress-17.txt
+#test/regress/regress-16.txt
+#test/regress/regress-1674.txt
+#test/regress/regress-14.txt
+#test/regress/regress-28.txt
+#test/regress/regress-1924.txt
+#test/regress/regress-29.txt
+#test/regress/regress-15.txt
+#test/regress/regress-2034.txt
+#test/regress/regress-11.txt
+#test/regress/empty-quoted-module.txt
+#test/regress/regress-10.txt
+#test/regress/bad-missing-end.txt
+#test/regress/regress-12.txt
+#test/regress/wasm2c-try-reset.txt
+#test/regress/regress-1922.txt
+#test/regress/regress-13.txt
 
-./test.sh test/interp/atomic-rmw-or.txt
-./test.sh test/interp/run-export-with-argument.txt
-./test.sh test/interp/empty.txt
-./test.sh test/interp/atomic-rmw-and.txt
-./test.sh test/interp/atomic-rmw-cmpxchg.txt
-./test.sh test/interp/unreachable.txt
-./test.sh test/interp/expr-if.txt
-./test.sh test/interp/start-failure.txt
-./test.sh test/interp/return-void.txt
-./test.sh test/interp/atomic-rmw-xchg.txt
-./test.sh test/interp/atomic-rmw-add.txt
-./test.sh test/interp/basic-tracing.txt
-./test.sh test/interp/brtable.txt
-./test.sh test/interp/expr-brif.txt
-./test.sh test/interp/return.txt
-./test.sh test/interp/atomic-rmw-sub.txt
-./test.sh test/interp/trap-with-callstack.txt
-./test.sh test/interp/nested-if.txt
-./test.sh test/interp/expr-br.txt
-./test.sh test/interp/select.txt
-./test.sh test/interp/loop.txt
-./test.sh test/interp/basic.txt
-./test.sh test/interp/br.txt
-./test.sh test/interp/call-zero-args.txt
-./test.sh test/interp/start.txt
-./test.sh test/interp/brif-loop.txt
-./test.sh test/interp/if.txt
-./test.sh test/interp/brif.txt
-./test.sh test/interp/run-export-with-invalid-arguments-size.txt
+test/interp/atomic-rmw-or.txt
+test/interp/run-export-with-argument.txt
+test/interp/empty.txt
+test/interp/atomic-rmw-and.txt
+test/interp/atomic-rmw-cmpxchg.txt
+test/interp/unreachable.txt
+test/interp/expr-if.txt
+test/interp/start-failure.txt
+test/interp/return-void.txt
+test/interp/atomic-rmw-xchg.txt
+test/interp/atomic-rmw-add.txt
+test/interp/basic-tracing.txt
+test/interp/brtable.txt
+test/interp/expr-brif.txt
+test/interp/return.txt
+test/interp/atomic-rmw-sub.txt
+test/interp/trap-with-callstack.txt
+test/interp/nested-if.txt
+test/interp/expr-br.txt
+test/interp/select.txt
+test/interp/loop.txt
+test/interp/basic.txt
+test/interp/br.txt
+test/interp/call-zero-args.txt
+test/interp/start.txt
+test/interp/brif-loop.txt
+test/interp/if.txt
+test/interp/brif.txt
+test/interp/run-export-with-invalid-arguments-size.txt
 
 # Skipping exceptions tests; they are still experimental.
-#./test.sh test/interp/throw-across-frame.txt
-#./test.sh test/interp/rethrow-and-br.txt
+#test/interp/throw-across-frame.txt
+#test/interp/rethrow-and-br.txt
 
-#./test.sh test/interp/reference-types.txt
-#./test.sh test/interp/atomic-load.txt
-./test.sh test/interp/return-call-indirect-import.txt
-#./test.sh test/interp/basic-logging.txt
-#./test.sh test/interp/atomic-rmw-xor.txt
-#./test.sh test/interp/return-call.txt
-#./test.sh test/interp/return-call-indirect.txt
-#./test.sh test/interp/simd-splat.txt
-#./test.sh test/interp/loop-multi.txt
-#./test.sh test/interp/call-multi-result.txt
-#./test.sh test/interp/simd-shift.txt
-#./test.sh test/interp/return-call-import.txt
-#./test.sh test/interp/return-call-local-set.txt
-#./test.sh test/interp/load.txt
-#./test.sh test/interp/cast.txt
-#./test.sh test/interp/unary-extend.txt
-#./test.sh test/interp/import.txt
-#./test.sh test/interp/block-multi.txt
-#./test.sh test/interp/store.txt
-#./test.sh test/interp/if-multi.txt
-#./test.sh test/interp/try.txt
-#./test.sh test/interp/rethrow.txt
-#./test.sh test/interp/run-export-as-global.txt
-#./test.sh test/interp/convert-sat.txt
-#./test.sh test/interp/call-dummy-import.txt
-#./test.sh test/interp/convert.txt
-#./test.sh test/interp/callindirect.txt
-#./test.sh test/interp/callimport-zero-args.txt
-#./test.sh test/interp/atomic-store.txt
-#./test.sh test/interp/simd-load-store.txt
-#./test.sh test/interp/simd-unary.txt
-#./test.sh test/interp/run-non-func-export.txt
-#./test.sh test/interp/store64.txt
-#./test.sh test/interp/memory-empty-segment.txt
-#./test.sh test/interp/compare.txt
-#./test.sh test/interp/simd-lane.txt
-#./test.sh test/interp/simd-bitselect.txt
-#./test.sh test/interp/simd-basic.txt
-#./test.sh test/interp/expr-block.txt
-#./test.sh test/interp/simd-compare.txt
-#./test.sh test/interp/unary.txt
-#./test.sh test/interp/try-delegate.txt
-#./test.sh test/interp/load64.txt
-#./test.sh test/interp/call.txt
-#./test.sh test/interp/simd-binary.txt
-#./test.sh test/interp/binary.txt
+#test/interp/reference-types.txt
+#test/interp/atomic-load.txt
+test/interp/return-call-indirect-import.txt
+#test/interp/basic-logging.txt
+#test/interp/atomic-rmw-xor.txt
+#test/interp/return-call.txt
+#test/interp/return-call-indirect.txt
+#test/interp/simd-splat.txt
+#test/interp/loop-multi.txt
+#test/interp/call-multi-result.txt
+#test/interp/simd-shift.txt
+#test/interp/return-call-import.txt
+#test/interp/return-call-local-set.txt
+#test/interp/load.txt
+#test/interp/cast.txt
+#test/interp/unary-extend.txt
+#test/interp/import.txt
+#test/interp/block-multi.txt
+#test/interp/store.txt
+#test/interp/if-multi.txt
+#test/interp/try.txt
+#test/interp/rethrow.txt
+#test/interp/run-export-as-global.txt
+#test/interp/convert-sat.txt
+#test/interp/call-dummy-import.txt
+#test/interp/convert.txt
+#test/interp/callindirect.txt
+#test/interp/callimport-zero-args.txt
+#test/interp/atomic-store.txt
+#test/interp/simd-load-store.txt
+#test/interp/simd-unary.txt
+#test/interp/run-non-func-export.txt
+#test/interp/store64.txt
+#test/interp/memory-empty-segment.txt
+#test/interp/compare.txt
+#test/interp/simd-lane.txt
+#test/interp/simd-bitselect.txt
+#test/interp/simd-basic.txt
+#test/interp/expr-block.txt
+#test/interp/simd-compare.txt
+#test/interp/unary.txt
+#test/interp/try-delegate.txt
+#test/interp/load64.txt
+#test/interp/call.txt
+#test/interp/simd-binary.txt
+#test/interp/binary.txt
 
-#./test.sh test/parse/bad-single-semicolon.txt
-#./test.sh test/parse/all-features.txt
-#./test.sh test/parse/bad-string-unicode-escape-unterminated.txt
-#./test.sh test/parse/export-mutable-global.txt
-#./test.sh test/parse/bad-input-command.txt
-#./test.sh test/parse/force-color.txt
-#./test.sh test/parse/bad-crlf.txt
-#./test.sh test/parse/bad-string-unicode-escape-short.txt
-#./test.sh test/parse/string-escape.txt
-#./test.sh test/parse/module/reference-types-disabled.txt
-#./test.sh test/parse/module/bad-export-memory-undefined.txt
-#./test.sh test/parse/module/struct-field-name.txt
-#./test.sh test/parse/module/bad-table-too-many.txt
-#./test.sh test/parse/module/import-global-globalget.txt
-#./test.sh test/parse/module/struct-mut-field.txt
-#./test.sh test/parse/module/bad-export-table-name-undefined.txt
-#./test.sh test/parse/module/bad-export-func-too-many.txt
-#./test.sh test/parse/module/bad-import-func-not-result.txt
-#./test.sh test/parse/module/memory-segment-1.txt
-#./test.sh test/parse/module/bad-start-not-void.txt
-#./test.sh test/parse/module/elem-offset.txt
-#./test.sh test/parse/module/bad-array-no-fields.txt
-#./test.sh test/parse/module/export-memory.txt
-#./test.sh test/parse/module/bad-memory-init-size.txt
-#./test.sh test/parse/module/bad-import-func-one-string.txt
-#./test.sh test/parse/module/tag.txt
-#./test.sh test/parse/module/bad-start-not-nullary.txt
-#./test.sh test/parse/module/array.txt
-#./test.sh test/parse/module/bad-table-no-offset.txt
-#./test.sh test/parse/module/bad-table-invalid-function.txt
-#./test.sh test/parse/module/bad-import-memory-redefinition.txt
-#./test.sh test/parse/module/bad-memory-shared-nomax.txt
-#./test.sh test/parse/module/bad-export-func-no-string.txt
-#./test.sh test/parse/module/memory-init-max-size.txt
-#./test.sh test/parse/module/bad-memory-init-size-too-big.txt
-#./test.sh test/parse/module/bad-elem-redefinition.txt
-#./test.sh test/parse/module/bad-memory-max-less-than-init.txt
-#./test.sh test/parse/module/bad-memory-max-size-too-big.txt
-#./test.sh test/parse/module/table-elem-expr.txt
-#./test.sh test/parse/module/global.txt
-#./test.sh test/parse/module/bad-export-func-name-undefined.txt
-#./test.sh test/parse/module/bad-import-func-not-param.txt
-#./test.sh test/parse/module/import-func.txt
-#./test.sh test/parse/module/bad-memory-init-size-negative.txt
-#./test.sh test/parse/module/bad-module-no-close.txt
-#./test.sh test/parse/module/module-empty.txt
-#./test.sh test/parse/module/bad-export-global-name-undefined.txt
-#./test.sh test/parse/module/bad-table-elem.txt
-#./test.sh test/parse/module/import-func-type.txt
-#./test.sh test/parse/module/table-named.txt
-#./test.sh test/parse/module/bad-memory-segment-address.txt
-#./test.sh test/parse/module/type.txt
-#./test.sh test/parse/module/bad-import-global-redefinition.txt
-#./test.sh test/parse/module/import-memory.txt
-#./test.sh test/parse/module/import-memory-shared.txt
-#./test.sh test/parse/module/bad-global-invalid-globalget.txt
-#./test.sh test/parse/module/bad-export-table-undefined.txt
-#./test.sh test/parse/module/memory-init-size.txt
-#./test.sh test/parse/module/memory-segment-many.txt
-#./test.sh test/parse/module/bad-memory-too-many.txt
-#./test.sh test/parse/module/bad-global-invalid-expr.txt
-#./test.sh test/parse/module/bad-start-too-many.txt
-#./test.sh test/parse/module/export-func.txt
-#./test.sh test/parse/module/type-multi-param.txt
-#./test.sh test/parse/module/memory-shared.txt
-#./test.sh test/parse/module/array-mut-field.txt
-#./test.sh test/parse/module/export-tag.txt
-#./test.sh test/parse/module/bad-export-func-name.txt
-#./test.sh test/parse/module/bad-array-too-many-fields.txt
-#./test.sh test/parse/module/struct.txt
-#./test.sh test/parse/module/bad-module-with-assert.txt
-#./test.sh test/parse/module/import-mutable-global.txt
-#./test.sh test/parse/module/type-empty.txt
-#./test.sh test/parse/module/table-elem-var.txt
-#./test.sh test/parse/module/import-tag.txt
-#./test.sh test/parse/module/bad-export-memory-name-undefined.txt
-#./test.sh test/parse/module/struct-and-func.txt
-#./test.sh test/parse/module/type-empty-param.txt
-#./test.sh test/parse/module/import-table.txt
-#./test.sh test/parse/module/bad-export-func-undefined.txt
-#./test.sh test/parse/module/table.txt
-#./test.sh test/parse/module/memory-segment-passive.txt
-#./test.sh test/parse/module/import-global.txt
-#./test.sh test/parse/module/bad-binary-module-magic.txt
-#./test.sh test/parse/module/export-memory-multi.txt
-#./test.sh test/parse/module/start.txt
-#./test.sh test/parse/module/export-func-named.txt
-#./test.sh test/parse/module/memory-segment-long.txt
-#./test.sh test/parse/module/bad-func-redefinition.txt
-#./test.sh test/parse/module/bad-module-multi.txt
-#./test.sh test/parse/module/export-global.txt
-#./test.sh test/parse/module/bad-memory-max-size.txt
-#./test.sh test/parse/module/memory-segment-multi-string.txt
-#./test.sh test/parse/module/start-named.txt
-#./test.sh test/parse/module/bad-import-table-shared.txt
-#./test.sh test/parse/module/type-no-param.txt
-#./test.sh test/parse/module/export-func-multi.txt
-#./test.sh test/parse/module/binary-module.txt
-#./test.sh test/parse/module/bad-import-table-redefinition.txt
-#./test.sh test/parse/module/bad-export-global-undefined.txt
-#./test.sh test/parse/module/bad-import-func-redefinition.txt
-#./test.sh test/parse/module/data-offset.txt
-#./test.sh test/parse/module/bad-memory-max-size-negative.txt
-#./test.sh test/parse/module/export-table.txt
-#./test.sh test/parse/module/import-func-no-param.txt
-#./test.sh test/parse/module/bad-export-func-empty.txt
-#./test.sh test/parse/module/bad-memory-empty.txt
-#./test.sh test/parse/line-comment.txt
-#./test.sh test/parse/annotations.txt
-#./test.sh test/parse/expr/if-then-br-named.txt
-#./test.sh test/parse/expr/callref-internal-function.txt
-#./test.sh test/parse/expr/bad-const-v128-i8x16-overflow.txt
-#./test.sh test/parse/expr/bad-select-multi.txt
-#./test.sh test/parse/expr/localset-index-mixed-named-unnamed.txt
-#./test.sh test/parse/expr/call-named.txt
-#./test.sh test/parse/expr/bad-simd-shuffle-nat-expected.txt
-#./test.sh test/parse/expr/bad-globalget-undefined.txt
-#./test.sh test/parse/expr/bad-simd-shuffle-lane-index-overflow.txt
-#./test.sh test/parse/expr/throw.txt
-#./test.sh test/parse/expr/callref-imported-function.txt
-#./test.sh test/parse/expr/block-named.txt
-#./test.sh test/parse/expr/globalset.txt
-#./test.sh test/parse/expr/bad-globalget-name-undefined.txt
-#./test.sh test/parse/expr/bad-const-v128-i32x4-overflow.txt
-#./test.sh test/parse/expr/bad-const-type-i32-in-non-simd-const.txt
-#./test.sh test/parse/expr/brtable-multi.txt
-#./test.sh test/parse/expr/try-multi.txt
-#./test.sh test/parse/expr/reference-types.txt
-#./test.sh test/parse/expr/bad-if-mismatch-label.txt
-#./test.sh test/parse/expr/localset-param-named.txt
-#./test.sh test/parse/expr/localset.txt
-#./test.sh test/parse/expr/bad-atomic-unnatural-align.txt
-#./test.sh test/parse/expr/bulk-memory-disabled.txt
-#./test.sh test/parse/expr/bad-load-align-not-pot.txt
-#./test.sh test/parse/expr/unreachable.txt
-#./test.sh test/parse/expr/memory-drop.txt
-#./test.sh test/parse/expr/bad-store-offset-negative.txt
-#./test.sh test/parse/expr/loop-named.txt
-#./test.sh test/parse/expr/atomic.txt
-#./test.sh test/parse/expr/if-then-else-br.txt
-#./test.sh test/parse/expr/globalset-named.txt
-#./test.sh test/parse/expr/tail-call-disabled.txt
-#./test.sh test/parse/expr/bad-br-no-depth.txt
-#./test.sh test/parse/expr/bad-const-i32-underflow.txt
-#./test.sh test/parse/expr/memory-init64.txt
-#./test.sh test/parse/expr/bad-const-v128-nat-overflow.txt
-#./test.sh test/parse/expr/memory-copy64.txt
-#./test.sh test/parse/expr/bad-unexpected.txt
-#./test.sh test/parse/expr/return-void.txt
-#./test.sh test/parse/expr/bad-try-delegate.txt
-#./test.sh test/parse/expr/memory-fill.txt
-#./test.sh test/parse/expr/bad-load-offset-negative.txt
-#./test.sh test/parse/expr/bad-globalset-name-undefined.txt
-#./test.sh test/parse/expr/bad-const-i32-overflow.txt
-#./test.sh test/parse/expr/table-init.txt
-#./test.sh test/parse/expr/table-grow.txt
-#./test.sh test/parse/expr/bad-if-no-then.txt
-#./test.sh test/parse/expr/loop-multi.txt
-#./test.sh test/parse/expr/brif-named.txt
-#./test.sh test/parse/expr/localset-index-after-param.txt
-#./test.sh test/parse/expr/br-block.txt
-#./test.sh test/parse/expr/if-then-br.txt
-#./test.sh test/parse/expr/localget-param.txt
-#./test.sh test/parse/expr/memory-copy.txt
-#./test.sh test/parse/expr/bad-loop-mismatch-label.txt
-#./test.sh test/parse/expr/bad-store-float.sign.txt
-#./test.sh test/parse/expr/call-defined-later.txt
-#./test.sh test/parse/expr/table-get.txt
-#./test.sh test/parse/expr/bad-const-v128-type-i32-expected.txt
-#./test.sh test/parse/expr/bad-loop-end-label.txt
-#./test.sh test/parse/expr/if-then-else-br-named.txt
-#./test.sh test/parse/expr/return-if.txt
-#./test.sh test/parse/expr/bad-try-clause.txt
-#./test.sh test/parse/expr/tail-call-named.txt
-#./test.sh test/parse/expr/load.txt
-#./test.sh test/parse/expr/localget-named.txt
-#./test.sh test/parse/expr/bad-load-float-sign.txt
-#./test.sh test/parse/expr/brtable.txt
-#./test.sh test/parse/expr/cast.txt
-#./test.sh test/parse/expr/bad-load-type.txt
-#./test.sh test/parse/expr/bad-try-multiple-catch.txt
-#./test.sh test/parse/expr/callimport-defined-later.txt
-#./test.sh test/parse/expr/callimport-type.txt
-#./test.sh test/parse/expr/unary-extend.txt
-#./test.sh test/parse/expr/expr-brif.txt
-#./test.sh test/parse/expr/return.txt
-#./test.sh test/parse/expr/bad-globalset-undefined.txt
-#./test.sh test/parse/expr/bad-br-defined-later.txt
-#./test.sh test/parse/expr/bad-load-align.txt
-#./test.sh test/parse/expr/const.txt
-#./test.sh test/parse/expr/bad-convert-float-sign.txt
-#./test.sh test/parse/expr/brtable-named.txt
-#./test.sh test/parse/expr/expr-br.txt
-#./test.sh test/parse/expr/bad-const-f64-nan-arith.txt
-#./test.sh test/parse/expr/bad-localset-no-value.txt
-#./test.sh test/parse/expr/bad-brtable-no-vars.txt
-#./test.sh test/parse/expr/block-multi.txt
-#./test.sh test/parse/expr/bad-br-name-undefined.txt
-#./test.sh test/parse/expr/bad-store-align.txt
-#./test.sh test/parse/expr/store.txt
-#./test.sh test/parse/expr/call-name-prefix.txt
-#./test.sh test/parse/expr/if-multi.txt
-#./test.sh test/parse/expr/reference-types-named.txt
-#./test.sh test/parse/expr/localget-param-named.txt
-#./test.sh test/parse/expr/bad-block-mismatch-label.txt
-#./test.sh test/parse/expr/if-return.txt
-#./test.sh test/parse/expr/try.txt
-#./test.sh test/parse/expr/localset-named.txt
-#./test.sh test/parse/expr/localget-index-mixed-named-unnamed.txt
-#./test.sh test/parse/expr/bad-localset-name-undefined.txt
-#./test.sh test/parse/expr/select.txt
-#./test.sh test/parse/expr/callimport-named.txt
-#./test.sh test/parse/expr/bad-localset-undefined.txt
-#./test.sh test/parse/expr/loop-multi-named.txt
-#./test.sh test/parse/expr/local-tee.txt
-#./test.sh test/parse/expr/bad-br-name.txt
-#./test.sh test/parse/expr/bad-block-end-label.txt
-#./test.sh test/parse/expr/rethrow.txt
-#./test.sh test/parse/expr/nop.txt
-#./test.sh test/parse/expr/localset-param.txt
-#./test.sh test/parse/expr/bad-localget-name.txt
-#./test.sh test/parse/expr/memory-size.txt
-#./test.sh test/parse/expr/loop.txt
-#./test.sh test/parse/expr/bad-store-align-not-pot.txt
-#./test.sh test/parse/expr/memory-copy-differing-type.txt
-#./test.sh test/parse/expr/br-named.txt
-#./test.sh test/parse/expr/br-loop.txt
-#./test.sh test/parse/expr/bad-simd-shuffle-lane-index-overflow2.txt
-#./test.sh test/parse/expr/bad-const-i32-garbage.txt
-#./test.sh test/parse/expr/load-offset.txt
-#./test.sh test/parse/expr/memory-init.txt
-#./test.sh test/parse/expr/simd.txt
-#./test.sh test/parse/expr/memory-grow.txt
-#./test.sh test/parse/expr/if-then-else-list.txt
-#./test.sh test/parse/expr/callimport.txt
-#./test.sh test/parse/expr/convert-sat.txt
-#./test.sh test/parse/expr/bad-localget-name-undefined.txt
-#./test.sh test/parse/expr/reference-types-call-indirect.txt
-#./test.sh test/parse/expr/globalget.txt
-#./test.sh test/parse/expr/convert.txt
-#./test.sh test/parse/expr/table-copy.txt
-#./test.sh test/parse/expr/bulk-memory-named64.txt
-#./test.sh test/parse/expr/callindirect.txt
-#./test.sh test/parse/expr/br.txt
-#./test.sh test/parse/expr/if-multi-named.txt
-#./test.sh test/parse/expr/localget.txt
-#./test.sh test/parse/expr/bad-compare-one-expr.txt
-#./test.sh test/parse/expr/tail-call.txt
-#./test.sh test/parse/expr/bad-nop.txt
-#./test.sh test/parse/expr/bad-simd-shuffle-not-enough-indices.txt
-#./test.sh test/parse/expr/store64.txt
-#./test.sh test/parse/expr/try-catch-all.txt
-#./test.sh test/parse/expr/atomic64.txt
-#./test.sh test/parse/expr/bad-if-end-label.txt
-#./test.sh test/parse/expr/store-aligned.txt
-#./test.sh test/parse/expr/block-return.txt
-#./test.sh test/parse/expr/compare.txt
-#./test.sh test/parse/expr/table-drop.txt
-#./test.sh test/parse/expr/localget-index-after-param.txt
-#./test.sh test/parse/expr/if-then-else.txt
-#./test.sh test/parse/expr/bad-binary-one-expr.txt
-#./test.sh test/parse/expr/bad-store-type.txt
-#./test.sh test/parse/expr/block.txt
-#./test.sh test/parse/expr/if.txt
-#./test.sh test/parse/expr/bad-br-undefined.txt
-#./test.sh test/parse/expr/bad-const-f32-trailing.txt
-#./test.sh test/parse/expr/bad-const-f32-nan-arith.txt
-#./test.sh test/parse/expr/memory-fill64.txt
-#./test.sh test/parse/expr/atomic-align.txt
-#./test.sh test/parse/expr/bad-convert-int-no-sign.txt
-#./test.sh test/parse/expr/atomic-disabled.txt
-#./test.sh test/parse/expr/unary.txt
-#./test.sh test/parse/expr/load-aligned.txt
-#./test.sh test/parse/expr/try-delegate.txt
-#./test.sh test/parse/expr/bad-br-bad-depth.txt
-#./test.sh test/parse/expr/bad-const-v128-i16x8-overflow.txt
-#./test.sh test/parse/expr/drop.txt
-#./test.sh test/parse/expr/bad-const-i32-trailing.txt
-#./test.sh test/parse/expr/bad-const-i32-just-negative-sign.txt
-#./test.sh test/parse/expr/brif.txt
-#./test.sh test/parse/expr/bad-localget-undefined.txt
-#./test.sh test/parse/expr/table-set.txt
-#./test.sh test/parse/expr/return-block.txt
-#./test.sh test/parse/expr/load64.txt
-#./test.sh test/parse/expr/block-multi-named.txt
-#./test.sh test/parse/expr/bulk-memory-named.txt
-#./test.sh test/parse/expr/memory-grow64.txt
-#./test.sh test/parse/expr/bad-localset-name.txt
-#./test.sh test/parse/expr/bad-const-i64-overflow.txt
-#./test.sh test/parse/expr/call.txt
-#./test.sh test/parse/expr/bad-load-align-negative.txt
-#./test.sh test/parse/expr/callindirect-named.txt
-#./test.sh test/parse/expr/bad-load-align-misspelled.txt
-#./test.sh test/parse/expr/bad-memory-copy-differing-type.txt
-#./test.sh test/parse/expr/store-offset.txt
-#./test.sh test/parse/expr/globalget-named.txt
-#./test.sh test/parse/expr/binary.txt
-#./test.sh test/parse/expr/bad-brtable-bad-depth.txt
-#./test.sh test/parse/string-hex.txt
-#./test.sh test/parse/assert/bad-assertreturn-unknown-function.txt
-#./test.sh test/parse/assert/assert-return-arithmetic-nan.txt
-#./test.sh test/parse/assert/bad-assert-before-module.txt
-#./test.sh test/parse/assert/bad-invoke-too-few.txt
-#./test.sh test/parse/assert/assertmalformed.txt
-#./test.sh test/parse/assert/bad-assertreturn-too-many.txt
-#./test.sh test/parse/assert/bad-invoke-no-module.txt
-#./test.sh test/parse/assert/assert-return-canonical-nan.txt
-#./test.sh test/parse/assert/invoke.txt
-#./test.sh test/parse/assert/assertinvalid-binary-module.txt
-#./test.sh test/parse/assert/bad-assertexception.txt
-#./test.sh test/parse/assert/assertexception.txt
-#./test.sh test/parse/assert/assertreturn.txt
-#./test.sh test/parse/assert/assert-after-module.txt
-#./test.sh test/parse/assert/bad-assertreturn-non-const.txt
-#./test.sh test/parse/assert/bad-invoke-too-many.txt
-#./test.sh test/parse/assert/assertinvalid.txt
-#./test.sh test/parse/assert/bad-assertreturn-too-few.txt
-#./test.sh test/parse/assert/bad-invoke-unknown-function.txt
-#./test.sh test/parse/bad-string-unicode-escape-unexpected.txt
-#./test.sh test/parse/nested-comments.txt
-#./test.sh test/parse/bad-string-eof.txt
-#./test.sh test/parse/bad-output-command.txt
-#./test.sh test/parse/custom-sections.txt
-#./test.sh test/parse/basic.txt
-#./test.sh test/parse/bad-string-hex-escape.txt
-#./test.sh test/parse/empty-file.txt
-#./test.sh test/parse/bad-string-unicode-escape-unallowed.txt
-#./test.sh test/parse/bad-annotations.txt
-#./test.sh test/parse/bad-error-long-token.txt
-#./test.sh test/parse/bad-error-long-line.txt
-#./test.sh test/parse/bad-string-unicode-escape.txt
-#./test.sh test/parse/bad-toplevel.txt
-#./test.sh test/parse/bad-string-escape.txt
-#./test.sh test/parse/bad-delegate-label.txt
-#./test.sh test/parse/bad-string-unicode-escape-large.txt
-#./test.sh test/parse/stdin.txt
-#./test.sh test/parse/func/bad-param-binding.txt
-#./test.sh test/parse/func/bad-local-redefinition.txt
-#./test.sh test/parse/func/param-type-1.txt
-#./test.sh test/parse/func/bad-sig-params-empty.txt
-#./test.sh test/parse/func/param-type-2.txt
-#./test.sh test/parse/func/bad-param-type-list.txt
-#./test.sh test/parse/func/result.txt
-#./test.sh test/parse/func/bad-sig-too-many-params.txt
-#./test.sh test/parse/func/sig-match.txt
-#./test.sh test/parse/func/bad-local-type.txt
-#./test.sh test/parse/func/bad-result-type.txt
-#./test.sh test/parse/func/bad-sig-too-few-params.txt
-#./test.sh test/parse/func/bad-local-type-list.txt
-#./test.sh test/parse/func/bad-sig-result-type-void.txt
-#./test.sh test/parse/func/param-multi.txt
-#./test.sh test/parse/func/bad-sig-param-type-mismatch.txt
-#./test.sh test/parse/func/bad-local-name.txt
-#./test.sh test/parse/func/bad-func-name.txt
-#./test.sh test/parse/func/bad-param.txt
-#./test.sh test/parse/func/no-space.txt
-#./test.sh test/parse/func/bad-sig-result-type-mismatch.txt
-#./test.sh test/parse/func/param-binding.txt
-#./test.sh test/parse/func/result-empty.txt
-#./test.sh test/parse/func/local-empty.txt
-#./test.sh test/parse/func/bad-local-binding.txt
-#./test.sh test/parse/func/local-multi.txt
-#./test.sh test/parse/func/result-multi.txt
-#./test.sh test/parse/func/bad-param-redefinition.txt
-#./test.sh test/parse/func/func-named.txt
-#./test.sh test/parse/func/sig.txt
-#./test.sh test/parse/func/bad-sig-result-type-not-void.txt
-#./test.sh test/parse/func/bad-local-binding-no-type.txt
-#./test.sh test/parse/func/local.txt
-#./test.sh test/parse/func/bad-param-name.txt
-#./test.sh test/spec/unreached-valid.txt
-#./test.sh test/spec/simd_load64_lane.txt
-#./test.sh test/spec/imports.txt
-#./test.sh test/spec/memory_size.txt
-#./test.sh test/spec/float_exprs.txt
-#./test.sh test/spec/comments.txt
-#./test.sh test/spec/address.txt
-#./test.sh test/spec/memory_trap.txt
-#./test.sh test/spec/br_table.txt
-#./test.sh test/spec/local_get.txt
-#./test.sh test/spec/utf8-import-module.txt
-#./test.sh test/spec/memory64/address.txt
-#./test.sh test/spec/memory64/address64.txt
-#./test.sh test/spec/memory64/align64.txt
-#./test.sh test/spec/memory64/memory_redundancy64.txt
-#./test.sh test/spec/memory64/memory64.txt
-#./test.sh test/spec/memory64/endianness64.txt
-#./test.sh test/spec/memory64/memory.txt
-#./test.sh test/spec/memory64/binary-leb128.txt
-#./test.sh test/spec/memory64/memory_grow64.txt
-#./test.sh test/spec/memory64/load64.txt
-#./test.sh test/spec/memory64/memory_trap64.txt
-#./test.sh test/spec/memory64/binary.txt
-#./test.sh test/spec/memory64/float_memory64.txt
-#./test.sh test/spec/names.txt
-#./test.sh test/spec/simd_f64x2_pmin_pmax.txt
-#./test.sh test/spec/align.txt
-#./test.sh test/spec/simd_i32x4_trunc_sat_f64x2.txt
-#./test.sh test/spec/i64.txt
-#./test.sh test/spec/unreachable.txt
-#./test.sh test/spec/utf8-invalid-encoding.txt
-#./test.sh test/spec/simd_i8x16_arith2.txt
-#./test.sh test/spec/simd_f32x4_cmp.txt
-#./test.sh test/spec/float_misc.txt
-#./test.sh test/spec/simd_i64x2_arith.txt
-#./test.sh test/spec/f32.txt
-#./test.sh test/spec/simd_const.txt
-#./test.sh test/spec/simd_f64x2.txt
-#./test.sh test/spec/memory_grow.txt
-#./test.sh test/spec/ref_func.txt
-#./test.sh test/spec/memory_init.txt
-#./test.sh test/spec/simd_f32x4_arith.txt
-#./test.sh test/spec/simd_store32_lane.txt
-#./test.sh test/spec/table_get.txt
-#./test.sh test/spec/simd_i16x8_arith2.txt
-#./test.sh test/spec/inline-module.txt
-#./test.sh test/spec/skip-stack-guard-page.txt
-#./test.sh test/spec/table_copy.txt
-#./test.sh test/spec/simd_f32x4_rounding.txt
-#./test.sh test/spec/simd_store.txt
-#./test.sh test/spec/float_literals.txt
-#./test.sh test/spec/global.txt
-#./test.sh test/spec/memory_redundancy.txt
-#./test.sh test/spec/table-sub.txt
-#./test.sh test/spec/table_fill.txt
-#./test.sh test/spec/simd_linking.txt
-#./test.sh test/spec/simd_load_splat.txt
-#./test.sh test/spec/simd_load_zero.txt
-#./test.sh test/spec/simd_lane.txt
-#./test.sh test/spec/simd_i64x2_extmul_i32x4.txt
-#./test.sh test/spec/extended-const/global.txt
-#./test.sh test/spec/extended-const/elem.txt
-#./test.sh test/spec/extended-const/data.txt
-#./test.sh test/spec/load.txt
-#./test.sh test/spec/simd_i32x4_extmul_i16x8.txt
-#./test.sh test/spec/simd_align.txt
-#./test.sh test/spec/left-to-right.txt
-#./test.sh test/spec/simd_load8_lane.txt
-#./test.sh test/spec/simd_load_extend.txt
-#./test.sh test/spec/simd_load.txt
-#./test.sh test/spec/token.txt
-#./test.sh test/spec/simd_splat.txt
-#./test.sh test/spec/type.txt
-#./test.sh test/spec/custom.txt
-#./test.sh test/spec/simd_i16x8_extadd_pairwise_i8x16.txt
-#./test.sh test/spec/simd_i8x16_arith.txt
-#./test.sh test/spec/return.txt
-#./test.sh test/spec/tail-call/return_call_indirect.txt
-#./test.sh test/spec/tail-call/return_call.txt
-#./test.sh test/spec/int_literals.txt
-#./test.sh test/spec/simd_store16_lane.txt
-#./test.sh test/spec/tokens.txt
-#./test.sh test/spec/simd_i8x16_sat_arith.txt
-#./test.sh test/spec/ref_is_null.txt
-#./test.sh test/spec/const.txt
-#./test.sh test/spec/ref_null.txt
-#./test.sh test/spec/simd_i16x8_cmp.txt
-#./test.sh test/spec/f64_bitwise.txt
-#./test.sh test/spec/store.txt
-#./test.sh test/spec/endianness.txt
-#./test.sh test/spec/float_memory.txt
-#./test.sh test/spec/simd_i32x4_cmp.txt
-#./test.sh test/spec/exports.txt
-#./test.sh test/spec/multi-memory/imports.txt
-#./test.sh test/spec/multi-memory/memory_size.txt
-#./test.sh test/spec/multi-memory/linking1.txt
-#./test.sh test/spec/multi-memory/align0.txt
-#./test.sh test/spec/multi-memory/linking0.txt
-#./test.sh test/spec/multi-memory/memory_grow.txt
-#./test.sh test/spec/multi-memory/exports0.txt
-#./test.sh test/spec/multi-memory/linking2.txt
-#./test.sh test/spec/multi-memory/linking3.txt
-#./test.sh test/spec/multi-memory/memory_copy1.txt
-#./test.sh test/spec/multi-memory/memory_copy0.txt
-#./test.sh test/spec/multi-memory/load.txt
-#./test.sh test/spec/multi-memory/memory-multi.txt
-#./test.sh test/spec/multi-memory/traps0.txt
-#./test.sh test/spec/multi-memory/data_drop0.txt
-#./test.sh test/spec/multi-memory/store0.txt
-#./test.sh test/spec/multi-memory/store1.txt
-#./test.sh test/spec/multi-memory/store.txt
-#./test.sh test/spec/multi-memory/memory_size1.txt
-#./test.sh test/spec/multi-memory/imports1.txt
-#./test.sh test/spec/multi-memory/imports0.txt
-#./test.sh test/spec/multi-memory/memory_size0.txt
-#./test.sh test/spec/multi-memory/load2.txt
-#./test.sh test/spec/multi-memory/load0.txt
-#./test.sh test/spec/multi-memory/memory_size2.txt
-#./test.sh test/spec/multi-memory/memory_fill0.txt
-#./test.sh test/spec/multi-memory/imports2.txt
-#./test.sh test/spec/multi-memory/binary0.txt
-#./test.sh test/spec/multi-memory/imports3.txt
-#./test.sh test/spec/multi-memory/memory.txt
-#./test.sh test/spec/multi-memory/memory_size3.txt
-#./test.sh test/spec/multi-memory/load1.txt
-#./test.sh test/spec/multi-memory/memory_init0.txt
-#./test.sh test/spec/multi-memory/memory_trap1.txt
-#./test.sh test/spec/multi-memory/imports4.txt
-#./test.sh test/spec/multi-memory/simd_memory-multi.txt
-#./test.sh test/spec/multi-memory/memory_trap0.txt
-#./test.sh test/spec/multi-memory/address0.txt
-#./test.sh test/spec/multi-memory/data0.txt
-#./test.sh test/spec/multi-memory/data1.txt
-#./test.sh test/spec/multi-memory/address1.txt
-#./test.sh test/spec/multi-memory/float_memory0.txt
-#./test.sh test/spec/multi-memory/float_exprs0.txt
-#./test.sh test/spec/multi-memory/start0.txt
-#./test.sh test/spec/multi-memory/float_exprs1.txt
-#./test.sh test/spec/multi-memory/data.txt
-#./test.sh test/spec/multi-memory/binary.txt
-#./test.sh test/spec/table_set.txt
-#./test.sh test/spec/simd_load32_lane.txt
-#./test.sh test/spec/simd_i64x2_arith2.txt
-#./test.sh test/spec/labels.txt
-#./test.sh test/spec/select.txt
-#./test.sh test/spec/utf8-custom-section-id.txt
-#./test.sh test/spec/simd_store8_lane.txt
-#./test.sh test/spec/simd_i16x8_arith.txt
-#./test.sh test/spec/nop.txt
-#./test.sh test/spec/simd_address.txt
-#./test.sh test/spec/simd_i32x4_arith2.txt
-#./test.sh test/spec/simd_f64x2_cmp.txt
-#./test.sh test/spec/loop.txt
-#./test.sh test/spec/simd_i8x16_cmp.txt
-#./test.sh test/spec/i32.txt
-#./test.sh test/spec/traps.txt
-#./test.sh test/spec/memory.txt
-#./test.sh test/spec/func.txt
-#./test.sh test/spec/simd_conversions.txt
-#./test.sh test/spec/conversions.txt
-#./test.sh test/spec/simd_bit_shift.txt
-#./test.sh test/spec/relaxed-simd/i8x16_relaxed_swizzle.txt
-#./test.sh test/spec/relaxed-simd/relaxed_laneselect.txt
-#./test.sh test/spec/relaxed-simd/relaxed_min_max.txt
-#./test.sh test/spec/relaxed-simd/i16x8_relaxed_q15mulr_s.txt
-#./test.sh test/spec/relaxed-simd/i32x4_relaxed_trunc.txt
-#./test.sh test/spec/relaxed-simd/relaxed_madd_nmadd.txt
-#./test.sh test/spec/local_set.txt
-#./test.sh test/spec/f64_cmp.txt
-#./test.sh test/spec/memory_fill.txt
-#./test.sh test/spec/br.txt
-#./test.sh test/spec/f64.txt
-#./test.sh test/spec/simd_i32x4_arith.txt
-#./test.sh test/spec/table.txt
-#./test.sh test/spec/fac.txt
-#./test.sh test/spec/simd_i16x8_extmul_i8x16.txt
-#./test.sh test/spec/unreached-invalid.txt
-#./test.sh test/spec/simd_store64_lane.txt
-#./test.sh test/spec/simd_f64x2_arith.txt
-#./test.sh test/spec/start.txt
-#./test.sh test/spec/simd_i16x8_q15mulr_sat_s.txt
-#./test.sh test/spec/br_if.txt
-#./test.sh test/spec/elem.txt
-#./test.sh test/spec/binary-leb128.txt
-#./test.sh test/spec/simd_f32x4.txt
-#./test.sh test/spec/unwind.txt
-#./test.sh test/spec/block.txt
-#./test.sh test/spec/if.txt
-#./test.sh test/spec/int_exprs.txt
-#./test.sh test/spec/simd_f64x2_rounding.txt
-#./test.sh test/spec/simd_i64x2_cmp.txt
-#./test.sh test/spec/table_grow.txt
-#./test.sh test/spec/forward.txt
-#./test.sh test/spec/simd_i32x4_extadd_pairwise_i16x8.txt
-#./test.sh test/spec/table_init.txt
-#./test.sh test/spec/simd_bitwise.txt
-#./test.sh test/spec/f32_bitwise.txt
-#./test.sh test/spec/linking.txt
-#./test.sh test/spec/simd_boolean.txt
-#./test.sh test/spec/memory_copy.txt
-#./test.sh test/spec/simd_load16_lane.txt
-#./test.sh test/spec/f32_cmp.txt
-#./test.sh test/spec/call_indirect.txt
-#./test.sh test/spec/exception-handling/imports.txt
-#./test.sh test/spec/exception-handling/throw.txt
-#./test.sh test/spec/exception-handling/try_delegate.txt
-#./test.sh test/spec/exception-handling/tag.txt
-#./test.sh test/spec/exception-handling/try_catch.txt
-#./test.sh test/spec/exception-handling/exports.txt
-#./test.sh test/spec/exception-handling/rethrow.txt
-#./test.sh test/spec/exception-handling/binary.txt
-#./test.sh test/spec/simd_f32x4_pmin_pmax.txt
-#./test.sh test/spec/simd_i16x8_sat_arith.txt
-#./test.sh test/spec/switch.txt
-#./test.sh test/spec/table_size.txt
-#./test.sh test/spec/stack.txt
-#./test.sh test/spec/simd_i32x4_trunc_sat_f32x4.txt
-#./test.sh test/spec/func_ptrs.txt
-#./test.sh test/spec/simd_i32x4_dot_i16x8.txt
-#./test.sh test/spec/simd_int_to_int_extend.txt
-#./test.sh test/spec/data.txt
-#./test.sh test/spec/bulk.txt
-#./test.sh test/spec/call.txt
-#./test.sh test/spec/utf8-import-field.txt
-#./test.sh test/spec/local_tee.txt
-#./test.sh test/spec/binary.txt
-#./test.sh test/spectest-interp-error-count.txt
-#./test.sh test/spectest-interp-invalid-literal.txt
-#./test.sh test/roundtrip/invalid-br-var.txt
-#./test.sh test/roundtrip/memory-index64.txt
-#./test.sh test/roundtrip/label.txt
-#./test.sh test/roundtrip/inline-export-memory.txt
-#./test.sh test/roundtrip/invalid-local-index.txt
-#./test.sh test/roundtrip/reference-types.txt
-#./test.sh test/roundtrip/select-type.txt
-#./test.sh test/roundtrip/inline-export-multi.txt
-#./test.sh test/roundtrip/generate-tail-call.txt
-#./test.sh test/roundtrip/fold-load-store64.txt
-#./test.sh test/roundtrip/memory-max64.txt
-#./test.sh test/roundtrip/global-index.txt
-#./test.sh test/roundtrip/table-index.txt
-#./test.sh test/roundtrip/fold-block.txt
-#./test.sh test/roundtrip/apply-memory-names.txt
-#./test.sh test/roundtrip/memory-max.txt
-#./test.sh test/roundtrip/generate-if-label-names.txt
-#./test.sh test/roundtrip/inline-import-func.txt
-#./test.sh test/roundtrip/generate-local-names.txt
-#./test.sh test/roundtrip/debug-names-after-data.txt
-#./test.sh test/roundtrip/fold-try-delegate.txt
-#./test.sh test/roundtrip/table-init-index.txt
-#./test.sh test/roundtrip/fold-basic.txt
-#./test.sh test/roundtrip/fold-global-getset.txt
-#./test.sh test/roundtrip/generate-func-names.txt
-#./test.sh test/roundtrip/named-params.txt
-#./test.sh test/roundtrip/fold-tail-call.txt
-#./test.sh test/roundtrip/inline-import-tag.txt
-#./test.sh test/roundtrip/debug-import-names.txt
-#./test.sh test/roundtrip/fold-function-references.txt
-#./test.sh test/roundtrip/inline-export-tag.txt
-#./test.sh test/roundtrip/fold-unreachable.txt
-#./test.sh test/roundtrip/generate-from-export-name.txt
-#./test.sh test/roundtrip/inline-import-memory.txt
-#./test.sh test/roundtrip/generate-start-name.txt
-#./test.sh test/roundtrip/generate-existing-name.txt
-#./test.sh test/roundtrip/apply-global-names.txt
-#./test.sh test/roundtrip/fold-atomic-fence.txt
-#./test.sh test/roundtrip/memory-index.txt
-#./test.sh test/roundtrip/fold-callref.txt
-#./test.sh test/roundtrip/code-metadata.txt
-#./test.sh test/roundtrip/multi-value-block-type.txt
-#./test.sh test/roundtrip/inline-import-table.txt
-#./test.sh test/roundtrip/generate-global-names.txt
-#./test.sh test/roundtrip/elem-nonzero-table.txt
-#./test.sh test/roundtrip/generate-func-type-names.txt
-#./test.sh test/roundtrip/bulk-memory64.txt
-#./test.sh test/roundtrip/table-import-externref.txt
-#./test.sh test/roundtrip/rethrow.txt
-#./test.sh test/roundtrip/debug-names.txt
-#./test.sh test/roundtrip/named-locals.txt
-#./test.sh test/roundtrip/fold-local-getset.txt
-#./test.sh test/roundtrip/func-index.txt
-#./test.sh test/roundtrip/fold-reference-types.txt
-#./test.sh test/roundtrip/fold-multi.txt
-#./test.sh test/roundtrip/fold-call.txt
-#./test.sh test/roundtrip/table-copy-index.txt
-#./test.sh test/roundtrip/custom-sections.txt
-#./test.sh test/roundtrip/string-unicode-escape.txt
-#./test.sh test/roundtrip/simd.txt
-#./test.sh test/roundtrip/inline-import-global.txt
-#./test.sh test/roundtrip/fold-atomic.txt
-#./test.sh test/roundtrip/fold-block-labels.txt
-#./test.sh test/roundtrip/generate-label-names.txt
-#./test.sh test/roundtrip/bulk-memory.txt
-#./test.sh test/roundtrip/elem-declare.txt
-#./test.sh test/roundtrip/generate-from-import-name.txt
-#./test.sh test/roundtrip/generate-import-names.txt
-#./test.sh test/roundtrip/fold-nop.txt
-#./test.sh test/roundtrip/generate-some-names.txt
-#./test.sh test/roundtrip/fold-call-import-gen-names.txt
-#./test.sh test/roundtrip/inline-export-table.txt
-#./test.sh test/roundtrip/fold-simd.txt
-#./test.sh test/roundtrip/try-delegate.txt
-#./test.sh test/roundtrip/fold-try.txt
-#./test.sh test/roundtrip/fold-rethrow.txt
-#./test.sh test/roundtrip/fold-bulk-memory.txt
-#./test.sh test/roundtrip/fold-load-store.txt
-#./test.sh test/roundtrip/inline-export-global.txt
-#./test.sh test/roundtrip/fold-fac.txt
-#./test.sh test/roundtrip/generate-bulk-memory-names.txt
-#./test.sh test/roundtrip/inline-export-func.txt
-#./test.sh test/roundtrip/inline-export-func-name.txt
-#./test.sh test/roundtrip/fold-throw.txt
-#./test.sh test/roundtrip/generate-tag-names.txt
-#./test.sh test/roundtrip/inline-import-export.txt
-#./test.sh test/harness/wasm2c/simd_formatting.txt
-#./test.sh test/harness/wasm2c/stdin_file.txt
-#./test.sh test/harness/wasm2c/floating_point.txt
-#./test.sh test/wast2json/module-binary.txt
-#./test.sh test/spectest-interp-assert-failure.txt
-#./test.sh test/wasm2c/check-imports.txt
-#./test.sh test/wasm2c/bad-enable-feature.txt
-#./test.sh test/wasm2c/address-overflow.txt
-#./test.sh test/wasm2c/add.txt
-#./test.sh test/wasm2c/export-names.txt
-#./test.sh test/wasm2c/spec/unreached-valid.txt
-#./test.sh test/wasm2c/spec/simd_load64_lane.txt
-#./test.sh test/wasm2c/spec/imports.txt
-#./test.sh test/wasm2c/spec/memory_size.txt
-#./test.sh test/wasm2c/spec/float_exprs.txt
-#./test.sh test/wasm2c/spec/comments.txt
-#./test.sh test/wasm2c/spec/address.txt
-#./test.sh test/wasm2c/spec/memory_trap.txt
-#./test.sh test/wasm2c/spec/br_table.txt
-#./test.sh test/wasm2c/spec/local_get.txt
-#./test.sh test/wasm2c/spec/utf8-import-module.txt
-#./test.sh test/wasm2c/spec/memory64/address.txt
-#./test.sh test/wasm2c/spec/memory64/address64.txt
-#./test.sh test/wasm2c/spec/memory64/align64.txt
-#./test.sh test/wasm2c/spec/memory64/memory_redundancy64.txt
-#./test.sh test/wasm2c/spec/memory64/memory64.txt
-#./test.sh test/wasm2c/spec/memory64/endianness64.txt
-#./test.sh test/wasm2c/spec/memory64/memory.txt
-#./test.sh test/wasm2c/spec/memory64/binary-leb128.txt
-#./test.sh test/wasm2c/spec/memory64/memory_grow64.txt
-#./test.sh test/wasm2c/spec/memory64/load64.txt
-#./test.sh test/wasm2c/spec/memory64/memory_trap64.txt
-#./test.sh test/wasm2c/spec/memory64/binary.txt
-#./test.sh test/wasm2c/spec/memory64/float_memory64.txt
-#./test.sh test/wasm2c/spec/names.txt
-#./test.sh test/wasm2c/spec/simd_f64x2_pmin_pmax.txt
-#./test.sh test/wasm2c/spec/align.txt
-#./test.sh test/wasm2c/spec/simd_i32x4_trunc_sat_f64x2.txt
-#./test.sh test/wasm2c/spec/i64.txt
-#./test.sh test/wasm2c/spec/unreachable.txt
-#./test.sh test/wasm2c/spec/utf8-invalid-encoding.txt
-#./test.sh test/wasm2c/spec/simd_i8x16_arith2.txt
-#./test.sh test/wasm2c/spec/simd_f32x4_cmp.txt
-#./test.sh test/wasm2c/spec/float_misc.txt
-#./test.sh test/wasm2c/spec/simd_i64x2_arith.txt
-#./test.sh test/wasm2c/spec/f32.txt
-#./test.sh test/wasm2c/spec/simd_const.txt
-#./test.sh test/wasm2c/spec/simd_f64x2.txt
-#./test.sh test/wasm2c/spec/memory_grow.txt
-#./test.sh test/wasm2c/spec/ref_func.txt
-#./test.sh test/wasm2c/spec/memory_init.txt
-#./test.sh test/wasm2c/spec/simd_f32x4_arith.txt
-#./test.sh test/wasm2c/spec/simd_store32_lane.txt
-#./test.sh test/wasm2c/spec/table_get.txt
-#./test.sh test/wasm2c/spec/simd_i16x8_arith2.txt
-#./test.sh test/wasm2c/spec/inline-module.txt
-#./test.sh test/wasm2c/spec/skip-stack-guard-page.txt
-#./test.sh test/wasm2c/spec/table_copy.txt
-#./test.sh test/wasm2c/spec/simd_f32x4_rounding.txt
-#./test.sh test/wasm2c/spec/simd_store.txt
-#./test.sh test/wasm2c/spec/float_literals.txt
-#./test.sh test/wasm2c/spec/global.txt
-#./test.sh test/wasm2c/spec/memory_redundancy.txt
-#./test.sh test/wasm2c/spec/table-sub.txt
-#./test.sh test/wasm2c/spec/table_fill.txt
-#./test.sh test/wasm2c/spec/simd_linking.txt
-#./test.sh test/wasm2c/spec/simd_load_splat.txt
-#./test.sh test/wasm2c/spec/simd_load_zero.txt
-#./test.sh test/wasm2c/spec/simd_lane.txt
-#./test.sh test/wasm2c/spec/simd_i64x2_extmul_i32x4.txt
-#./test.sh test/wasm2c/spec/extended-const/global.txt
-#./test.sh test/wasm2c/spec/extended-const/elem.txt
-#./test.sh test/wasm2c/spec/extended-const/data.txt
-#./test.sh test/wasm2c/spec/load.txt
-#./test.sh test/wasm2c/spec/simd_i32x4_extmul_i16x8.txt
-#./test.sh test/wasm2c/spec/simd_align.txt
-#./test.sh test/wasm2c/spec/left-to-right.txt
-#./test.sh test/wasm2c/spec/simd_load8_lane.txt
-#./test.sh test/wasm2c/spec/simd_load_extend.txt
-#./test.sh test/wasm2c/spec/simd_load.txt
-#./test.sh test/wasm2c/spec/token.txt
-#./test.sh test/wasm2c/spec/simd_splat.txt
-#./test.sh test/wasm2c/spec/type.txt
-#./test.sh test/wasm2c/spec/custom.txt
-#./test.sh test/wasm2c/spec/simd_i16x8_extadd_pairwise_i8x16.txt
-#./test.sh test/wasm2c/spec/simd_i8x16_arith.txt
-#./test.sh test/wasm2c/spec/return.txt
-#./test.sh test/wasm2c/spec/tail-call/return_call_indirect.txt
-#./test.sh test/wasm2c/spec/tail-call/return_call.txt
-#./test.sh test/wasm2c/spec/int_literals.txt
-#./test.sh test/wasm2c/spec/simd_store16_lane.txt
-#./test.sh test/wasm2c/spec/tokens.txt
-#./test.sh test/wasm2c/spec/simd_i8x16_sat_arith.txt
-#./test.sh test/wasm2c/spec/ref_is_null.txt
-#./test.sh test/wasm2c/spec/const.txt
-#./test.sh test/wasm2c/spec/ref_null.txt
-#./test.sh test/wasm2c/spec/simd_i16x8_cmp.txt
-#./test.sh test/wasm2c/spec/f64_bitwise.txt
-#./test.sh test/wasm2c/spec/store.txt
-#./test.sh test/wasm2c/spec/endianness.txt
-#./test.sh test/wasm2c/spec/float_memory.txt
-#./test.sh test/wasm2c/spec/simd_i32x4_cmp.txt
-#./test.sh test/wasm2c/spec/exports.txt
-#./test.sh test/wasm2c/spec/multi-memory/imports.txt
-#./test.sh test/wasm2c/spec/multi-memory/memory_size.txt
-#./test.sh test/wasm2c/spec/multi-memory/linking1.txt
-#./test.sh test/wasm2c/spec/multi-memory/align0.txt
-#./test.sh test/wasm2c/spec/multi-memory/linking0.txt
-#./test.sh test/wasm2c/spec/multi-memory/memory_grow.txt
-#./test.sh test/wasm2c/spec/multi-memory/exports0.txt
-#./test.sh test/wasm2c/spec/multi-memory/linking2.txt
-#./test.sh test/wasm2c/spec/multi-memory/linking3.txt
-#./test.sh test/wasm2c/spec/multi-memory/memory_copy1.txt
-#./test.sh test/wasm2c/spec/multi-memory/memory_copy0.txt
-#./test.sh test/wasm2c/spec/multi-memory/load.txt
-#./test.sh test/wasm2c/spec/multi-memory/memory-multi.txt
-#./test.sh test/wasm2c/spec/multi-memory/traps0.txt
-#./test.sh test/wasm2c/spec/multi-memory/data_drop0.txt
-#./test.sh test/wasm2c/spec/multi-memory/store0.txt
-#./test.sh test/wasm2c/spec/multi-memory/store1.txt
-#./test.sh test/wasm2c/spec/multi-memory/store.txt
-#./test.sh test/wasm2c/spec/multi-memory/memory_size1.txt
-#./test.sh test/wasm2c/spec/multi-memory/imports1.txt
-#./test.sh test/wasm2c/spec/multi-memory/imports0.txt
-#./test.sh test/wasm2c/spec/multi-memory/memory_size0.txt
-#./test.sh test/wasm2c/spec/multi-memory/load2.txt
-#./test.sh test/wasm2c/spec/multi-memory/load0.txt
-#./test.sh test/wasm2c/spec/multi-memory/memory_size2.txt
-#./test.sh test/wasm2c/spec/multi-memory/memory_fill0.txt
-#./test.sh test/wasm2c/spec/multi-memory/imports2.txt
-#./test.sh test/wasm2c/spec/multi-memory/binary0.txt
-#./test.sh test/wasm2c/spec/multi-memory/imports3.txt
-#./test.sh test/wasm2c/spec/multi-memory/memory.txt
-#./test.sh test/wasm2c/spec/multi-memory/memory_size3.txt
-#./test.sh test/wasm2c/spec/multi-memory/load1.txt
-#./test.sh test/wasm2c/spec/multi-memory/memory_init0.txt
-#./test.sh test/wasm2c/spec/multi-memory/memory_trap1.txt
-#./test.sh test/wasm2c/spec/multi-memory/imports4.txt
-#./test.sh test/wasm2c/spec/multi-memory/simd_memory-multi.txt
-#./test.sh test/wasm2c/spec/multi-memory/memory_trap0.txt
-#./test.sh test/wasm2c/spec/multi-memory/address0.txt
-#./test.sh test/wasm2c/spec/multi-memory/data0.txt
-#./test.sh test/wasm2c/spec/multi-memory/data1.txt
-#./test.sh test/wasm2c/spec/multi-memory/address1.txt
-#./test.sh test/wasm2c/spec/multi-memory/float_memory0.txt
-#./test.sh test/wasm2c/spec/multi-memory/float_exprs0.txt
-#./test.sh test/wasm2c/spec/multi-memory/start0.txt
-#./test.sh test/wasm2c/spec/multi-memory/float_exprs1.txt
-#./test.sh test/wasm2c/spec/multi-memory/data.txt
-#./test.sh test/wasm2c/spec/multi-memory/binary.txt
-#./test.sh test/wasm2c/spec/table_set.txt
-#./test.sh test/wasm2c/spec/simd_load32_lane.txt
-#./test.sh test/wasm2c/spec/simd_i64x2_arith2.txt
-#./test.sh test/wasm2c/spec/labels.txt
-#./test.sh test/wasm2c/spec/select.txt
-#./test.sh test/wasm2c/spec/utf8-custom-section-id.txt
-#./test.sh test/wasm2c/spec/simd_store8_lane.txt
-#./test.sh test/wasm2c/spec/simd_i16x8_arith.txt
-#./test.sh test/wasm2c/spec/nop.txt
-#./test.sh test/wasm2c/spec/simd_address.txt
-#./test.sh test/wasm2c/spec/simd_i32x4_arith2.txt
-#./test.sh test/wasm2c/spec/simd_f64x2_cmp.txt
-#./test.sh test/wasm2c/spec/loop.txt
-#./test.sh test/wasm2c/spec/simd_i8x16_cmp.txt
-#./test.sh test/wasm2c/spec/i32.txt
-#./test.sh test/wasm2c/spec/traps.txt
-#./test.sh test/wasm2c/spec/threads/atomic.txt
-#./test.sh test/wasm2c/spec/memory.txt
-#./test.sh test/wasm2c/spec/func.txt
-#./test.sh test/wasm2c/spec/simd_conversions.txt
-#./test.sh test/wasm2c/spec/conversions.txt
-#./test.sh test/wasm2c/spec/simd_bit_shift.txt
-#./test.sh test/wasm2c/spec/local_set.txt
-#./test.sh test/wasm2c/spec/f64_cmp.txt
-#./test.sh test/wasm2c/spec/memory_fill.txt
-#./test.sh test/wasm2c/spec/br.txt
-#./test.sh test/wasm2c/spec/f64.txt
-#./test.sh test/wasm2c/spec/simd_i32x4_arith.txt
-#./test.sh test/wasm2c/spec/table.txt
-#./test.sh test/wasm2c/spec/fac.txt
-#./test.sh test/wasm2c/spec/simd_i16x8_extmul_i8x16.txt
-#./test.sh test/wasm2c/spec/unreached-invalid.txt
-#./test.sh test/wasm2c/spec/simd_store64_lane.txt
-#./test.sh test/wasm2c/spec/simd_f64x2_arith.txt
-#./test.sh test/wasm2c/spec/start.txt
-#./test.sh test/wasm2c/spec/simd_i16x8_q15mulr_sat_s.txt
-#./test.sh test/wasm2c/spec/br_if.txt
-#./test.sh test/wasm2c/spec/elem.txt
-#./test.sh test/wasm2c/spec/binary-leb128.txt
-#./test.sh test/wasm2c/spec/simd_f32x4.txt
-#./test.sh test/wasm2c/spec/unwind.txt
-#./test.sh test/wasm2c/spec/block.txt
-#./test.sh test/wasm2c/spec/if.txt
-#./test.sh test/wasm2c/spec/int_exprs.txt
-#./test.sh test/wasm2c/spec/simd_f64x2_rounding.txt
-#./test.sh test/wasm2c/spec/simd_i64x2_cmp.txt
-#./test.sh test/wasm2c/spec/table_grow.txt
-#./test.sh test/wasm2c/spec/forward.txt
-#./test.sh test/wasm2c/spec/simd_i32x4_extadd_pairwise_i16x8.txt
-#./test.sh test/wasm2c/spec/table_init.txt
-#./test.sh test/wasm2c/spec/simd_bitwise.txt
-#./test.sh test/wasm2c/spec/f32_bitwise.txt
-#./test.sh test/wasm2c/spec/linking.txt
-#./test.sh test/wasm2c/spec/simd_boolean.txt
-#./test.sh test/wasm2c/spec/memory_copy.txt
-#./test.sh test/wasm2c/spec/simd_load16_lane.txt
-#./test.sh test/wasm2c/spec/f32_cmp.txt
-#./test.sh test/wasm2c/spec/call_indirect.txt
-#./test.sh test/wasm2c/spec/exception-handling/imports.txt
-#./test.sh test/wasm2c/spec/exception-handling/throw.txt
-#./test.sh test/wasm2c/spec/exception-handling/try_delegate.txt
-#./test.sh test/wasm2c/spec/exception-handling/tag.txt
-#./test.sh test/wasm2c/spec/exception-handling/try_catch.txt
-#./test.sh test/wasm2c/spec/exception-handling/exports.txt
-#./test.sh test/wasm2c/spec/exception-handling/rethrow.txt
-#./test.sh test/wasm2c/spec/exception-handling/binary.txt
-#./test.sh test/wasm2c/spec/simd_f32x4_pmin_pmax.txt
-#./test.sh test/wasm2c/spec/simd_i16x8_sat_arith.txt
-#./test.sh test/wasm2c/spec/switch.txt
-#./test.sh test/wasm2c/spec/table_size.txt
-#./test.sh test/wasm2c/spec/stack.txt
-#./test.sh test/wasm2c/spec/simd_i32x4_trunc_sat_f32x4.txt
-#./test.sh test/wasm2c/spec/func_ptrs.txt
-#./test.sh test/wasm2c/spec/simd_i32x4_dot_i16x8.txt
-#./test.sh test/wasm2c/spec/simd_int_to_int_extend.txt
-#./test.sh test/wasm2c/spec/data.txt
-#./test.sh test/wasm2c/spec/bulk.txt
-#./test.sh test/wasm2c/spec/call.txt
-#./test.sh test/wasm2c/spec/utf8-import-field.txt
-#./test.sh test/wasm2c/spec/local_tee.txt
-#./test.sh test/wasm2c/spec/binary.txt
-#./test.sh test/wasm2c/duplicate-names.txt
-#./test.sh test/wasm2c/tail-calls.txt
-#./test.sh test/wasm2c/minimal.txt
-#./test.sh test/wasm2c/hello.txt
-#./test.sh test/wasm2c/spec-multi-output/memory_init.txt
-#./test.sh test/wasm2c/spec-multi-output/linking.txt
-#./test.sh test/wasm2c/spec-multi-output/exception-handling/try_catch.txt
-#./test.sh test/wasm2c/spec-multi-output/call.txt
-#./test.sh test/desugar/try.txt
-#./test.sh test/desugar/basic.txt
-#./test.sh test/desugar/implicit-func-type.txt
-#./test.sh test/desugar/locals.txt
-#./test.sh test/desugar/call_indirect.txt
-#./test.sh test/binary/bad-opcode-prefix.txt
-#./test.sh test/binary/bad-memory-init-max-size.txt
-#./test.sh test/binary/linking-section.txt
-#./test.sh test/binary/bad-interp-returncallindirect-invalid-sig.txt
-#./test.sh test/binary/bad-opcode.txt
-#./test.sh test/binary/bad-function-body-count.txt
-#./test.sh test/binary/bad-elem-flags.txt
-#./test.sh test/binary/bad-brtable-too-big.txt
-#./test.sh test/binary/bad-data-drop-no-data-count.txt
-#./test.sh test/binary/bad-memory-init-size.txt
-#./test.sh test/binary/names.txt
-#./test.sh test/binary/bad-table-limits-flag-is64.txt
-#./test.sh test/binary/bad-callindirect-invalid-sig.txt
-#./test.sh test/binary/bad-code-metadata-instance-count.txt
-#./test.sh test/binary/bad-linking-function-index.txt
-#./test.sh test/binary/bad-data-without-memory.txt
-#./test.sh test/binary/bad-subsection-unfinished.txt
-#./test.sh test/binary/bad-func-with-struct-type.txt
-#./test.sh test/binary/bad-linking-data-segment-index.txt
-#./test.sh test/binary/bad-tag-before-memory.txt
-#./test.sh test/binary/bad-table-limits-flag.txt
-#./test.sh test/binary/function-local-count-zero.txt
-#./test.sh test/binary/bad-duplicate-subsection.txt
-#./test.sh test/binary/bad-section-ends-early.txt
-#./test.sh test/binary/bad-memory-limits-flag-leb128.txt
-#./test.sh test/binary/bad-function-sig.txt
-#./test.sh test/binary/bad-start-func.txt
-#./test.sh test/binary/bad-logging-basic.txt
-#./test.sh test/binary/bad-magic.txt
-#./test.sh test/binary/bad-code-metadata-instance-out-of-order.txt
-#./test.sh test/binary/bad-alignment.txt
-#./test.sh test/binary/bad-memory-size-reserved.txt
-#./test.sh test/binary/bad-returncallindirect-invalid-sig.txt
-#./test.sh test/binary/bad-code-metadata-function-duplicate.txt
-#./test.sh test/binary/bad-duplicate-section.txt
-#./test.sh test/binary/bad-relocs.txt
-#./test.sh test/binary/bad-subsection-size.txt
-#./test.sh test/binary/bad-data-count-order-after-code.txt
-#./test.sh test/binary/duplicate-func-names.txt
-#./test.sh test/binary/bad-data-count-order-before-elem.txt
-#./test.sh test/binary/bad-names-duplicates.txt
-#./test.sh test/binary/bad-linking-global-index.txt
-#./test.sh test/binary/user-section.txt
-#./test.sh test/binary/dylink-section.txt
-#./test.sh test/binary/bad-call-indirect-reserved.txt
-#./test.sh test/binary/target-features-section.txt
-#./test.sh test/binary/bad-code-metadata-function-count.txt
-#./test.sh test/binary/bad-export-func.txt
-#./test.sh test/binary/bad-import-kind.txt
-#./test.sh test/binary/bad-names-out-of-order.txt
-#./test.sh test/binary/no-global-names.txt
-#./test.sh test/binary/bad-reloc-type.txt
-#./test.sh test/binary/bad-segment-no-memory.txt
-#./test.sh test/binary/bad-names-locals-out-of-order.txt
-#./test.sh test/binary/bad-code-metadata-function-out-of-order.txt
-#./test.sh test/binary/relocs.txt
-#./test.sh test/binary/bad-op-after-end.txt
-#./test.sh test/binary/bad-function-names-too-many.txt
-#./test.sh test/binary/bad-function-body-size.txt
-#./test.sh test/binary/bad-data-count-mismatch.txt
-#./test.sh test/binary/bad-memory-init-no-data-count.txt
-#./test.sh test/binary/bad-function-local-type.txt
-#./test.sh test/binary/bad-memory-limits-flag.txt
-#./test.sh test/binary/annotations-custom-sections.txt
-#./test.sh test/binary/ignore-custom-section-error-objdump.txt
-#./test.sh test/binary/bad-extra-end.txt
-#./test.sh test/binary/bad-linking-metadata.txt
-#./test.sh test/binary/basic.txt
-#./test.sh test/binary/code-metadata-section.txt
-#./test.sh test/binary/ignore-custom-section-error-wasm2wat.txt
-#./test.sh test/binary/bad-import-sig.txt
-#./test.sh test/binary/bad-multiple-catch-all.txt
-#./test.sh test/binary/bad-returncallindirect-reserved.txt
-#./test.sh test/binary/bad-duplicate-section-around-custom.txt
-#./test.sh test/binary/bad-typecheck-missing-drop.txt
-#./test.sh test/binary/bad-memory-grow-reserved.txt
-#./test.sh test/binary/bad-memory-limits-flag-is64.txt
-#./test.sh test/binary/bad-subsection-out-of-order.txt
-#./test.sh test/binary/bad-typecheck-fail.txt
-#./test.sh test/binary/bad-code-metadata-instance-duplicate.txt
-#./test.sh test/binary/bad-memory-limits-flag-shared.txt
-#./test.sh test/binary/bad-function-count-missing-code-section.txt
-#./test.sh test/binary/bad-memory-max-size.txt
-#./test.sh test/binary/dylink0-section.txt
-#./test.sh test/binary/no-names.txt
-#./test.sh test/binary/bad-version.txt
-#./test.sh test/binary/bad-names-function-locals-out-of-order.txt
-#./test.sh test/binary/bad-section-size-zero.txt
-#./test.sh test/binary/missing-code-section-empty-function-section.txt
-#./test.sh test/binary/bad-name-section-invalid-index.txt
-#./test.sh test/binary/bad-unfinished-section.txt
-#./test.sh test/binary/bad-name-section-location.txt
-#./test.sh test/binary/bad-returncall-invalid-func.txt
-#./test.sh test/binary/bad-data-invalid-memidx.txt
-#./test.sh test/binary/bad-function-param-type.txt
-#./test.sh test/binary/bad-data-size.txt
-#./test.sh test/binary/invalid-name.txt
-#./test.sh test/binary/bad-code-metadata-function-index.txt
-#./test.sh test/binary/bad-type-form.txt
-#./test.sh test/binary/missing-function-section-empty-code-section.txt
-#./test.sh test/binary/bad-too-many-locals.txt
-#./test.sh test/binary/bad-export-out-of-range.txt
-#./test.sh test/binary/bad-names-duplicate-locals.txt
-#./test.sh test/binary/duplicate-local-names.txt
-#./test.sh test/binary/bad-tag-after-global.txt
-#./test.sh test/binary/bad-linking-tag-index.txt
-#./test.sh test/binary/gen-wasm-parse-error.txt
-#./test.sh test/binary/bad-section-code-leb128.txt
-#./test.sh test/binary/bad-function-result-type.txt
-#./test.sh test/typecheck/bad-call-result-mismatch.txt
-#./test.sh test/typecheck/bad-atomic-type-mismatch.txt
-#./test.sh test/typecheck/bad-unary-type-mismatch.txt
-#./test.sh test/typecheck/bad-nested-br.txt
-#./test.sh test/typecheck/bad-call-type-mismatch.txt
-#./test.sh test/typecheck/bad-expr-if.txt
-#./test.sh test/typecheck/brtable-multi.txt
-#./test.sh test/typecheck/bad-callref-wrong-signature.txt
-#./test.sh test/typecheck/return-value.txt
-#./test.sh test/typecheck/nested-br.txt
-#./test.sh test/typecheck/brif-multi.txt
-#./test.sh test/typecheck/atomic-no-shared-memory.txt
-#./test.sh test/typecheck/bad-if-multi-mismatch.txt
-#./test.sh test/typecheck/bad-cast-type-mismatch.txt
-#./test.sh test/typecheck/bad-callref-null.txt
-#./test.sh test/typecheck/br-table-loop.txt
-#./test.sh test/typecheck/bad-reference-types-no-table.txt
-#./test.sh test/typecheck/return-drop-value.txt
-#./test.sh test/typecheck/bad-assertexception-type-mismatch.txt
-#./test.sh test/typecheck/if-value.txt
-#./test.sh test/typecheck/bad-callindirect-func-type-mismatch.txt
-#./test.sh test/typecheck/if-then-br.txt
-#./test.sh test/typecheck/bad-global-no-init-expr.txt
-#./test.sh test/typecheck/bad-global-type-mismatch.txt
-#./test.sh test/typecheck/bad-store-index-type-mismatch.txt
-#./test.sh test/typecheck/if-anyref.txt
-#./test.sh test/typecheck/bad-empty-catch.txt
-#./test.sh test/typecheck/bad-compare-type-mismatch-2.txt
-#./test.sh test/typecheck/nocheck.txt
-#./test.sh test/typecheck/bad-global-globalget-type-mismatch.txt
-#./test.sh test/typecheck/bad-callref-int32.txt
-#./test.sh test/typecheck/bad-compare-type-mismatch-1.txt
-#./test.sh test/typecheck/bad-returncall-type-mismatch.txt
-#./test.sh test/typecheck/bad-loop-multi-mismatch.txt
-#./test.sh test/typecheck/bad-delegate-depth.txt
-#./test.sh test/typecheck/bad-returncallindirect-no-table.txt
-#./test.sh test/typecheck/bad-localset-type-mismatch.txt
-#./test.sh test/typecheck/bad-bulk-memory-no-table.txt
-#./test.sh test/typecheck/bad-returncallindirect-type-mismatch.txt
-#./test.sh test/typecheck/bad-rethrow-depth.txt
-#./test.sh test/typecheck/bad-select-cond.txt
-#./test.sh test/typecheck/bad-assertreturn-invoke-type-mismatch.txt
-#./test.sh test/typecheck/rethrow.txt
-#./test.sh test/typecheck/bad-empty-catch-all.txt
-#./test.sh test/typecheck/bad-bulk-memory-type-mismatch.txt
-#./test.sh test/typecheck/bad-callimport-type-mismatch.txt
-#./test.sh test/typecheck/delegate.txt
-#./test.sh test/typecheck/return-drop-value-2.txt
-#./test.sh test/typecheck/bad-block-multi-mismatch.txt
-#./test.sh test/typecheck/bad-memory-grow-type-mismatch.txt
-#./test.sh test/typecheck/bad-load-type-mismatch.txt
-#./test.sh test/typecheck/bad-convert-type-mismatch.txt
-#./test.sh test/typecheck/label-redefinition.txt
-#./test.sh test/typecheck/bad-binary-type-mismatch-1.txt
-#./test.sh test/typecheck/bad-tag-results.txt
-#./test.sh test/typecheck/bad-if-type-mismatch.txt
-#./test.sh test/typecheck/bad-if-condition-type-mismatch.txt
-#./test.sh test/typecheck/bad-invoke-type-mismatch.txt
-#./test.sh test/typecheck/bad-rethrow-not-in-catch.txt
-#./test.sh test/typecheck/bad-simd-lane.txt
-#./test.sh test/typecheck/try-delegate.txt
-#./test.sh test/typecheck/bad-if-value-void.txt
-#./test.sh test/typecheck/bad-bulk-memory-no-memory.txt
-#./test.sh test/typecheck/bad-binary-type-mismatch-2.txt
-#./test.sh test/typecheck/bad-brtable-type-mismatch.txt
-#./test.sh test/typecheck/bad-select-value1.txt
-#./test.sh test/typecheck/bad-return-type-mismatch.txt
-#./test.sh test/typecheck/bad-callindirect-type-mismatch.txt
-#./test.sh test/typecheck/bad-select-value0.txt
-#./test.sh test/typecheck/bad-no-shared-memory.txt
-#./test.sh test/typecheck/bad-function-result-type-mismatch.txt
-#./test.sh test/typecheck/bad-bulk-memory-invalid-segment.txt
-#./test.sh test/typecheck/bad-assertreturn-type-mismatch.txt
-#./test.sh test/typecheck/br-multi.txt
+#test/parse/bad-single-semicolon.txt
+#test/parse/all-features.txt
+#test/parse/bad-string-unicode-escape-unterminated.txt
+#test/parse/export-mutable-global.txt
+#test/parse/bad-input-command.txt
+#test/parse/force-color.txt
+#test/parse/bad-crlf.txt
+#test/parse/bad-string-unicode-escape-short.txt
+#test/parse/string-escape.txt
+#test/parse/module/reference-types-disabled.txt
+#test/parse/module/bad-export-memory-undefined.txt
+#test/parse/module/struct-field-name.txt
+#test/parse/module/bad-table-too-many.txt
+#test/parse/module/import-global-globalget.txt
+#test/parse/module/struct-mut-field.txt
+#test/parse/module/bad-export-table-name-undefined.txt
+#test/parse/module/bad-export-func-too-many.txt
+#test/parse/module/bad-import-func-not-result.txt
+#test/parse/module/memory-segment-1.txt
+#test/parse/module/bad-start-not-void.txt
+#test/parse/module/elem-offset.txt
+#test/parse/module/bad-array-no-fields.txt
+#test/parse/module/export-memory.txt
+#test/parse/module/bad-memory-init-size.txt
+#test/parse/module/bad-import-func-one-string.txt
+#test/parse/module/tag.txt
+#test/parse/module/bad-start-not-nullary.txt
+#test/parse/module/array.txt
+#test/parse/module/bad-table-no-offset.txt
+#test/parse/module/bad-table-invalid-function.txt
+#test/parse/module/bad-import-memory-redefinition.txt
+#test/parse/module/bad-memory-shared-nomax.txt
+#test/parse/module/bad-export-func-no-string.txt
+#test/parse/module/memory-init-max-size.txt
+#test/parse/module/bad-memory-init-size-too-big.txt
+#test/parse/module/bad-elem-redefinition.txt
+#test/parse/module/bad-memory-max-less-than-init.txt
+#test/parse/module/bad-memory-max-size-too-big.txt
+#test/parse/module/table-elem-expr.txt
+#test/parse/module/global.txt
+#test/parse/module/bad-export-func-name-undefined.txt
+#test/parse/module/bad-import-func-not-param.txt
+#test/parse/module/import-func.txt
+#test/parse/module/bad-memory-init-size-negative.txt
+#test/parse/module/bad-module-no-close.txt
+#test/parse/module/module-empty.txt
+#test/parse/module/bad-export-global-name-undefined.txt
+#test/parse/module/bad-table-elem.txt
+#test/parse/module/import-func-type.txt
+#test/parse/module/table-named.txt
+#test/parse/module/bad-memory-segment-address.txt
+#test/parse/module/type.txt
+#test/parse/module/bad-import-global-redefinition.txt
+#test/parse/module/import-memory.txt
+#test/parse/module/import-memory-shared.txt
+#test/parse/module/bad-global-invalid-globalget.txt
+#test/parse/module/bad-export-table-undefined.txt
+#test/parse/module/memory-init-size.txt
+#test/parse/module/memory-segment-many.txt
+#test/parse/module/bad-memory-too-many.txt
+#test/parse/module/bad-global-invalid-expr.txt
+#test/parse/module/bad-start-too-many.txt
+#test/parse/module/export-func.txt
+#test/parse/module/type-multi-param.txt
+#test/parse/module/memory-shared.txt
+#test/parse/module/array-mut-field.txt
+#test/parse/module/export-tag.txt
+#test/parse/module/bad-export-func-name.txt
+#test/parse/module/bad-array-too-many-fields.txt
+#test/parse/module/struct.txt
+#test/parse/module/bad-module-with-assert.txt
+#test/parse/module/import-mutable-global.txt
+#test/parse/module/type-empty.txt
+#test/parse/module/table-elem-var.txt
+#test/parse/module/import-tag.txt
+#test/parse/module/bad-export-memory-name-undefined.txt
+#test/parse/module/struct-and-func.txt
+#test/parse/module/type-empty-param.txt
+#test/parse/module/import-table.txt
+#test/parse/module/bad-export-func-undefined.txt
+#test/parse/module/table.txt
+#test/parse/module/memory-segment-passive.txt
+#test/parse/module/import-global.txt
+#test/parse/module/bad-binary-module-magic.txt
+#test/parse/module/export-memory-multi.txt
+#test/parse/module/start.txt
+#test/parse/module/export-func-named.txt
+#test/parse/module/memory-segment-long.txt
+#test/parse/module/bad-func-redefinition.txt
+#test/parse/module/bad-module-multi.txt
+#test/parse/module/export-global.txt
+#test/parse/module/bad-memory-max-size.txt
+#test/parse/module/memory-segment-multi-string.txt
+#test/parse/module/start-named.txt
+#test/parse/module/bad-import-table-shared.txt
+#test/parse/module/type-no-param.txt
+#test/parse/module/export-func-multi.txt
+#test/parse/module/binary-module.txt
+#test/parse/module/bad-import-table-redefinition.txt
+#test/parse/module/bad-export-global-undefined.txt
+#test/parse/module/bad-import-func-redefinition.txt
+#test/parse/module/data-offset.txt
+#test/parse/module/bad-memory-max-size-negative.txt
+#test/parse/module/export-table.txt
+#test/parse/module/import-func-no-param.txt
+#test/parse/module/bad-export-func-empty.txt
+#test/parse/module/bad-memory-empty.txt
+#test/parse/line-comment.txt
+#test/parse/annotations.txt
+#test/parse/expr/if-then-br-named.txt
+#test/parse/expr/callref-internal-function.txt
+#test/parse/expr/bad-const-v128-i8x16-overflow.txt
+#test/parse/expr/bad-select-multi.txt
+#test/parse/expr/localset-index-mixed-named-unnamed.txt
+#test/parse/expr/call-named.txt
+#test/parse/expr/bad-simd-shuffle-nat-expected.txt
+#test/parse/expr/bad-globalget-undefined.txt
+#test/parse/expr/bad-simd-shuffle-lane-index-overflow.txt
+#test/parse/expr/throw.txt
+#test/parse/expr/callref-imported-function.txt
+#test/parse/expr/block-named.txt
+#test/parse/expr/globalset.txt
+#test/parse/expr/bad-globalget-name-undefined.txt
+#test/parse/expr/bad-const-v128-i32x4-overflow.txt
+#test/parse/expr/bad-const-type-i32-in-non-simd-const.txt
+#test/parse/expr/brtable-multi.txt
+#test/parse/expr/try-multi.txt
+#test/parse/expr/reference-types.txt
+#test/parse/expr/bad-if-mismatch-label.txt
+#test/parse/expr/localset-param-named.txt
+#test/parse/expr/localset.txt
+#test/parse/expr/bad-atomic-unnatural-align.txt
+#test/parse/expr/bulk-memory-disabled.txt
+#test/parse/expr/bad-load-align-not-pot.txt
+#test/parse/expr/unreachable.txt
+#test/parse/expr/memory-drop.txt
+#test/parse/expr/bad-store-offset-negative.txt
+#test/parse/expr/loop-named.txt
+#test/parse/expr/atomic.txt
+#test/parse/expr/if-then-else-br.txt
+#test/parse/expr/globalset-named.txt
+#test/parse/expr/tail-call-disabled.txt
+#test/parse/expr/bad-br-no-depth.txt
+#test/parse/expr/bad-const-i32-underflow.txt
+#test/parse/expr/memory-init64.txt
+#test/parse/expr/bad-const-v128-nat-overflow.txt
+#test/parse/expr/memory-copy64.txt
+#test/parse/expr/bad-unexpected.txt
+#test/parse/expr/return-void.txt
+#test/parse/expr/bad-try-delegate.txt
+#test/parse/expr/memory-fill.txt
+#test/parse/expr/bad-load-offset-negative.txt
+#test/parse/expr/bad-globalset-name-undefined.txt
+#test/parse/expr/bad-const-i32-overflow.txt
+#test/parse/expr/table-init.txt
+#test/parse/expr/table-grow.txt
+#test/parse/expr/bad-if-no-then.txt
+#test/parse/expr/loop-multi.txt
+#test/parse/expr/brif-named.txt
+#test/parse/expr/localset-index-after-param.txt
+#test/parse/expr/br-block.txt
+#test/parse/expr/if-then-br.txt
+#test/parse/expr/localget-param.txt
+#test/parse/expr/memory-copy.txt
+#test/parse/expr/bad-loop-mismatch-label.txt
+#test/parse/expr/bad-store-float.sign.txt
+#test/parse/expr/call-defined-later.txt
+#test/parse/expr/table-get.txt
+#test/parse/expr/bad-const-v128-type-i32-expected.txt
+#test/parse/expr/bad-loop-end-label.txt
+#test/parse/expr/if-then-else-br-named.txt
+#test/parse/expr/return-if.txt
+#test/parse/expr/bad-try-clause.txt
+#test/parse/expr/tail-call-named.txt
+#test/parse/expr/load.txt
+#test/parse/expr/localget-named.txt
+#test/parse/expr/bad-load-float-sign.txt
+#test/parse/expr/brtable.txt
+#test/parse/expr/cast.txt
+#test/parse/expr/bad-load-type.txt
+#test/parse/expr/bad-try-multiple-catch.txt
+#test/parse/expr/callimport-defined-later.txt
+#test/parse/expr/callimport-type.txt
+#test/parse/expr/unary-extend.txt
+#test/parse/expr/expr-brif.txt
+#test/parse/expr/return.txt
+#test/parse/expr/bad-globalset-undefined.txt
+#test/parse/expr/bad-br-defined-later.txt
+#test/parse/expr/bad-load-align.txt
+#test/parse/expr/const.txt
+#test/parse/expr/bad-convert-float-sign.txt
+#test/parse/expr/brtable-named.txt
+#test/parse/expr/expr-br.txt
+#test/parse/expr/bad-const-f64-nan-arith.txt
+#test/parse/expr/bad-localset-no-value.txt
+#test/parse/expr/bad-brtable-no-vars.txt
+#test/parse/expr/block-multi.txt
+#test/parse/expr/bad-br-name-undefined.txt
+#test/parse/expr/bad-store-align.txt
+#test/parse/expr/store.txt
+#test/parse/expr/call-name-prefix.txt
+#test/parse/expr/if-multi.txt
+#test/parse/expr/reference-types-named.txt
+#test/parse/expr/localget-param-named.txt
+#test/parse/expr/bad-block-mismatch-label.txt
+#test/parse/expr/if-return.txt
+#test/parse/expr/try.txt
+#test/parse/expr/localset-named.txt
+#test/parse/expr/localget-index-mixed-named-unnamed.txt
+#test/parse/expr/bad-localset-name-undefined.txt
+#test/parse/expr/select.txt
+#test/parse/expr/callimport-named.txt
+#test/parse/expr/bad-localset-undefined.txt
+#test/parse/expr/loop-multi-named.txt
+#test/parse/expr/local-tee.txt
+#test/parse/expr/bad-br-name.txt
+#test/parse/expr/bad-block-end-label.txt
+#test/parse/expr/rethrow.txt
+#test/parse/expr/nop.txt
+#test/parse/expr/localset-param.txt
+#test/parse/expr/bad-localget-name.txt
+#test/parse/expr/memory-size.txt
+#test/parse/expr/loop.txt
+#test/parse/expr/bad-store-align-not-pot.txt
+#test/parse/expr/memory-copy-differing-type.txt
+#test/parse/expr/br-named.txt
+#test/parse/expr/br-loop.txt
+#test/parse/expr/bad-simd-shuffle-lane-index-overflow2.txt
+#test/parse/expr/bad-const-i32-garbage.txt
+#test/parse/expr/load-offset.txt
+#test/parse/expr/memory-init.txt
+#test/parse/expr/simd.txt
+#test/parse/expr/memory-grow.txt
+#test/parse/expr/if-then-else-list.txt
+#test/parse/expr/callimport.txt
+#test/parse/expr/convert-sat.txt
+#test/parse/expr/bad-localget-name-undefined.txt
+#test/parse/expr/reference-types-call-indirect.txt
+#test/parse/expr/globalget.txt
+#test/parse/expr/convert.txt
+#test/parse/expr/table-copy.txt
+#test/parse/expr/bulk-memory-named64.txt
+#test/parse/expr/callindirect.txt
+#test/parse/expr/br.txt
+#test/parse/expr/if-multi-named.txt
+#test/parse/expr/localget.txt
+#test/parse/expr/bad-compare-one-expr.txt
+#test/parse/expr/tail-call.txt
+#test/parse/expr/bad-nop.txt
+#test/parse/expr/bad-simd-shuffle-not-enough-indices.txt
+#test/parse/expr/store64.txt
+#test/parse/expr/try-catch-all.txt
+#test/parse/expr/atomic64.txt
+#test/parse/expr/bad-if-end-label.txt
+#test/parse/expr/store-aligned.txt
+#test/parse/expr/block-return.txt
+#test/parse/expr/compare.txt
+#test/parse/expr/table-drop.txt
+#test/parse/expr/localget-index-after-param.txt
+#test/parse/expr/if-then-else.txt
+#test/parse/expr/bad-binary-one-expr.txt
+#test/parse/expr/bad-store-type.txt
+#test/parse/expr/block.txt
+#test/parse/expr/if.txt
+#test/parse/expr/bad-br-undefined.txt
+#test/parse/expr/bad-const-f32-trailing.txt
+#test/parse/expr/bad-const-f32-nan-arith.txt
+#test/parse/expr/memory-fill64.txt
+#test/parse/expr/atomic-align.txt
+#test/parse/expr/bad-convert-int-no-sign.txt
+#test/parse/expr/atomic-disabled.txt
+#test/parse/expr/unary.txt
+#test/parse/expr/load-aligned.txt
+#test/parse/expr/try-delegate.txt
+#test/parse/expr/bad-br-bad-depth.txt
+#test/parse/expr/bad-const-v128-i16x8-overflow.txt
+#test/parse/expr/drop.txt
+#test/parse/expr/bad-const-i32-trailing.txt
+#test/parse/expr/bad-const-i32-just-negative-sign.txt
+#test/parse/expr/brif.txt
+#test/parse/expr/bad-localget-undefined.txt
+#test/parse/expr/table-set.txt
+#test/parse/expr/return-block.txt
+#test/parse/expr/load64.txt
+#test/parse/expr/block-multi-named.txt
+#test/parse/expr/bulk-memory-named.txt
+#test/parse/expr/memory-grow64.txt
+#test/parse/expr/bad-localset-name.txt
+#test/parse/expr/bad-const-i64-overflow.txt
+#test/parse/expr/call.txt
+#test/parse/expr/bad-load-align-negative.txt
+#test/parse/expr/callindirect-named.txt
+#test/parse/expr/bad-load-align-misspelled.txt
+#test/parse/expr/bad-memory-copy-differing-type.txt
+#test/parse/expr/store-offset.txt
+#test/parse/expr/globalget-named.txt
+#test/parse/expr/binary.txt
+#test/parse/expr/bad-brtable-bad-depth.txt
+#test/parse/string-hex.txt
+#test/parse/assert/bad-assertreturn-unknown-function.txt
+#test/parse/assert/assert-return-arithmetic-nan.txt
+#test/parse/assert/bad-assert-before-module.txt
+#test/parse/assert/bad-invoke-too-few.txt
+#test/parse/assert/assertmalformed.txt
+#test/parse/assert/bad-assertreturn-too-many.txt
+#test/parse/assert/bad-invoke-no-module.txt
+#test/parse/assert/assert-return-canonical-nan.txt
+#test/parse/assert/invoke.txt
+#test/parse/assert/assertinvalid-binary-module.txt
+#test/parse/assert/bad-assertexception.txt
+#test/parse/assert/assertexception.txt
+#test/parse/assert/assertreturn.txt
+#test/parse/assert/assert-after-module.txt
+#test/parse/assert/bad-assertreturn-non-const.txt
+#test/parse/assert/bad-invoke-too-many.txt
+#test/parse/assert/assertinvalid.txt
+#test/parse/assert/bad-assertreturn-too-few.txt
+#test/parse/assert/bad-invoke-unknown-function.txt
+#test/parse/bad-string-unicode-escape-unexpected.txt
+#test/parse/nested-comments.txt
+#test/parse/bad-string-eof.txt
+#test/parse/bad-output-command.txt
+#test/parse/custom-sections.txt
+#test/parse/basic.txt
+#test/parse/bad-string-hex-escape.txt
+#test/parse/empty-file.txt
+#test/parse/bad-string-unicode-escape-unallowed.txt
+#test/parse/bad-annotations.txt
+#test/parse/bad-error-long-token.txt
+#test/parse/bad-error-long-line.txt
+#test/parse/bad-string-unicode-escape.txt
+#test/parse/bad-toplevel.txt
+#test/parse/bad-string-escape.txt
+#test/parse/bad-delegate-label.txt
+#test/parse/bad-string-unicode-escape-large.txt
+#test/parse/stdin.txt
+#test/parse/func/bad-param-binding.txt
+#test/parse/func/bad-local-redefinition.txt
+#test/parse/func/param-type-1.txt
+#test/parse/func/bad-sig-params-empty.txt
+#test/parse/func/param-type-2.txt
+#test/parse/func/bad-param-type-list.txt
+#test/parse/func/result.txt
+#test/parse/func/bad-sig-too-many-params.txt
+#test/parse/func/sig-match.txt
+#test/parse/func/bad-local-type.txt
+#test/parse/func/bad-result-type.txt
+#test/parse/func/bad-sig-too-few-params.txt
+#test/parse/func/bad-local-type-list.txt
+#test/parse/func/bad-sig-result-type-void.txt
+#test/parse/func/param-multi.txt
+#test/parse/func/bad-sig-param-type-mismatch.txt
+#test/parse/func/bad-local-name.txt
+#test/parse/func/bad-func-name.txt
+#test/parse/func/bad-param.txt
+#test/parse/func/no-space.txt
+#test/parse/func/bad-sig-result-type-mismatch.txt
+#test/parse/func/param-binding.txt
+#test/parse/func/result-empty.txt
+#test/parse/func/local-empty.txt
+#test/parse/func/bad-local-binding.txt
+#test/parse/func/local-multi.txt
+#test/parse/func/result-multi.txt
+#test/parse/func/bad-param-redefinition.txt
+#test/parse/func/func-named.txt
+#test/parse/func/sig.txt
+#test/parse/func/bad-sig-result-type-not-void.txt
+#test/parse/func/bad-local-binding-no-type.txt
+#test/parse/func/local.txt
+#test/parse/func/bad-param-name.txt
+#test/spec/unreached-valid.txt
+#test/spec/simd_load64_lane.txt
+#test/spec/imports.txt
+#test/spec/memory_size.txt
+#test/spec/float_exprs.txt
+#test/spec/comments.txt
+#test/spec/address.txt
+#test/spec/memory_trap.txt
+#test/spec/br_table.txt
+#test/spec/local_get.txt
+#test/spec/utf8-import-module.txt
+#test/spec/memory64/address.txt
+#test/spec/memory64/address64.txt
+#test/spec/memory64/align64.txt
+#test/spec/memory64/memory_redundancy64.txt
+#test/spec/memory64/memory64.txt
+#test/spec/memory64/endianness64.txt
+#test/spec/memory64/memory.txt
+#test/spec/memory64/binary-leb128.txt
+#test/spec/memory64/memory_grow64.txt
+#test/spec/memory64/load64.txt
+#test/spec/memory64/memory_trap64.txt
+#test/spec/memory64/binary.txt
+#test/spec/memory64/float_memory64.txt
+#test/spec/names.txt
+#test/spec/simd_f64x2_pmin_pmax.txt
+#test/spec/align.txt
+#test/spec/simd_i32x4_trunc_sat_f64x2.txt
+#test/spec/i64.txt
+#test/spec/unreachable.txt
+#test/spec/utf8-invalid-encoding.txt
+#test/spec/simd_i8x16_arith2.txt
+#test/spec/simd_f32x4_cmp.txt
+#test/spec/float_misc.txt
+#test/spec/simd_i64x2_arith.txt
+#test/spec/f32.txt
+#test/spec/simd_const.txt
+#test/spec/simd_f64x2.txt
+#test/spec/memory_grow.txt
+#test/spec/ref_func.txt
+#test/spec/memory_init.txt
+#test/spec/simd_f32x4_arith.txt
+#test/spec/simd_store32_lane.txt
+#test/spec/table_get.txt
+#test/spec/simd_i16x8_arith2.txt
+#test/spec/inline-module.txt
+#test/spec/skip-stack-guard-page.txt
+#test/spec/table_copy.txt
+#test/spec/simd_f32x4_rounding.txt
+#test/spec/simd_store.txt
+#test/spec/float_literals.txt
+#test/spec/global.txt
+#test/spec/memory_redundancy.txt
+#test/spec/table-sub.txt
+#test/spec/table_fill.txt
+#test/spec/simd_linking.txt
+#test/spec/simd_load_splat.txt
+#test/spec/simd_load_zero.txt
+#test/spec/simd_lane.txt
+#test/spec/simd_i64x2_extmul_i32x4.txt
+#test/spec/extended-const/global.txt
+#test/spec/extended-const/elem.txt
+#test/spec/extended-const/data.txt
+#test/spec/load.txt
+#test/spec/simd_i32x4_extmul_i16x8.txt
+#test/spec/simd_align.txt
+#test/spec/left-to-right.txt
+#test/spec/simd_load8_lane.txt
+#test/spec/simd_load_extend.txt
+#test/spec/simd_load.txt
+#test/spec/token.txt
+#test/spec/simd_splat.txt
+#test/spec/type.txt
+#test/spec/custom.txt
+#test/spec/simd_i16x8_extadd_pairwise_i8x16.txt
+#test/spec/simd_i8x16_arith.txt
+#test/spec/return.txt
+#test/spec/tail-call/return_call_indirect.txt
+#test/spec/tail-call/return_call.txt
+#test/spec/int_literals.txt
+#test/spec/simd_store16_lane.txt
+#test/spec/tokens.txt
+#test/spec/simd_i8x16_sat_arith.txt
+#test/spec/ref_is_null.txt
+#test/spec/const.txt
+#test/spec/ref_null.txt
+#test/spec/simd_i16x8_cmp.txt
+#test/spec/f64_bitwise.txt
+#test/spec/store.txt
+#test/spec/endianness.txt
+#test/spec/float_memory.txt
+#test/spec/simd_i32x4_cmp.txt
+#test/spec/exports.txt
+#test/spec/multi-memory/imports.txt
+#test/spec/multi-memory/memory_size.txt
+#test/spec/multi-memory/linking1.txt
+#test/spec/multi-memory/align0.txt
+#test/spec/multi-memory/linking0.txt
+#test/spec/multi-memory/memory_grow.txt
+#test/spec/multi-memory/exports0.txt
+#test/spec/multi-memory/linking2.txt
+#test/spec/multi-memory/linking3.txt
+#test/spec/multi-memory/memory_copy1.txt
+#test/spec/multi-memory/memory_copy0.txt
+#test/spec/multi-memory/load.txt
+#test/spec/multi-memory/memory-multi.txt
+#test/spec/multi-memory/traps0.txt
+#test/spec/multi-memory/data_drop0.txt
+#test/spec/multi-memory/store0.txt
+#test/spec/multi-memory/store1.txt
+#test/spec/multi-memory/store.txt
+#test/spec/multi-memory/memory_size1.txt
+#test/spec/multi-memory/imports1.txt
+#test/spec/multi-memory/imports0.txt
+#test/spec/multi-memory/memory_size0.txt
+#test/spec/multi-memory/load2.txt
+#test/spec/multi-memory/load0.txt
+#test/spec/multi-memory/memory_size2.txt
+#test/spec/multi-memory/memory_fill0.txt
+#test/spec/multi-memory/imports2.txt
+#test/spec/multi-memory/binary0.txt
+#test/spec/multi-memory/imports3.txt
+#test/spec/multi-memory/memory.txt
+#test/spec/multi-memory/memory_size3.txt
+#test/spec/multi-memory/load1.txt
+#test/spec/multi-memory/memory_init0.txt
+#test/spec/multi-memory/memory_trap1.txt
+#test/spec/multi-memory/imports4.txt
+#test/spec/multi-memory/simd_memory-multi.txt
+#test/spec/multi-memory/memory_trap0.txt
+#test/spec/multi-memory/address0.txt
+#test/spec/multi-memory/data0.txt
+#test/spec/multi-memory/data1.txt
+#test/spec/multi-memory/address1.txt
+#test/spec/multi-memory/float_memory0.txt
+#test/spec/multi-memory/float_exprs0.txt
+#test/spec/multi-memory/start0.txt
+#test/spec/multi-memory/float_exprs1.txt
+#test/spec/multi-memory/data.txt
+#test/spec/multi-memory/binary.txt
+#test/spec/table_set.txt
+#test/spec/simd_load32_lane.txt
+#test/spec/simd_i64x2_arith2.txt
+#test/spec/labels.txt
+#test/spec/select.txt
+#test/spec/utf8-custom-section-id.txt
+#test/spec/simd_store8_lane.txt
+#test/spec/simd_i16x8_arith.txt
+#test/spec/nop.txt
+#test/spec/simd_address.txt
+#test/spec/simd_i32x4_arith2.txt
+#test/spec/simd_f64x2_cmp.txt
+#test/spec/loop.txt
+#test/spec/simd_i8x16_cmp.txt
+#test/spec/i32.txt
+#test/spec/traps.txt
+#test/spec/memory.txt
+#test/spec/func.txt
+#test/spec/simd_conversions.txt
+#test/spec/conversions.txt
+#test/spec/simd_bit_shift.txt
+#test/spec/relaxed-simd/i8x16_relaxed_swizzle.txt
+#test/spec/relaxed-simd/relaxed_laneselect.txt
+#test/spec/relaxed-simd/relaxed_min_max.txt
+#test/spec/relaxed-simd/i16x8_relaxed_q15mulr_s.txt
+#test/spec/relaxed-simd/i32x4_relaxed_trunc.txt
+#test/spec/relaxed-simd/relaxed_madd_nmadd.txt
+#test/spec/local_set.txt
+#test/spec/f64_cmp.txt
+#test/spec/memory_fill.txt
+#test/spec/br.txt
+#test/spec/f64.txt
+#test/spec/simd_i32x4_arith.txt
+#test/spec/table.txt
+#test/spec/fac.txt
+#test/spec/simd_i16x8_extmul_i8x16.txt
+#test/spec/unreached-invalid.txt
+#test/spec/simd_store64_lane.txt
+#test/spec/simd_f64x2_arith.txt
+#test/spec/start.txt
+#test/spec/simd_i16x8_q15mulr_sat_s.txt
+#test/spec/br_if.txt
+#test/spec/elem.txt
+#test/spec/binary-leb128.txt
+#test/spec/simd_f32x4.txt
+#test/spec/unwind.txt
+#test/spec/block.txt
+#test/spec/if.txt
+#test/spec/int_exprs.txt
+#test/spec/simd_f64x2_rounding.txt
+#test/spec/simd_i64x2_cmp.txt
+#test/spec/table_grow.txt
+#test/spec/forward.txt
+#test/spec/simd_i32x4_extadd_pairwise_i16x8.txt
+#test/spec/table_init.txt
+#test/spec/simd_bitwise.txt
+#test/spec/f32_bitwise.txt
+#test/spec/linking.txt
+#test/spec/simd_boolean.txt
+#test/spec/memory_copy.txt
+#test/spec/simd_load16_lane.txt
+#test/spec/f32_cmp.txt
+#test/spec/call_indirect.txt
+#test/spec/exception-handling/imports.txt
+#test/spec/exception-handling/throw.txt
+#test/spec/exception-handling/try_delegate.txt
+#test/spec/exception-handling/tag.txt
+#test/spec/exception-handling/try_catch.txt
+#test/spec/exception-handling/exports.txt
+#test/spec/exception-handling/rethrow.txt
+#test/spec/exception-handling/binary.txt
+#test/spec/simd_f32x4_pmin_pmax.txt
+#test/spec/simd_i16x8_sat_arith.txt
+#test/spec/switch.txt
+#test/spec/table_size.txt
+#test/spec/stack.txt
+#test/spec/simd_i32x4_trunc_sat_f32x4.txt
+#test/spec/func_ptrs.txt
+#test/spec/simd_i32x4_dot_i16x8.txt
+#test/spec/simd_int_to_int_extend.txt
+#test/spec/data.txt
+#test/spec/bulk.txt
+#test/spec/call.txt
+#test/spec/utf8-import-field.txt
+#test/spec/local_tee.txt
+#test/spec/binary.txt
+#test/spectest-interp-error-count.txt
+#test/spectest-interp-invalid-literal.txt
+#test/roundtrip/invalid-br-var.txt
+#test/roundtrip/memory-index64.txt
+#test/roundtrip/label.txt
+#test/roundtrip/inline-export-memory.txt
+#test/roundtrip/invalid-local-index.txt
+#test/roundtrip/reference-types.txt
+#test/roundtrip/select-type.txt
+#test/roundtrip/inline-export-multi.txt
+#test/roundtrip/generate-tail-call.txt
+#test/roundtrip/fold-load-store64.txt
+#test/roundtrip/memory-max64.txt
+#test/roundtrip/global-index.txt
+#test/roundtrip/table-index.txt
+#test/roundtrip/fold-block.txt
+#test/roundtrip/apply-memory-names.txt
+#test/roundtrip/memory-max.txt
+#test/roundtrip/generate-if-label-names.txt
+#test/roundtrip/inline-import-func.txt
+#test/roundtrip/generate-local-names.txt
+#test/roundtrip/debug-names-after-data.txt
+#test/roundtrip/fold-try-delegate.txt
+#test/roundtrip/table-init-index.txt
+#test/roundtrip/fold-basic.txt
+#test/roundtrip/fold-global-getset.txt
+#test/roundtrip/generate-func-names.txt
+#test/roundtrip/named-params.txt
+#test/roundtrip/fold-tail-call.txt
+#test/roundtrip/inline-import-tag.txt
+#test/roundtrip/debug-import-names.txt
+#test/roundtrip/fold-function-references.txt
+#test/roundtrip/inline-export-tag.txt
+#test/roundtrip/fold-unreachable.txt
+#test/roundtrip/generate-from-export-name.txt
+#test/roundtrip/inline-import-memory.txt
+#test/roundtrip/generate-start-name.txt
+#test/roundtrip/generate-existing-name.txt
+#test/roundtrip/apply-global-names.txt
+#test/roundtrip/fold-atomic-fence.txt
+#test/roundtrip/memory-index.txt
+#test/roundtrip/fold-callref.txt
+#test/roundtrip/code-metadata.txt
+#test/roundtrip/multi-value-block-type.txt
+#test/roundtrip/inline-import-table.txt
+#test/roundtrip/generate-global-names.txt
+#test/roundtrip/elem-nonzero-table.txt
+#test/roundtrip/generate-func-type-names.txt
+#test/roundtrip/bulk-memory64.txt
+#test/roundtrip/table-import-externref.txt
+#test/roundtrip/rethrow.txt
+#test/roundtrip/debug-names.txt
+#test/roundtrip/named-locals.txt
+#test/roundtrip/fold-local-getset.txt
+#test/roundtrip/func-index.txt
+#test/roundtrip/fold-reference-types.txt
+#test/roundtrip/fold-multi.txt
+#test/roundtrip/fold-call.txt
+#test/roundtrip/table-copy-index.txt
+#test/roundtrip/custom-sections.txt
+#test/roundtrip/string-unicode-escape.txt
+#test/roundtrip/simd.txt
+#test/roundtrip/inline-import-global.txt
+#test/roundtrip/fold-atomic.txt
+#test/roundtrip/fold-block-labels.txt
+#test/roundtrip/generate-label-names.txt
+#test/roundtrip/bulk-memory.txt
+#test/roundtrip/elem-declare.txt
+#test/roundtrip/generate-from-import-name.txt
+#test/roundtrip/generate-import-names.txt
+#test/roundtrip/fold-nop.txt
+#test/roundtrip/generate-some-names.txt
+#test/roundtrip/fold-call-import-gen-names.txt
+#test/roundtrip/inline-export-table.txt
+#test/roundtrip/fold-simd.txt
+#test/roundtrip/try-delegate.txt
+#test/roundtrip/fold-try.txt
+#test/roundtrip/fold-rethrow.txt
+#test/roundtrip/fold-bulk-memory.txt
+#test/roundtrip/fold-load-store.txt
+#test/roundtrip/inline-export-global.txt
+#test/roundtrip/fold-fac.txt
+#test/roundtrip/generate-bulk-memory-names.txt
+#test/roundtrip/inline-export-func.txt
+#test/roundtrip/inline-export-func-name.txt
+#test/roundtrip/fold-throw.txt
+#test/roundtrip/generate-tag-names.txt
+#test/roundtrip/inline-import-export.txt
+#test/harness/wasm2c/simd_formatting.txt
+#test/harness/wasm2c/stdin_file.txt
+#test/harness/wasm2c/floating_point.txt
+#test/wast2json/module-binary.txt
+#test/spectest-interp-assert-failure.txt
+#test/wasm2c/check-imports.txt
+#test/wasm2c/bad-enable-feature.txt
+#test/wasm2c/address-overflow.txt
+#test/wasm2c/add.txt
+#test/wasm2c/export-names.txt
+#test/wasm2c/spec/unreached-valid.txt
+#test/wasm2c/spec/simd_load64_lane.txt
+#test/wasm2c/spec/imports.txt
+#test/wasm2c/spec/memory_size.txt
+#test/wasm2c/spec/float_exprs.txt
+#test/wasm2c/spec/comments.txt
+#test/wasm2c/spec/address.txt
+#test/wasm2c/spec/memory_trap.txt
+#test/wasm2c/spec/br_table.txt
+#test/wasm2c/spec/local_get.txt
+#test/wasm2c/spec/utf8-import-module.txt
+#test/wasm2c/spec/memory64/address.txt
+#test/wasm2c/spec/memory64/address64.txt
+#test/wasm2c/spec/memory64/align64.txt
+#test/wasm2c/spec/memory64/memory_redundancy64.txt
+#test/wasm2c/spec/memory64/memory64.txt
+#test/wasm2c/spec/memory64/endianness64.txt
+#test/wasm2c/spec/memory64/memory.txt
+#test/wasm2c/spec/memory64/binary-leb128.txt
+#test/wasm2c/spec/memory64/memory_grow64.txt
+#test/wasm2c/spec/memory64/load64.txt
+#test/wasm2c/spec/memory64/memory_trap64.txt
+#test/wasm2c/spec/memory64/binary.txt
+#test/wasm2c/spec/memory64/float_memory64.txt
+#test/wasm2c/spec/names.txt
+#test/wasm2c/spec/simd_f64x2_pmin_pmax.txt
+#test/wasm2c/spec/align.txt
+#test/wasm2c/spec/simd_i32x4_trunc_sat_f64x2.txt
+#test/wasm2c/spec/i64.txt
+#test/wasm2c/spec/unreachable.txt
+#test/wasm2c/spec/utf8-invalid-encoding.txt
+#test/wasm2c/spec/simd_i8x16_arith2.txt
+#test/wasm2c/spec/simd_f32x4_cmp.txt
+#test/wasm2c/spec/float_misc.txt
+#test/wasm2c/spec/simd_i64x2_arith.txt
+#test/wasm2c/spec/f32.txt
+#test/wasm2c/spec/simd_const.txt
+#test/wasm2c/spec/simd_f64x2.txt
+#test/wasm2c/spec/memory_grow.txt
+#test/wasm2c/spec/ref_func.txt
+#test/wasm2c/spec/memory_init.txt
+#test/wasm2c/spec/simd_f32x4_arith.txt
+#test/wasm2c/spec/simd_store32_lane.txt
+#test/wasm2c/spec/table_get.txt
+#test/wasm2c/spec/simd_i16x8_arith2.txt
+#test/wasm2c/spec/inline-module.txt
+#test/wasm2c/spec/skip-stack-guard-page.txt
+#test/wasm2c/spec/table_copy.txt
+#test/wasm2c/spec/simd_f32x4_rounding.txt
+#test/wasm2c/spec/simd_store.txt
+#test/wasm2c/spec/float_literals.txt
+#test/wasm2c/spec/global.txt
+#test/wasm2c/spec/memory_redundancy.txt
+#test/wasm2c/spec/table-sub.txt
+#test/wasm2c/spec/table_fill.txt
+#test/wasm2c/spec/simd_linking.txt
+#test/wasm2c/spec/simd_load_splat.txt
+#test/wasm2c/spec/simd_load_zero.txt
+#test/wasm2c/spec/simd_lane.txt
+#test/wasm2c/spec/simd_i64x2_extmul_i32x4.txt
+#test/wasm2c/spec/extended-const/global.txt
+#test/wasm2c/spec/extended-const/elem.txt
+#test/wasm2c/spec/extended-const/data.txt
+#test/wasm2c/spec/load.txt
+#test/wasm2c/spec/simd_i32x4_extmul_i16x8.txt
+#test/wasm2c/spec/simd_align.txt
+#test/wasm2c/spec/left-to-right.txt
+#test/wasm2c/spec/simd_load8_lane.txt
+#test/wasm2c/spec/simd_load_extend.txt
+#test/wasm2c/spec/simd_load.txt
+#test/wasm2c/spec/token.txt
+#test/wasm2c/spec/simd_splat.txt
+#test/wasm2c/spec/type.txt
+#test/wasm2c/spec/custom.txt
+#test/wasm2c/spec/simd_i16x8_extadd_pairwise_i8x16.txt
+#test/wasm2c/spec/simd_i8x16_arith.txt
+#test/wasm2c/spec/return.txt
+#test/wasm2c/spec/tail-call/return_call_indirect.txt
+#test/wasm2c/spec/tail-call/return_call.txt
+#test/wasm2c/spec/int_literals.txt
+#test/wasm2c/spec/simd_store16_lane.txt
+#test/wasm2c/spec/tokens.txt
+#test/wasm2c/spec/simd_i8x16_sat_arith.txt
+#test/wasm2c/spec/ref_is_null.txt
+#test/wasm2c/spec/const.txt
+#test/wasm2c/spec/ref_null.txt
+#test/wasm2c/spec/simd_i16x8_cmp.txt
+#test/wasm2c/spec/f64_bitwise.txt
+#test/wasm2c/spec/store.txt
+#test/wasm2c/spec/endianness.txt
+#test/wasm2c/spec/float_memory.txt
+#test/wasm2c/spec/simd_i32x4_cmp.txt
+#test/wasm2c/spec/exports.txt
+#test/wasm2c/spec/multi-memory/imports.txt
+#test/wasm2c/spec/multi-memory/memory_size.txt
+#test/wasm2c/spec/multi-memory/linking1.txt
+#test/wasm2c/spec/multi-memory/align0.txt
+#test/wasm2c/spec/multi-memory/linking0.txt
+#test/wasm2c/spec/multi-memory/memory_grow.txt
+#test/wasm2c/spec/multi-memory/exports0.txt
+#test/wasm2c/spec/multi-memory/linking2.txt
+#test/wasm2c/spec/multi-memory/linking3.txt
+#test/wasm2c/spec/multi-memory/memory_copy1.txt
+#test/wasm2c/spec/multi-memory/memory_copy0.txt
+#test/wasm2c/spec/multi-memory/load.txt
+#test/wasm2c/spec/multi-memory/memory-multi.txt
+#test/wasm2c/spec/multi-memory/traps0.txt
+#test/wasm2c/spec/multi-memory/data_drop0.txt
+#test/wasm2c/spec/multi-memory/store0.txt
+#test/wasm2c/spec/multi-memory/store1.txt
+#test/wasm2c/spec/multi-memory/store.txt
+#test/wasm2c/spec/multi-memory/memory_size1.txt
+#test/wasm2c/spec/multi-memory/imports1.txt
+#test/wasm2c/spec/multi-memory/imports0.txt
+#test/wasm2c/spec/multi-memory/memory_size0.txt
+#test/wasm2c/spec/multi-memory/load2.txt
+#test/wasm2c/spec/multi-memory/load0.txt
+#test/wasm2c/spec/multi-memory/memory_size2.txt
+#test/wasm2c/spec/multi-memory/memory_fill0.txt
+#test/wasm2c/spec/multi-memory/imports2.txt
+#test/wasm2c/spec/multi-memory/binary0.txt
+#test/wasm2c/spec/multi-memory/imports3.txt
+#test/wasm2c/spec/multi-memory/memory.txt
+#test/wasm2c/spec/multi-memory/memory_size3.txt
+#test/wasm2c/spec/multi-memory/load1.txt
+#test/wasm2c/spec/multi-memory/memory_init0.txt
+#test/wasm2c/spec/multi-memory/memory_trap1.txt
+#test/wasm2c/spec/multi-memory/imports4.txt
+#test/wasm2c/spec/multi-memory/simd_memory-multi.txt
+#test/wasm2c/spec/multi-memory/memory_trap0.txt
+#test/wasm2c/spec/multi-memory/address0.txt
+#test/wasm2c/spec/multi-memory/data0.txt
+#test/wasm2c/spec/multi-memory/data1.txt
+#test/wasm2c/spec/multi-memory/address1.txt
+#test/wasm2c/spec/multi-memory/float_memory0.txt
+#test/wasm2c/spec/multi-memory/float_exprs0.txt
+#test/wasm2c/spec/multi-memory/start0.txt
+#test/wasm2c/spec/multi-memory/float_exprs1.txt
+#test/wasm2c/spec/multi-memory/data.txt
+#test/wasm2c/spec/multi-memory/binary.txt
+#test/wasm2c/spec/table_set.txt
+#test/wasm2c/spec/simd_load32_lane.txt
+#test/wasm2c/spec/simd_i64x2_arith2.txt
+#test/wasm2c/spec/labels.txt
+#test/wasm2c/spec/select.txt
+#test/wasm2c/spec/utf8-custom-section-id.txt
+#test/wasm2c/spec/simd_store8_lane.txt
+#test/wasm2c/spec/simd_i16x8_arith.txt
+#test/wasm2c/spec/nop.txt
+#test/wasm2c/spec/simd_address.txt
+#test/wasm2c/spec/simd_i32x4_arith2.txt
+#test/wasm2c/spec/simd_f64x2_cmp.txt
+#test/wasm2c/spec/loop.txt
+#test/wasm2c/spec/simd_i8x16_cmp.txt
+#test/wasm2c/spec/i32.txt
+#test/wasm2c/spec/traps.txt
+#test/wasm2c/spec/threads/atomic.txt
+#test/wasm2c/spec/memory.txt
+#test/wasm2c/spec/func.txt
+#test/wasm2c/spec/simd_conversions.txt
+#test/wasm2c/spec/conversions.txt
+#test/wasm2c/spec/simd_bit_shift.txt
+#test/wasm2c/spec/local_set.txt
+#test/wasm2c/spec/f64_cmp.txt
+#test/wasm2c/spec/memory_fill.txt
+#test/wasm2c/spec/br.txt
+#test/wasm2c/spec/f64.txt
+#test/wasm2c/spec/simd_i32x4_arith.txt
+#test/wasm2c/spec/table.txt
+#test/wasm2c/spec/fac.txt
+#test/wasm2c/spec/simd_i16x8_extmul_i8x16.txt
+#test/wasm2c/spec/unreached-invalid.txt
+#test/wasm2c/spec/simd_store64_lane.txt
+#test/wasm2c/spec/simd_f64x2_arith.txt
+#test/wasm2c/spec/start.txt
+#test/wasm2c/spec/simd_i16x8_q15mulr_sat_s.txt
+#test/wasm2c/spec/br_if.txt
+#test/wasm2c/spec/elem.txt
+#test/wasm2c/spec/binary-leb128.txt
+#test/wasm2c/spec/simd_f32x4.txt
+#test/wasm2c/spec/unwind.txt
+#test/wasm2c/spec/block.txt
+#test/wasm2c/spec/if.txt
+#test/wasm2c/spec/int_exprs.txt
+#test/wasm2c/spec/simd_f64x2_rounding.txt
+#test/wasm2c/spec/simd_i64x2_cmp.txt
+#test/wasm2c/spec/table_grow.txt
+#test/wasm2c/spec/forward.txt
+#test/wasm2c/spec/simd_i32x4_extadd_pairwise_i16x8.txt
+#test/wasm2c/spec/table_init.txt
+#test/wasm2c/spec/simd_bitwise.txt
+#test/wasm2c/spec/f32_bitwise.txt
+#test/wasm2c/spec/linking.txt
+#test/wasm2c/spec/simd_boolean.txt
+#test/wasm2c/spec/memory_copy.txt
+#test/wasm2c/spec/simd_load16_lane.txt
+#test/wasm2c/spec/f32_cmp.txt
+#test/wasm2c/spec/call_indirect.txt
+#test/wasm2c/spec/exception-handling/imports.txt
+#test/wasm2c/spec/exception-handling/throw.txt
+#test/wasm2c/spec/exception-handling/try_delegate.txt
+#test/wasm2c/spec/exception-handling/tag.txt
+#test/wasm2c/spec/exception-handling/try_catch.txt
+#test/wasm2c/spec/exception-handling/exports.txt
+#test/wasm2c/spec/exception-handling/rethrow.txt
+#test/wasm2c/spec/exception-handling/binary.txt
+#test/wasm2c/spec/simd_f32x4_pmin_pmax.txt
+#test/wasm2c/spec/simd_i16x8_sat_arith.txt
+#test/wasm2c/spec/switch.txt
+#test/wasm2c/spec/table_size.txt
+#test/wasm2c/spec/stack.txt
+#test/wasm2c/spec/simd_i32x4_trunc_sat_f32x4.txt
+#test/wasm2c/spec/func_ptrs.txt
+#test/wasm2c/spec/simd_i32x4_dot_i16x8.txt
+#test/wasm2c/spec/simd_int_to_int_extend.txt
+#test/wasm2c/spec/data.txt
+#test/wasm2c/spec/bulk.txt
+#test/wasm2c/spec/call.txt
+#test/wasm2c/spec/utf8-import-field.txt
+#test/wasm2c/spec/local_tee.txt
+#test/wasm2c/spec/binary.txt
+#test/wasm2c/duplicate-names.txt
+#test/wasm2c/tail-calls.txt
+#test/wasm2c/minimal.txt
+#test/wasm2c/hello.txt
+#test/wasm2c/spec-multi-output/memory_init.txt
+#test/wasm2c/spec-multi-output/linking.txt
+#test/wasm2c/spec-multi-output/exception-handling/try_catch.txt
+#test/wasm2c/spec-multi-output/call.txt
+#test/desugar/try.txt
+#test/desugar/basic.txt
+#test/desugar/implicit-func-type.txt
+#test/desugar/locals.txt
+#test/desugar/call_indirect.txt
+#test/binary/bad-opcode-prefix.txt
+#test/binary/bad-memory-init-max-size.txt
+#test/binary/linking-section.txt
+#test/binary/bad-interp-returncallindirect-invalid-sig.txt
+#test/binary/bad-opcode.txt
+#test/binary/bad-function-body-count.txt
+#test/binary/bad-elem-flags.txt
+#test/binary/bad-brtable-too-big.txt
+#test/binary/bad-data-drop-no-data-count.txt
+#test/binary/bad-memory-init-size.txt
+#test/binary/names.txt
+#test/binary/bad-table-limits-flag-is64.txt
+#test/binary/bad-callindirect-invalid-sig.txt
+#test/binary/bad-code-metadata-instance-count.txt
+#test/binary/bad-linking-function-index.txt
+#test/binary/bad-data-without-memory.txt
+#test/binary/bad-subsection-unfinished.txt
+#test/binary/bad-func-with-struct-type.txt
+#test/binary/bad-linking-data-segment-index.txt
+#test/binary/bad-tag-before-memory.txt
+#test/binary/bad-table-limits-flag.txt
+#test/binary/function-local-count-zero.txt
+#test/binary/bad-duplicate-subsection.txt
+#test/binary/bad-section-ends-early.txt
+#test/binary/bad-memory-limits-flag-leb128.txt
+#test/binary/bad-function-sig.txt
+#test/binary/bad-start-func.txt
+#test/binary/bad-logging-basic.txt
+#test/binary/bad-magic.txt
+#test/binary/bad-code-metadata-instance-out-of-order.txt
+#test/binary/bad-alignment.txt
+#test/binary/bad-memory-size-reserved.txt
+#test/binary/bad-returncallindirect-invalid-sig.txt
+#test/binary/bad-code-metadata-function-duplicate.txt
+#test/binary/bad-duplicate-section.txt
+#test/binary/bad-relocs.txt
+#test/binary/bad-subsection-size.txt
+#test/binary/bad-data-count-order-after-code.txt
+#test/binary/duplicate-func-names.txt
+#test/binary/bad-data-count-order-before-elem.txt
+#test/binary/bad-names-duplicates.txt
+#test/binary/bad-linking-global-index.txt
+#test/binary/user-section.txt
+#test/binary/dylink-section.txt
+#test/binary/bad-call-indirect-reserved.txt
+#test/binary/target-features-section.txt
+#test/binary/bad-code-metadata-function-count.txt
+#test/binary/bad-export-func.txt
+#test/binary/bad-import-kind.txt
+#test/binary/bad-names-out-of-order.txt
+#test/binary/no-global-names.txt
+#test/binary/bad-reloc-type.txt
+#test/binary/bad-segment-no-memory.txt
+#test/binary/bad-names-locals-out-of-order.txt
+#test/binary/bad-code-metadata-function-out-of-order.txt
+#test/binary/relocs.txt
+#test/binary/bad-op-after-end.txt
+#test/binary/bad-function-names-too-many.txt
+#test/binary/bad-function-body-size.txt
+#test/binary/bad-data-count-mismatch.txt
+#test/binary/bad-memory-init-no-data-count.txt
+#test/binary/bad-function-local-type.txt
+#test/binary/bad-memory-limits-flag.txt
+#test/binary/annotations-custom-sections.txt
+#test/binary/ignore-custom-section-error-objdump.txt
+#test/binary/bad-extra-end.txt
+#test/binary/bad-linking-metadata.txt
+#test/binary/basic.txt
+#test/binary/code-metadata-section.txt
+#test/binary/ignore-custom-section-error-wasm2wat.txt
+#test/binary/bad-import-sig.txt
+#test/binary/bad-multiple-catch-all.txt
+#test/binary/bad-returncallindirect-reserved.txt
+#test/binary/bad-duplicate-section-around-custom.txt
+#test/binary/bad-typecheck-missing-drop.txt
+#test/binary/bad-memory-grow-reserved.txt
+#test/binary/bad-memory-limits-flag-is64.txt
+#test/binary/bad-subsection-out-of-order.txt
+#test/binary/bad-typecheck-fail.txt
+#test/binary/bad-code-metadata-instance-duplicate.txt
+#test/binary/bad-memory-limits-flag-shared.txt
+#test/binary/bad-function-count-missing-code-section.txt
+#test/binary/bad-memory-max-size.txt
+#test/binary/dylink0-section.txt
+#test/binary/no-names.txt
+#test/binary/bad-version.txt
+#test/binary/bad-names-function-locals-out-of-order.txt
+#test/binary/bad-section-size-zero.txt
+#test/binary/missing-code-section-empty-function-section.txt
+#test/binary/bad-name-section-invalid-index.txt
+#test/binary/bad-unfinished-section.txt
+#test/binary/bad-name-section-location.txt
+#test/binary/bad-returncall-invalid-func.txt
+#test/binary/bad-data-invalid-memidx.txt
+#test/binary/bad-function-param-type.txt
+#test/binary/bad-data-size.txt
+#test/binary/invalid-name.txt
+#test/binary/bad-code-metadata-function-index.txt
+#test/binary/bad-type-form.txt
+#test/binary/missing-function-section-empty-code-section.txt
+#test/binary/bad-too-many-locals.txt
+#test/binary/bad-export-out-of-range.txt
+#test/binary/bad-names-duplicate-locals.txt
+#test/binary/duplicate-local-names.txt
+#test/binary/bad-tag-after-global.txt
+#test/binary/bad-linking-tag-index.txt
+#test/binary/gen-wasm-parse-error.txt
+#test/binary/bad-section-code-leb128.txt
+#test/binary/bad-function-result-type.txt
+#test/typecheck/bad-call-result-mismatch.txt
+#test/typecheck/bad-atomic-type-mismatch.txt
+#test/typecheck/bad-unary-type-mismatch.txt
+#test/typecheck/bad-nested-br.txt
+#test/typecheck/bad-call-type-mismatch.txt
+#test/typecheck/bad-expr-if.txt
+#test/typecheck/brtable-multi.txt
+#test/typecheck/bad-callref-wrong-signature.txt
+#test/typecheck/return-value.txt
+#test/typecheck/nested-br.txt
+#test/typecheck/brif-multi.txt
+#test/typecheck/atomic-no-shared-memory.txt
+#test/typecheck/bad-if-multi-mismatch.txt
+#test/typecheck/bad-cast-type-mismatch.txt
+#test/typecheck/bad-callref-null.txt
+#test/typecheck/br-table-loop.txt
+#test/typecheck/bad-reference-types-no-table.txt
+#test/typecheck/return-drop-value.txt
+#test/typecheck/bad-assertexception-type-mismatch.txt
+#test/typecheck/if-value.txt
+#test/typecheck/bad-callindirect-func-type-mismatch.txt
+#test/typecheck/if-then-br.txt
+#test/typecheck/bad-global-no-init-expr.txt
+#test/typecheck/bad-global-type-mismatch.txt
+#test/typecheck/bad-store-index-type-mismatch.txt
+#test/typecheck/if-anyref.txt
+#test/typecheck/bad-empty-catch.txt
+#test/typecheck/bad-compare-type-mismatch-2.txt
+#test/typecheck/nocheck.txt
+#test/typecheck/bad-global-globalget-type-mismatch.txt
+#test/typecheck/bad-callref-int32.txt
+#test/typecheck/bad-compare-type-mismatch-1.txt
+#test/typecheck/bad-returncall-type-mismatch.txt
+#test/typecheck/bad-loop-multi-mismatch.txt
+#test/typecheck/bad-delegate-depth.txt
+#test/typecheck/bad-returncallindirect-no-table.txt
+#test/typecheck/bad-localset-type-mismatch.txt
+#test/typecheck/bad-bulk-memory-no-table.txt
+#test/typecheck/bad-returncallindirect-type-mismatch.txt
+#test/typecheck/bad-rethrow-depth.txt
+#test/typecheck/bad-select-cond.txt
+#test/typecheck/bad-assertreturn-invoke-type-mismatch.txt
+#test/typecheck/rethrow.txt
+#test/typecheck/bad-empty-catch-all.txt
+#test/typecheck/bad-bulk-memory-type-mismatch.txt
+#test/typecheck/bad-callimport-type-mismatch.txt
+#test/typecheck/delegate.txt
+#test/typecheck/return-drop-value-2.txt
+#test/typecheck/bad-block-multi-mismatch.txt
+#test/typecheck/bad-memory-grow-type-mismatch.txt
+#test/typecheck/bad-load-type-mismatch.txt
+#test/typecheck/bad-convert-type-mismatch.txt
+#test/typecheck/label-redefinition.txt
+#test/typecheck/bad-binary-type-mismatch-1.txt
+#test/typecheck/bad-tag-results.txt
+#test/typecheck/bad-if-type-mismatch.txt
+#test/typecheck/bad-if-condition-type-mismatch.txt
+#test/typecheck/bad-invoke-type-mismatch.txt
+#test/typecheck/bad-rethrow-not-in-catch.txt
+#test/typecheck/bad-simd-lane.txt
+#test/typecheck/try-delegate.txt
+#test/typecheck/bad-if-value-void.txt
+#test/typecheck/bad-bulk-memory-no-memory.txt
+#test/typecheck/bad-binary-type-mismatch-2.txt
+#test/typecheck/bad-brtable-type-mismatch.txt
+#test/typecheck/bad-select-value1.txt
+#test/typecheck/bad-return-type-mismatch.txt
+#test/typecheck/bad-callindirect-type-mismatch.txt
+#test/typecheck/bad-select-value0.txt
+#test/typecheck/bad-no-shared-memory.txt
+#test/typecheck/bad-function-result-type-mismatch.txt
+#test/typecheck/bad-bulk-memory-invalid-segment.txt
+#test/typecheck/bad-assertreturn-type-mismatch.txt
+#test/typecheck/br-multi.txt
 
-#./test.sh test/stats/immediates.txt
-#./test.sh test/stats/basic.txt
-#./test.sh test/stats/cutoff.txt
-#./test.sh test/two-commands.txt
+#test/stats/immediates.txt
+#test/stats/basic.txt
+#test/stats/cutoff.txt
+#test/two-commands.txt
 
 # Skip these because WABT's WASI support is incomplete.
-#./test.sh test/wasi/empty.txt
-#./test.sh test/wasi/oob_trap.txt
-#./test.sh test/wasi/write_stdout.txt
-#./test.sh test/wasi/clock.txt
-#./test.sh test/wasi/exit.txt
+#test/wasi/empty.txt
+#test/wasi/oob_trap.txt
+#test/wasi/write_stdout.txt
+#test/wasi/clock.txt
+#test/wasi/exit.txt
 
 # Skip these because our CLI tools have potentially different usage text.
-#./test.sh test/help/wasm-interp.txt
-#./test.sh test/help/wat2wasm.txt
-#./test.sh test/help/wasm-validate.txt
-#./test.sh test/help/wasm-objdump.txt
-#./test.sh test/help/wasm2wat.txt
-#./test.sh test/help/wasm-stats.txt
-#./test.sh test/help/wat-desugar.txt
-#./test.sh test/help/spectest-interp.txt
-#./test.sh test/help/wast2json.txt
+#test/help/wasm-interp.txt
+#test/help/wat2wasm.txt
+#test/help/wasm-validate.txt
+#test/help/wasm-objdump.txt
+#test/help/wasm2wat.txt
+#test/help/wasm-stats.txt
+#test/help/wat-desugar.txt
+#test/help/spectest-interp.txt
+#test/help/wast2json.txt
+
+EOF
