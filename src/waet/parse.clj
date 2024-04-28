@@ -1,31 +1,11 @@
 (ns waet.parse
   (:use [waet.util])
   (:require [waet.values :as val]
+            [waet.impl.scan :refer [bad-syntax *pos*] :as scan]
             [waet.inst :as inst]
             [waet.io :as io]))
 
 ;;;; See <https://webassembly.github.io/spec/core/text/index.html>.
-
-(def ^:dynamic *pos* nil)
-
-(defn origin [x]
-  (let [m (select-keys (meta x) [:line :column])]
-    (when (seq m)
-      m)))
-
-(defn set-pos-from [x]
-  (when-let [pos (origin x)]
-    (set! *pos* pos)))
-
-(defn bad-syntax
-  ([form message]
-   (bad-syntax form message nil))
-  ([form message data]
-   (fail (str "syntax error: " message)
-         (merge {::error :bad-syntax
-                 :form form}
-                *pos*
-                data))))
 
 ;;; Utils.
 
@@ -74,79 +54,26 @@
 
 ;;; Scanning.
 
-(def ^:dynamic *input*)
+(defn scan-i8  [] (scan/pred val/i8?))
+(defn scan-i16 [] (scan/pred val/i16?))
+(defn scan-i32 [] (scan/pred val/i32?))
+(defn scan-i64 [] (scan/pred val/i64?))
 
-(defmacro scanning [input & body]
-  `(binding [*input* ~input]
-     (let [res# (do ~@body)]
-       (when-first [x# (seq *input*)]
-         (bad-syntax x# "expected end of sequence"))
-       res#)))
+(defn scan-u8  [] (scan/pred val/u8?))
+(defn scan-u16 [] (scan/pred val/u16?))
+(defn scan-u32 [] (scan/pred val/u32?))
+(defn scan-u64 [] (scan/pred val/u64?))
 
-(defn scan-rest []
-  (let [xs *input*]
-    (set! *input* nil)
-    (vec xs)))
-
-(def no-match-exception (Exception. "no match"))
-
-(def debug-no-match? true)
-
-(defn no-match []
-  (when debug-no-match?
-    (throw (ex-info "no match" {::error :no-match
-                                :form (first *input*)
-                                :near *pos*})))
-  (throw no-match-exception))
-
-(defn no-match? [ex]
-  (or (identical? ex no-match-exception)      ; Fast path (preallocated).
-      (-> ex ex-data ::error (= :no-match)))) ; Slow path (with stacktrace).
-
-(defmacro scanning-opt [& body]
-  `(try
-     ~@body
-     (catch Exception ex#
-       (when-not (no-match? ex#)
-         (throw ex#)))))
-
-(defn scan-pred [pred]
-  (let [[x & xs] *input*]
-    (if (pred x)
-      (do (set! *input* xs)
-          (set-pos-from x)
-          x)
-      (no-match))))
-
-(defn scan []
-  (scan-pred (constantly true)))
-
-(defn scan-all [scan]
-  (loop [v []]
-    (if-let [x (scanning-opt (scan))]
-      (recur (conj v x))
-      v)))
-
-(defn scan-i8  [] (scan-pred val/i8?))
-(defn scan-i16 [] (scan-pred val/i16?))
-(defn scan-i32 [] (scan-pred val/i32?))
-(defn scan-i64 [] (scan-pred val/i64?))
-
-(defn scan-u8  [] (scan-pred val/u8?))
-(defn scan-u16 [] (scan-pred val/u16?))
-(defn scan-u32 [] (scan-pred val/u32?))
-(defn scan-u64 [] (scan-pred val/u64?))
-
-(defn scan-f32 [] (scan-pred val/f32?))
-(defn scan-f64 [] (scan-pred val/f64?))
+(defn scan-f32 [] (scan/pred val/f32?))
+(defn scan-f64 [] (scan/pred val/f64?))
 
 (defn scan-id []
-  (scan-pred val/id?))
+  (scan/pred val/id?))
 
 (defn scan-index
   ([]
    ;; Either symbolic or numeric index.
-   (scan-pred #(or (val/id? %) (val/index? %))))
+   (scan/pred #(or (val/id? %) (val/index? %))))
   ([section]
    (let [id (scan-index)]
      {:id id
@@ -155,35 +82,35 @@
 
 
 (defn scan-name []
-  (scan-pred val/name?))
+  (scan/pred val/name?))
 
 (defn scan-phrase
   ([]
-   (scan-pred phrase?))
+   (scan/pred phrase?))
   ([head]
-   (scan-pred #(has-head? head %))))
+   (scan/pred #(has-head? head %))))
 
 (defn scan-import []
   (scan-phrase 'import))
 
 (defn scan-typeid []
   (let [[_ & tail :as form] (scan-phrase 'type)]
-    (scanning tail
+    (scan/from tail
       (let [id (scan-id)]
         {:head 'type
          :near *pos*
          :id id}))))
 
 (defn scan-valtype []
-  (scan-pred '#{i32 i64 f32 f64}))
+  (scan/pred '#{i32 i64 f32 f64}))
 
 (defn scan-local* [head]
   (let [[_ & tail :as form] (scan-phrase head)]
-    (scanning tail
-      (let [[id types] (if-let [id (scanning-opt (scan-id))]
+    (scan/from tail
+      (let [[id types] (if-let [id (scan/optional (scan-id))]
                          (let [type (scan-valtype)]
                            [id [type]])
-                         [nil (scan-all scan-valtype)])]
+                         [nil (scan/zom scan-valtype)])]
         (mapv (fn [type]
                 {:head head
                  :near *pos*
@@ -194,7 +121,7 @@
 
 (defn scan-locals* [head]
   (loop [v []]
-    (if-let [x (scanning-opt (scan-local* head))]
+    (if-let [x (scan/optional (scan-local* head))]
       (recur (into v x))
       v)))
 
@@ -217,7 +144,7 @@
     (get-in *module* [:types :fields index])))
 
 (defn scan-typeuse []
-  (let [typeid (scanning-opt (scan-typeid))
+  (let [typeid (scan/optional (scan-typeid))
         params (scan-params)
         results (scan-results)
         forms (concat (when typeid
@@ -242,12 +169,12 @@
 (def scan-type scan-functype)
 
 (defn scan-sharing []
-  (scan-pred '#{shared unshared}))
+  (scan/pred '#{shared unshared}))
 
 (defn scan-limits []
   (let [n (scan-u32)
-        m (scanning-opt (scan-u32))
-        sharing (scanning-opt (scan-sharing))]
+        m (scan/optional (scan-u32))
+        sharing (scan/optional (scan-sharing))]
     {:min n
      :max (or m n)
      :shared? (= sharing 'shared)}))
@@ -255,7 +182,7 @@
 (def scan-memtype scan-limits)
 
 (defn scan-elemtype []
-  (scan-pred #{'anyfunc}))
+  (scan/pred #{'anyfunc}))
 
 (defn scan-tabletype []
   (let [limits (scan-limits)
@@ -264,9 +191,9 @@
      :elemtype elemtype}))
 
 (defn scan-globaltype []
-  (let [var (scanning-opt (scan-phrase 'mut))]
+  (let [var (scan/optional (scan-phrase 'mut))]
     (if-let [[head & tail] var]
-      (scanning tail
+      (scan/from tail
         (let [type (scan-valtype)]
           {:head head
            :kind :var
@@ -277,7 +204,7 @@
 
 (defn scan-inline-export []
   (let [form (scan-phrase 'export)]
-    (scanning (next form)
+    (scan/from (next form)
       (let [name (scan-name)]
         {:head 'export
          :form form
@@ -285,7 +212,7 @@
 
 (defn scan-inline-import []
   (let [form (scan-phrase 'import)]
-    (scanning (next form)
+    (scan/from (next form)
       (let [module (scan-name)
             name (scan-name)]
         {:head 'import
@@ -309,13 +236,13 @@
         (recur (into body (unfold inst)))))))
 
 (defn scan-label []
-  (scanning-opt (scan-index :labels)))
+  (scan/optional (scan-index :labels)))
 
 (defn scan-block []
   (let [label (scan-label)
         results (scan-results)
         [body terminator] (scan-body)
-        id (scanning-opt (scan-id))]
+        id (scan/optional (scan-id))]
     {:label label
      :results results
      :body body
@@ -339,12 +266,12 @@
     (assoc blocks :else else)))
 
 (defn scan-branches []
-  (let [labels (scan-all scan-label)]
+  (let [labels (scan/zom scan-label)]
     {:branches (vec (butlast labels))
      :default (last labels)}))
 
 (defn scan-kwarg [key scan-arg default]
-  (let [value (if (scanning-opt (scan-pred #{(symbol (str (name key) "="))}))
+  (let [value (if (scan/optional (scan/pred #{(symbol (str (name key) "="))}))
                 (scan-arg)
                 default)]
     {key value}))
@@ -366,7 +293,7 @@
           (repeatedly lanes scan-lane)))
 
 (defn scan-v128 []
-  (let [format (scan)]
+  (let [format (scan/one)]
     (case format
       i8x16 (-scan-v128 scan-i8 8 16)
       i16x8 (-scan-v128 scan-i16 16 8)
@@ -377,12 +304,13 @@
       (bad-syntax format "unsupported simd format" {:format format}))))
 
 (defn scan-op []
-  (let [id (scan-pred op?)]
+  (let [id (scan/pred op?)]
     (or (inst/by-name id)
         (bad-syntax id "unknown instruction" {:op id}))))
 
 (defn scan-inst* []
   (let [{:keys [opcode immediates] :as op} (scan-op)
+        _ (fail "TODO: handle immediates, it's now a sequence")
         args (case immediates
                :none {}
                :block (scan-block)
@@ -400,20 +328,20 @@
                :f32 {:value (scan-f32)}
                :f64 {:value (scan-f64)}
                :v128 {:value (scan-v128)}
-               (fail (str "Unsupported immediates") {:input *input*
+               (fail (str "Unsupported immediates") {:op opcode
                                                      :immediates immediates}))]
     (assoc args :op opcode)))
 
 (defn scan-inst []
-  (if-let [[op & _ :as form] (scanning-opt (scan-phrase))]
+  (if-let [[op & _ :as form] (scan/optional (scan-phrase))]
     {:form form}
     (scan-inst*)))
 
 (defn scan-expr []
-  (vec (mapcat unfold (scan-all scan-inst))))
+  (vec (mapcat unfold (scan/zom scan-inst))))
 
 (defn parse-body [[head & tail :as form]]
-  (scanning tail
+  (scan/from tail
     (let [label (scan-label)
           results (scan-results)
           body (scan-expr)]
@@ -428,13 +356,13 @@
   [(parse-body form)])
 
 (defn unfold-if [form]
-  (scanning form
-    (scan #{'if})
+  (scan/from form
+    (scan/pred #{'if})
     (let [label (scan-label)
           results (scan-results)
           then (-> (scan-phrase 'then)
                    parse-body)
-          else (-> (scanning-opt (scan-phrase 'else))
+          else (-> (scan/optional (scan-phrase 'else))
                    (or (list 'else))
                    parse-body)]
       [{:op 'if
@@ -446,7 +374,7 @@
         :form form}])))
 
 (defn unfold-plain [{:keys [form] :as inst}]
-  (scanning form
+  (scan/from form
     (let [inst (scan-inst*)]
       (concat (scan-expr) [inst]))))
 
@@ -465,19 +393,19 @@
 
 (defn parse-modulefield [form]
   (check-phrase form)
-  (set-pos-from form)
+  (scan/set-pos-from form)
   (-parse-modulefield form))
 
 (defmethod -parse-modulefield 'type [[head & tail :as form]]
-  (scanning tail
-    (let [id (scanning-opt (scan-id))
+  (scan/from tail
+    (let [id (scan/optional (scan-id))
           type (scan-type)]
       (ensure-type type))))
 
 (defn scan-importdesc []
   (let [[head & tail :as form] (scan-phrase)
-        ast (scanning tail
-              (let [id (scanning-opt (scan-id))
+        ast (scan/from tail
+              (let [id (scan/optional (scan-id))
                     [section type] (case head
                                      func [:funcs (scan-typeuse)]
                                      table [:tables (scan-tabletype)]
@@ -490,7 +418,7 @@
     (assoc ast :head head :form form)))
 
 (defmethod -parse-modulefield 'import [[head & tail :as form]]
-  (scanning tail
+  (scan/from tail
     (let [module (scan-name)
           name (scan-name)
           desc (scan-importdesc)
@@ -502,17 +430,17 @@
       (emit-field :imports ast))))
 
 (defn parse-named [[head & tail :as form] scan-and-emit]
-  (scanning tail
-    (let [id (scanning-opt (scan-id))
-          import (scanning-opt (scan-inline-import))]
+  (scan/from tail
+    (let [id (scan/optional (scan-id))
+          import (scan/optional (scan-inline-import))]
       (if-let [{:keys [module name]} import]
-        (let [forms (scan-rest)]
+        (let [forms (scan/tail)]
           (parse-modulefield (list 'import module name
                                    (concat ['func]
                                            (when id [id])
                                            forms))))
-        (if-let [{:keys [name]} (scanning-opt (scan-inline-export))]
-          (let [tail (scan-rest)
+        (if-let [{:keys [name]} (scan/optional (scan-inline-export))]
+          (let [tail (scan/tail)
                 id (fresh-id name)]
             (parse-modulefield (list 'export name (list head id)))
             (parse-modulefield (list* head id tail)))
@@ -535,7 +463,7 @@
 (defmethod -parse-modulefield 'table [[head & tail :as form]]
   (parse-named form
     (fn [id]
-      (if-let [elemtype (scanning-opt (scan-elemtype))]
+      (if-let [elemtype (scan/optional (scan-elemtype))]
         (let [[_ & elems] (scan-phrase 'elem)
               n (count elems)
               id (or id (fresh-id))]
@@ -575,7 +503,7 @@
                   memory :mems
                   global :globals
                   (fail (str "cannot export " head)))]
-    (scanning tail
+    (scan/from tail
       (let [index (scan-index)]
         {:sort :exportdesc
          :head head
@@ -584,7 +512,7 @@
          :id index})))) ; TODO [index->id].
 
 (defmethod -parse-modulefield 'export [[head & tail :as form]]
-  (scanning tail
+  (scan/from tail
     (let [name (scan-name)
           desc (scan-exportdesc)
           ast {:head head
@@ -595,7 +523,7 @@
 
 (defmethod -parse-modulefield 'start [[head & tail :as form]]
   (change! *module* update :fields conj [:start])
-  (let [start (scanning tail
+  (let [start (scan/from tail
                 (let [id (scan-id)]
                   {:sort :modulefield
                    :head head
@@ -604,8 +532,8 @@
     (change! *module* assoc :start start)))
 
 (defn scan-offset []
-  (if-let [[_ & tail :as form] (scanning-opt (scan-phrase 'offset))]
-    (let [expr (scanning tail
+  (if-let [[_ & tail :as form] (scan/optional (scan-phrase 'offset))]
+    (let [expr (scan/from tail
                  (scan-expr))]
       {:head 'offset
        :expr expr
@@ -615,13 +543,13 @@
        :expr expr})))
 
 (defmethod -parse-modulefield 'elem [[head & tail :as form]]
-  (scanning tail
-    (let [id (or (scanning-opt (scan-index)) 0)
+  (scan/from tail
+    (let [id (or (scan/optional (scan-index)) 0)
           table {:id id
                  :near *pos*
                  :section :tables}
           offset (scan-offset)
-          init (scan-all scan-index)
+          init (scan/zom scan-index)
           element {:head head
                    :table table
                    :offset offset
@@ -630,19 +558,19 @@
       (emit-field :elements element))))
 
 (defn scan-datastring []
-  (scan-pred #(or (string? %) (vector? %))))
+  (scan/pred #(or (string? %) (vector? %))))
 
 (defn scan-bytes []
   (let [w (io/new-array-writer)]
-    (doseq [s (scan-all scan-datastring)]
+    (doseq [s (scan/zom scan-datastring)]
       (if (vector? s)
         (run! #(io/write-byte w %) s)
         (io/write-bytes w (io/utf-8-bytes s))))
     (io/bytes-copy w)))
 
 (defmethod -parse-modulefield 'data [[head & tail :as form]]
-  (scanning tail
-    (let [id (or (scanning-opt (scan-index)) 0)
+  (scan/from tail
+    (let [id (or (scan/optional (scan-index)) 0)
           memory {:id id
                   :near *pos*
                   :section :mems}
