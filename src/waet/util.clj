@@ -1,4 +1,5 @@
-(ns waet.util)
+(ns waet.util
+  (:require [fipp.edn :refer [pprint]]))
 
 (defn fail
   ([msg] (fail msg {}))
@@ -14,3 +15,22 @@
 
 (defn bigint? [x]
   (instance? clojure.lang.BigInt x))
+
+(defn pprint-str [x]
+  (with-out-str
+    (pprint x)))
+
+(defn make-log [& message]
+  (->> message
+       (map #(if (string? %)
+               %
+               (pprint-str %)))
+       (apply str)))
+
+(defn log [& message]
+  (binding [*out* *err*]
+    (println (apply make-log message))))
+
+(defn fatal [& message]
+  (apply log message)
+  (System/exit 1))

@@ -7,6 +7,7 @@
 (require '[docopt.core :refer [docopt]])
 (require '[instaparse.core :as insta])
 (require '[fipp.edn :refer [pprint]])
+(require '[waet.util :refer :all])
 (require '[waet.wat :refer [wat->wie]])
 (require '[waet.core :refer [wie->wasm]])
 (require '[waet.io :as io])
@@ -71,11 +72,6 @@ options:
 (defn get-arg [name]
   (swap! used-args conj name)
   (parsed-args name))
-
-(defn fatal [& message]
-  (binding [*out* *err*]
-    (apply println message)
-    (System/exit 1)))
 
 ;; Ignore "enable" options; assume "--enable-all".
 (get-arg "--enable-exceptions")

@@ -2,6 +2,7 @@
 
 ;;;; Converts WAT s-expressions into WIE Edn (Clojure's s-exprs).
 
+(require '[waet.util :refer :all])
 (require '[fipp.edn :refer [pprint]])
 (require '[docopt.core :refer [docopt]])
 (require '[instaparse.core :as insta])
@@ -10,11 +11,6 @@
 (def usage "
 usage: wat2wie [<filename>]
 ")
-
-(defn fatal [& message]
-  (binding [*out* *err*]
-    (apply println message)
-    (System/exit 1)))
 
 (def args (docopt usage (cons "" *command-line-args*)))
 
