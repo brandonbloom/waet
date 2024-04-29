@@ -29,8 +29,8 @@
   float     =  #'[0-9]+\\.[0-9]+'
   integer   =  #'[0-9]+'
 
-  string         =  <'\"'> string-char* <'\"'>
-  <string-char>  =  string-escape / #'[^\"\\\\]' (* TODO: Exclude < U+20 and U+7F *)
+  string         =  <'\"'> string-chars* <'\"'>
+  <string-chars>  =  string-escape / #'[^\"\\\\]+' (* TODO: Exclude < U+20 and U+7F *)
 
   <string-escape>          =  <'\\\\'> (string-escape-codepoint / string-escape-hex / string-escape-char)
   string-escape-codepoint  =  <'u{'> hexnum <'}'>
