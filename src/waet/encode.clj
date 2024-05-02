@@ -126,16 +126,17 @@
   (write-u32-leb128 (count xs))
   (run! write xs))
 
+(defn write-byte-vec [bs]
+  (write-u32-leb128 (count bs))
+  (write-bytes bs))
+
 (defn write-vecsec [secid write fields]
   (when (seq fields)
     (writing-section secid
       (write-vec write fields))))
 
 (defn write-utf8 [s]
-  (let [^bytes bs (io/utf-8-bytes s)
-        n (count bs)]
-    (write-u32-leb128 n)
-    (write-bytes bs)))
+  (write-byte-vec (io/utf-8-bytes s)))
 
 (defn write-name [name]
   (write-utf8 (str name)))
@@ -381,11 +382,16 @@
 
 ;;; Data.
 
-(defn write-data [{:keys [memory offset init]}]
-  (write-index (:index memory))
-  (write-expr (:expr offset))
-  (write-u32-leb128 (count init))
-  (write-bytes init))
+(defn write-data [{:keys [memory offset init mode] :as data}]
+  (case mode
+    :active (if (-> memory :index zero?)
+                (do (write-u32-leb128 0)
+                    (write-expr (:expr offset)))
+                (do (write-u32-leb128 2)
+                    (write-index (:index memory))
+                    (write-expr (:expr offset))))
+    :passive (write-u32-leb128 1))
+  (write-byte-vec init))
 
 (defn write-datasec [data]
   (write-vecsec 11 write-data data))

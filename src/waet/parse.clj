@@ -599,11 +599,12 @@
           memory {:id id
                   :near *pos*
                   :section :mems}
-          offset (scan-offset)
+          offset (scan/optional (scan-offset))
           init (scan-bytes)
           data {:head head
                 :memory memory
                 :offset offset
+                :mode (if offset :active :passive)
                 :init init
                 :form form}]
       (emit-field :data data))))

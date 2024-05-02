@@ -92,7 +92,7 @@
 
   (->
     ;"x=1"
-    "\"\\ff\\ff\\ff\\ff\""
+    "\"\\ff\\ff\\ff\\ff\\00\""
     ;(slurp "/Users/brandonbloom/Projects/wabt/test/decompile/code-metadata.txt")
     wat->wie
     ;first
