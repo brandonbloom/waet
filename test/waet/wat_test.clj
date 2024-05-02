@@ -45,6 +45,7 @@
 
     "\"\\00\""  '"\0"
     "\"\\u{0000}\""  '"\0"
+    "\"\\ff\\ff\\ff\\ff\"" (str (char 255) (char 255) (char 255) (char 255))
 
     "(@x)"          (val/->Annotation 'x 'nil)
     "(@abc 1 2 3)"  (val/->Annotation 'abc '(1 2 3))

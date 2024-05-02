@@ -1,53 +1,11 @@
 (ns waet.wat
   (:use [waet.util])
-  (:require [instaparse.core :as insta]
+  (:require [clojure.java.io :as io]
+            [instaparse.core :as insta]
             [waet.values :as val]))
 
-(def grammar "
-
-  file           =  expressions?
-  <expression>   =  <ws>? (attribute / symbol / annotation / list / number / string)
-  <expressions>  =  expression* <ws>?
-
-  (* Indirection puts metadata on tag because string before transform
-     can't have metadata, but symbols can. *)
-  symbol   =  -symbol
-  -symbol  =  #'[a-zA-Z\\$][a-zA-Z0-9._]*'
-
-  (* Indirection gets location information of the paren,
-      instead of the first expression. That expression may not
-      exist (be nil), and so cannot have metadata. *)
-  list   =  -list
-  -list  =  <'('> !#\";@\" expressions <')'>
-
-  annotation  =  <'(@'> symbol expressions <')'>
-
-  <attribute>    =  attribute-key (symbol | number | string)
-  attribute-key  =  symbol <'='>
-
-  <number>  =  float | integer
-  float     =  #'[0-9]+\\.[0-9]+'
-  integer   =  #'[0-9]+'
-
-  string         =  <'\"'> string-chars* <'\"'>
-  <string-chars>  =  string-escape / #'[^\"\\\\]+' (* TODO: Exclude < U+20 and U+7F *)
-
-  <string-escape>          =  <'\\\\'> (string-escape-codepoint / string-escape-hex / string-escape-char)
-  string-escape-codepoint  =  <'u{'> hexnum <'}'>
-  string-escape-hex        =  hexdigit hexdigit
-  string-escape-char       =  #'[^u0-9a-fA-F]'
-
-  hexnum    =  hexdigit ('_'? hexnum)?
-  hexdigit  =  #'[0-9a-fA-F]'
-
-  ws     =  (space | comment)+
-  space  =  #'\\s+'
-
-  comment        =  line-comment | block-comment
-  line-comment   =  #';[^\\n]*'
-  block-comment  =  '(;' (#'[^;]*' | ';' !')')* ';)'
-
-")
+(def grammar
+  (slurp (io/resource "wat.ebnf")))
 
 (def parser (insta/parser grammar))
 
@@ -133,7 +91,8 @@
   (inspect-ambiguity "(x (; y ;))")
 
   (->
-    "x=1"
+    ;"x=1"
+    "\"\\ff\\ff\\ff\\ff\""
     ;(slurp "/Users/brandonbloom/Projects/wabt/test/decompile/code-metadata.txt")
     wat->wie
     ;first

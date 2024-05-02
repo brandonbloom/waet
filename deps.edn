@@ -1,3 +1,4 @@
 {:paths ["src"]
+ :resource-paths ["resources"]
  :deps {org.clojure/clojure {:mvn/version "1.10.0-alpha6"}
         fipp/fipp {:mvn/version "0.6.26"}}}
