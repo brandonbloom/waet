@@ -583,14 +583,20 @@
       (emit-field :elements element))))
 
 (defn scan-datastring []
-  (scan/pred #(or (string? %) (vector? %))))
+  (scan/pred #(or (string? %) (val/data? %))))
+
+(defn scan-data []
+  (apply val/make-data (scan/zom scan-datastring)))
 
 (defn scan-bytes []
-  (let [w (io/new-array-writer)]
-    (doseq [s (scan/zom scan-datastring)]
-      (if (vector? s)
-        (run! #(io/write-byte w %) s)
-        (io/write-bytes w (io/utf-8-bytes s))))
+  (let [w (io/new-array-writer)
+        data (scan-data)]
+    (doseq [chunk (val/data-chunks data)]
+      (cond
+        (string? chunk) (io/write-bytes w (io/utf-8-bytes chunk))
+        (number? chunk) (io/write-byte w chunk)
+        :else (fail "unsupported chunk type" {:type (type chunk)})
+        ))
     (io/bytes-copy w)))
 
 (defmethod -parse-modulefield 'data [[head & tail :as form]]

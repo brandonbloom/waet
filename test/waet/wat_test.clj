@@ -43,10 +43,11 @@
     "\"x\""    '"x"
     "\"\\n\""  '"\n"
 
-    "\"\\00\""  '"\0"
-    "\"\\u{0000}\""  '"\0"
-    "\"\\ff\\ff\\ff\\ff\"" (str (char 255) (char 255) (char 255) (char 255))
-    "\"\\00\\01\"" (str (char 0) (char 1))
+    "\"\\00\""              #waet/data[0]
+    "\"\\u{0000}\""         "\0"
+    "\"\\ff\\ff\\ff\\ff\""  #waet/data[255 255 255 255]
+    "\"\\00\\01\""          #waet/data[0 1]
+    "\"abc\\ff\""           #waet/data["abc" 0xFF]
 
     "(@x)"          (val/->Annotation 'x 'nil)
     "(@abc 1 2 3)"  (val/->Annotation 'abc '(1 2 3))

@@ -38,10 +38,16 @@
   (String. (-> n biginteger .toByteArray)
            java.nio.charset.StandardCharsets/UTF_8))
 
-(defn transform-hexnum [& digits]
+(defn digits->hexnum [digits]
   (reduce (fn [acc d] (+ (* acc 16) d))
           (bigint 0)
           digits))
+
+(defn transform-hexnum [& digits]
+  (let [n (digits->hexnum digits)]
+    (if (<= 0 n 255)
+      (int n)
+      n)))
 
 (defn transform-hexdigit [d]
   (let [i (-> d first int)]
@@ -50,6 +56,17 @@
       (<= (int \a) i (int \f))  (- i (int \a) -10)
       (<= (int \A) i (int \F))  (- i (int \A) -10)
       :else (fail "invalid hexdigit" {:digit d}))))
+
+
+(defn transform-data [& xs]
+  (let [data (apply val/make-data xs)
+        chunks (val/data-chunks data)]
+    (case (count chunks)
+      0 ""
+      1 (if (-> chunks first string?)
+          (first chunks)
+          data)
+      data)))
 
 (def transformers
   {:file (metadata-transformer vector)
@@ -63,9 +80,9 @@
    :float #(Double/parseDouble %)
    :integer #(Long/parseLong %)
 
-   :string str
+   :string transform-data
    :string-escape-codepoint transform-codepoint
-   :string-escape-hex (comp char transform-hexnum)
+   :string-escape-hex transform-hexnum
    :string-escape-char transform-escape-char
 
    :annotation (metadata-transformer transform-annotation)
@@ -91,8 +108,7 @@
   (inspect-ambiguity "(x (; y ;))")
 
   (->
-    ;"x=1"
-    "\"\\ff\\ff\\ff\\ff\\00\""
+    "\"\""
     ;(slurp "/Users/brandonbloom/Projects/wabt/test/decompile/code-metadata.txt")
     wat->wie
     ;first

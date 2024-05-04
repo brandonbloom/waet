@@ -23,7 +23,25 @@ compilation toolkit for compilers targeting WebAssembly.
 WAT (WebAssembly Text) is already an sexpression language and so has a great
 deal of common syntax with EDN (Clojure's Extensible Data Notation).
 
-*TODO: Document differences/translation.
+Where possible, WAT syntax is used directly. Where not possible, WAT is translated to WAET
+as described here.
+
+### Strings and Data
+
+Clojure on the JVM uses UTF-16 strings, but WAT data strings specify UTF-8 data.
+This means that binary data can not safely be encoded into strings. Instead,
+strings are treated abstractly and encoded into UTF-8 when written into Wasm binary.
+To exactly encode binary data, use `#waet/data[ ... ]` tagged literals. Each element of the
+vector is a data "chunk" which may be a string or number. Big integers are encoded big-endian,
+other integers are treated as individual bytes.
+
+### Attributes
+
+WAT attributes are encoded with the `#waet/attribute(NAME & DATA...)` tagged literal.
+
+### Other Differences
+
+- TODO: Document more differences.
 
 ## Status
 

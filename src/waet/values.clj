@@ -1,5 +1,6 @@
 (ns waet.values
-  (:require [waet.util :refer :all]))
+  (:require [waet.util :refer :all]
+            [fipp.ednize :refer [IEdn IOverride]]))
 
 (defn name? [x]
   ;;TODO: Tighter validation.
@@ -32,4 +33,55 @@
 
 (def index? u32?)
 
-(defrecord Annotation [head tail])
+(defrecord Annotation [head tail]
+  IOverride
+  IEdn
+  (-edn [_]
+    (tagged-literal 'waet/annotation (list* head tail)))
+  )
+
+;; Chunks are strings (to be re-encoded as UTF-8)
+;; and numbers (to be encoded as big-endian bytes).
+(defrecord Data [chunks]
+  IOverride
+  IEdn
+  (-edn [_]
+    (tagged-literal 'waet/data chunks))
+  )
+
+(defn data-chunks [^Data data]
+  (.chunks data))
+
+(defn chunk? [x]
+  (or (number? x)
+      (string? x)))
+
+(defn data? [x]
+  (instance? Data x))
+
+(defn nested-data? [x]
+  (or (data? x)
+      (nil? x)
+      (and (sequential? x)
+           (not (chunk? x)))))
+
+(defn data-children [x]
+  (if (data? x)
+    (data-chunks x)
+    (seq x)))
+
+(defn make-data [& xs]
+  (->> xs
+       (tree-seq nested-data? data-children)
+       (filter (complement nested-data?))
+       ;; TODO: concatenate neighboring strings.
+       vec
+       ->Data))
+
+(comment
+
+  (fipp.edn/pprint
+    (make-data #waet/data[1 #waet/data[2 3] [4 5] "abc" nil])
+    )
+
+)
