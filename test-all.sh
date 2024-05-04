@@ -274,13 +274,10 @@ test/interp/start-failure.txt
 test/interp/start.txt
 test/interp/trap-with-callstack.txt
 test/interp/unreachable.txt
-
-# Skipping exceptions tests; they are still experimental.
-#test/interp/throw-across-frame.txt
-#test/interp/rethrow-and-br.txt
+test/interp/unary.txt
+test/interp/expr-block.txt
 
 #test/interp/store.txt
-
 #test/interp/reference-types.txt
 #test/interp/return-call-indirect-import.txt
 #test/interp/basic-logging.txt
@@ -314,14 +311,16 @@ test/interp/unreachable.txt
 #test/interp/simd-lane.txt
 #test/interp/simd-bitselect.txt
 #test/interp/simd-basic.txt
-#test/interp/expr-block.txt
 #test/interp/simd-compare.txt
-#test/interp/unary.txt
 #test/interp/try-delegate.txt
 #test/interp/load64.txt
 #test/interp/call.txt
 #test/interp/simd-binary.txt
 #test/interp/binary.txt
+
+# Skipping exceptions tests; they are still experimental.
+#test/interp/throw-across-frame.txt
+#test/interp/rethrow-and-br.txt
 
 #test/parse/bad-single-semicolon.txt
 #test/parse/all-features.txt

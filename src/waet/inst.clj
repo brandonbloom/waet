@@ -237,6 +237,12 @@
   0xBE f32.reinterpret/i32
   0xBF f64.reinterpret/i64
 
+  0xC0 i32.extend8_s
+  0xC1 i32.extend16_s
+  0xC2 i64.extend8_s
+  0xC3 i64.extend16_s
+  0xC4 i64.extend32_s
+
   )
 
 
