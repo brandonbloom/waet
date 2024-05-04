@@ -18,6 +18,14 @@ Additionally -- and perhaps most importantly -- WAET provides the above
 functionality as a Clojure library for the purpose of being a pleasant
 compilation toolkit for compilers targeting WebAssembly.
 
+## Status
+
+Feature incomplete, barely tested, incompletely documented, and completely
+unstable.  The Waet syntax and command line tools are alpha status.  The
+Clojure API is expected to undergo significant breaking changes.
+
+Primarily tested in terms of a subset of wabt's own test suite.
+
 ## WIE: WebAssembly In Edn
 
 WAT (WebAssembly Text) is already an sexpression language and so has a great
@@ -42,18 +50,6 @@ WAT attributes are encoded with the `#waet/attribute(NAME & DATA...)` tagged lit
 ### Other Differences
 
 - TODO: Document more differences.
-
-## Status
-
-Very much a work-in-progress. I'll make an announcement if/when things stablize.
-
-Right now, most of the interesting bits of parsing, id resolution, and encoding
-work. Not all section types or instructions are fully-implemented.
-
-Practically nothing is tested, but will eventually use the full wabt test suite.
-
-It's not yet clear what subset of WAT code is reasonably WIE code.
-Investigation required.
 
 ## Usage
 
