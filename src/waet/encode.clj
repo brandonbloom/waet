@@ -20,8 +20,6 @@
     "1" true
     ("0" nil) false))
 
-(prn *compact*)
-
 (defmacro with-out-bytes [& body]
   `(binding [*w* (io/new-array-writer)]
      ~@body

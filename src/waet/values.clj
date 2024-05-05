@@ -78,6 +78,13 @@
        vec
        ->Data))
 
+(defn data->string [x]
+  (cond
+    (string? x) x
+    (u8? x) (char x)
+    (data? x) (->> x :chunks (map data->string) (apply str))
+    :else (fail "cannot convert data to string" {:type (class x)})))
+
 (comment
 
   (fipp.edn/pprint

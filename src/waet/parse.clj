@@ -90,9 +90,11 @@
       :section section
       :near *pos*})))
 
+(defn scan-datastring []
+  (scan/pred #(or (string? %) (val/data? %))))
 
 (defn scan-name []
-  (scan/pred val/name?))
+  (val/data->string (scan-datastring)))
 
 (defn scan-phrase
   ([]
@@ -591,9 +593,6 @@
                    :init init
                    :form form}]
       (emit-field :elements element))))
-
-(defn scan-datastring []
-  (scan/pred #(or (string? %) (val/data? %))))
 
 (defn scan-data []
   (apply val/make-data (scan/zom scan-datastring)))

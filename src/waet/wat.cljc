@@ -29,6 +29,7 @@
     "n" "\n"
     "r" "\r"
     "\"" "\""
+    "\\" "\\"
     "'" "'"
     (fail "unknown escape character" {:char c})))
 

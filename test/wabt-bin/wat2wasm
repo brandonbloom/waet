@@ -2,5 +2,6 @@
 
 export WAET_COMPACT=1
 
-# Convert indirectly through WIE to test wat translation to wie and encoding wie into wasm.
+# Convert indirectly through WIE.
+# This tests wat translation to wie and encoding wie into wasm.
 exec wat2wie2wasm "$@"

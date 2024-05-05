@@ -25,5 +25,5 @@ for name in actual expected; do
   wasm-objdump -dhxs /tmp/${name}.wasm > /tmp/${name}/dump
 done
 
-ksdiff /tmp/expected /tmp/actual
-#ksdiff /tmp/expected/dump /tmp/actual/dump
+#ksdiff /tmp/expected /tmp/actual
+ksdiff /tmp/expected/dump /tmp/actual/dump

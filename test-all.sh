@@ -322,7 +322,12 @@ test/interp/unreachable.txt
 #test/interp/throw-across-frame.txt
 #test/interp/rethrow-and-br.txt
 
+test/parse/basic.txt
+test/parse/string-escape.txt
+
+# Skip error message.
 #test/parse/bad-single-semicolon.txt
+
 #test/parse/all-features.txt
 #test/parse/bad-string-unicode-escape-unterminated.txt
 #test/parse/export-mutable-global.txt
@@ -330,7 +335,6 @@ test/interp/unreachable.txt
 #test/parse/force-color.txt
 #test/parse/bad-crlf.txt
 #test/parse/bad-string-unicode-escape-short.txt
-#test/parse/string-escape.txt
 #test/parse/module/reference-types-disabled.txt
 #test/parse/module/bad-export-memory-undefined.txt
 #test/parse/module/struct-field-name.txt
@@ -645,7 +649,6 @@ test/interp/unreachable.txt
 #test/parse/bad-string-eof.txt
 #test/parse/bad-output-command.txt
 #test/parse/custom-sections.txt
-#test/parse/basic.txt
 #test/parse/bad-string-hex-escape.txt
 #test/parse/empty-file.txt
 #test/parse/bad-string-unicode-escape-unallowed.txt
