@@ -14,11 +14,13 @@ fi
 
 testfile="$1"
 
+export WAET_COMPACT=1
+
 wat2wasm $WABT_HOME/${testfile} -o /tmp/expected.wasm
 wat2wie2wasm $WABT_HOME/${testfile} -o /tmp/actual.wasm
 
 for name in actual expected; do
-  mkdir /tmp/${name}
+  mkdir -p /tmp/${name}
   hexdump -C /tmp/${name}.wasm > /tmp/${name}/hex
   wasm-objdump -dhxs /tmp/${name}.wasm > /tmp/${name}/dump
 done

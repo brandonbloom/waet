@@ -1,4 +1,6 @@
 #!/bin/bash
 
+export WAET_COMPACT=1
+
 # Convert indirectly through WIE to test wat translation to wie and encoding wie into wasm.
 exec wat2wie2wasm "$@"

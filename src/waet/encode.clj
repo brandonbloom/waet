@@ -9,6 +9,19 @@
 
 (def ^:dynamic *w*)
 
+;; By default, WAET writes padded leb128 section sizes to avoid the
+;; extra copying necessary to measure sections to write a variable-length
+;; encoding of the size. This results in trivially larger wasm files, but
+;; is (in theory) faster and uses less memory. In practice, it probably
+;; doesn't matter much either way. Still, allow overriding this default
+;; to make it possible to pass WABT round-trip tests.
+(def ^:dynamic *compact*
+  (case (System/getenv "WAET_COMPACT")
+    "1" true
+    ("0" nil) false))
+
+(prn *compact*)
+
 (defmacro with-out-bytes [& body]
   `(binding [*w* (io/new-array-writer)]
      ~@body
@@ -116,22 +129,40 @@
     (write-padded-u32-leb128 size)
     (io/seek *w* end)))
 
+(defn write-section-header [secid size]
+  (write-byte ^byte secid)
+  (write-u32-leb128 size))
+
+(defn write-section [secid write-content]
+  (if *compact*
+    (let [bs (with-out-bytes (write-content))
+          size (count bs)]
+      (write-section-header secid size)
+      (write-bytes bs))
+    (let [mark (begin-section secid)]
+      (write-content)
+      (end-section mark))))
+
 (defmacro writing-section [secid & body]
-  `(let [mark# (begin-section ~secid)
-         res# (do ~@body)]
-     (end-section mark#)
-     res#))
+  `(write-section ~secid (fn [] ~@body)))
 
 (defn begin-subsection []
   (reserve-u32-leb128))
 
 (def end-subsection end-section)
 
+(defn write-subsection [write-content]
+  (if *compact*
+    (let [bs (with-out-bytes (write-content))
+          size (count bs)]
+      (write-u32-leb128 size)
+      (write-bytes bs))
+    (let [mark (begin-subsection)]
+      (write-content)
+      (end-subsection))))
+
 (defmacro writing-subsection [& body]
-  `(let [mark# (begin-subsection)
-         res# (do ~@body)]
-     (end-subsection mark#)
-     res#))
+  `(write-subsection (fn [] ~@body)))
 
 (defn write-vec [write xs]
   (write-u32-leb128 (count xs))
