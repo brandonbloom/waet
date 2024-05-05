@@ -111,7 +111,6 @@
 (defn new-array-writer []
   (ArrayWriter. 0 0 (byte-array 1024)))
 
-
 (def ^Charset utf8 StandardCharsets/UTF_8)
 
 (defn utf-8-bytes [^String s]

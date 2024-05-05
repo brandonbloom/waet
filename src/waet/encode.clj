@@ -9,6 +9,11 @@
 
 (def ^:dynamic *w*)
 
+(defmacro with-out-bytes [& body]
+  `(binding [*w* (io/new-array-writer)]
+     ~@body
+     (io/bytes-copy *w*)))
+
 (defn pos ^long []
   (io/position *w*))
 
@@ -54,6 +59,12 @@
 
 (defn write-s32-leb128 [^long n]
   (write-signed-leb128 n))
+
+(defn encode-unsigned-leb128 [n]
+  (with-out-bytes (write-unsigned-leb128 n)))
+
+(defn encode-signed-leb128 [n]
+  (with-out-bytes (write-signed-leb128 n)))
 
 (defn write-s64-leb128 [^long n]
   (write-signed-leb128

@@ -18,8 +18,10 @@ wat2wasm $WABT_HOME/${testfile} -o /tmp/expected.wasm
 wat2wie2wasm $WABT_HOME/${testfile} -o /tmp/actual.wasm
 
 for name in actual expected; do
-  hexdump -C /tmp/${name}.wasm > /tmp/${name}.hex
-  wasm-objdump -dhxs /tmp/${name}.wasm > /tmp/${name}.dump
+  mkdir /tmp/${name}
+  hexdump -C /tmp/${name}.wasm > /tmp/${name}/hex
+  wasm-objdump -dhxs /tmp/${name}.wasm > /tmp/${name}/dump
 done
 
-ksdiff /tmp/expected.dump /tmp/actual.dump
+ksdiff /tmp/expected /tmp/actual
+#ksdiff /tmp/expected/dump /tmp/actual/dump
