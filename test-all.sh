@@ -258,6 +258,7 @@ test/interp/brtable.txt
 test/interp/call-zero-args.txt
 test/interp/compare.txt
 test/interp/empty.txt
+test/interp/expr-block.txt
 test/interp/expr-br.txt
 test/interp/expr-brif.txt
 test/interp/expr-if.txt
@@ -272,12 +273,11 @@ test/interp/run-export-with-invalid-arguments-size.txt
 test/interp/select.txt
 test/interp/start-failure.txt
 test/interp/start.txt
+test/interp/store.txt
 test/interp/trap-with-callstack.txt
-test/interp/unreachable.txt
 test/interp/unary.txt
-test/interp/expr-block.txt
+test/interp/unreachable.txt
 
-#test/interp/store.txt
 #test/interp/reference-types.txt
 #test/interp/return-call-indirect-import.txt
 #test/interp/basic-logging.txt

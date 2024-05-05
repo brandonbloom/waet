@@ -54,11 +54,6 @@
 
 ;;; Scanning.
 
-(defn scan-i8  [] (scan/pred val/i8?))
-(defn scan-i16 [] (scan/pred val/i16?))
-(defn scan-i32 [] (scan/pred val/i32?))
-(defn scan-i64 [] (scan/pred val/i64?))
-
 (defn scan-u8  [] (scan/pred val/u8?))
 (defn scan-u16 [] (scan/pred val/u16?))
 (defn scan-u32 [] (scan/pred val/u32?))
@@ -66,6 +61,21 @@
 
 (defn scan-f32 [] (scan/pred val/f32?))
 (defn scan-f64 [] (scan/pred val/f64?))
+
+(defn scan-signed [n signed? unsigned?]
+  (let [i (scan/pred #(or (signed? %) (unsigned? %)))]
+    ;; Numbers larger than the signed max are coerced as twos-complement.
+    ;; See <https://webassembly.github.io/spec/core/syntax/values.html#syntax-int>
+    ;; and <https://webassembly.github.io/spec/core/exec/numerics.html#aux-signed>.
+    (long
+      (if (and (unsigned? i) (not (signed? i)))
+        (- i (.shiftLeft (biginteger 1N) n))
+        i))))
+
+(defn scan-i8  [] (scan-signed 8 val/i8?  val/u8?))
+(defn scan-i16 [] (scan-signed 16 val/i16? val/u16?))
+(defn scan-i32 [] (scan-signed 32 val/i32? val/u32?))
+(defn scan-i64 [] (scan-signed 64 val/i64? val/u64?))
 
 (defn scan-id []
   (scan/pred val/id?))

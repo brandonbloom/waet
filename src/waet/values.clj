@@ -16,10 +16,10 @@
       (string? x) ; Includes names.
       (id? x)))
 
-(defn u8?  [x] (and (integer? x) (<= 0 x))) ;TODO: check max.
-(defn u16? [x] (and (integer? x) (<= 0 x))) ;TODO: check max.
-(defn u32? [x] (and (integer? x) (<= 0 x))) ;TODO: check max.
-(defn u64? [x] (and (integer? x) (<= 0 x))) ;TODO: check max.
+(defn u8?  [x] (and (integer? x) (<= 0 x 0xFF)))
+(defn u16? [x] (and (integer? x) (<= 0 x 0xFFFF)))
+(defn u32? [x] (and (integer? x) (<= 0 x 0xFFFFFFFF)))
+(defn u64? [x] (and (integer? x) (<= 0 x 0xFFFFFFFFFFFFFFFF)))
 
 (defn i8?  [x] (and (integer? x) (<=    Byte/MIN_VALUE  x     Byte/MAX_VALUE)))
 (defn i16? [x] (and (integer? x) (<=   Short/MIN_VALUE  x    Short/MAX_VALUE)))

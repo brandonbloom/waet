@@ -55,7 +55,7 @@
 (defn write-s32-leb128 [^long n]
   (write-signed-leb128 n))
 
-(defn write-s64-leb128 [n]
+(defn write-s64-leb128 [^long n]
   (write-signed-leb128
     (if (>= n 9223372036854775807)
       (- n 18446744073709551616N)
