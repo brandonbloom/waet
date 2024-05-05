@@ -18,20 +18,21 @@
   <attribute>    =  attribute-key (symbol | number | string)
   attribute-key  =  symbol <'='>
 
-  <number>  =  float | integer
-  float     =  #'-?[0-9]+\.[0-9]+'
-  integer   =  #'-?[0-9]+'
+  <number>        =  hex-number / dec-number
+  hex-number      =  sign <'0x'> hex-digits (<'.'> hex-digits (<#'[Pp]'> sign hex-digits)?)?
+  dec-number      =  sign        dec-digits (<'.'> dec-digits (<#'[Ee]'> sign dec-digits)?)? !'x'
+  sign            =  '+' | '-' | ''
 
   string         =  <'"'> string-chars* <'"'>
   <string-chars>  =  string-escape / #'[^"\\]+' (* TODO: Exclude < U+20 and U+7F *)
 
   <string-escape>          =  <'\\'> (string-escape-codepoint / string-escape-hex / string-escape-char)
-  string-escape-codepoint  =  <'u{'> hexnum <'}'>
-  string-escape-hex        =  hexdigit hexdigit
+  string-escape-codepoint  =  <'u{'> hex-digits <'}'>
+  string-escape-hex        =  #'[0-9a-fA-F][0-9a-fA-F]'
   string-escape-char       =  #'[^u0-9a-fA-F]'
 
-  hexnum    =  hexdigit ('_'? hexnum)?
-  hexdigit  =  #'[0-9a-fA-F]'
+  dec-digits    =  #'[0-9][0-9_]*'
+  hex-digits    =  #'[0-9a-fA-F][0-9a-fA-F_]*'
 
   ws     =  (space | comment)+
   space  =  #'\s+'

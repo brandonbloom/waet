@@ -2,7 +2,8 @@
   (:use [waet.util])
   (:require [clojure.java.io :as io]
             [instaparse.core :as insta]
-            [waet.values :as val]))
+            [waet.values :as val])
+  (:import [java.util.Math]))
 
 (def grammar
   (slurp (io/resource "wat.ebnf")))
@@ -38,25 +39,36 @@
   (String. (-> n biginteger .toByteArray)
            java.nio.charset.StandardCharsets/UTF_8))
 
-(defn digits->hexnum [digits]
-  (reduce (fn [acc d] (+ (* acc 16) d))
-          (bigint 0)
-          digits))
-
-(defn transform-hexnum [& digits]
-  (let [n (digits->hexnum digits)]
-    (if (<= 0 n 255)
-      (int n)
-      n)))
-
-(defn transform-hexdigit [d]
-  (let [i (-> d first int)]
+(defn char->digit [d]
+  (let [i (int d)]
     (cond
       (<= (int \0) i (int \9))  (- i (int \0))
       (<= (int \a) i (int \f))  (- i (int \a) -10)
       (<= (int \A) i (int \F))  (- i (int \A) -10)
-      :else (fail "invalid hexdigit" {:digit d}))))
+      :else (fail "invalid digit" {:digit d}))))
 
+(defn seq->digits [xs]
+  (mapcat #(if (= % \_)
+             []
+             [(char->digit %)])
+          xs))
+
+(defn digits->bigint-base [base digits]
+  (reduce (fn [acc d] (+ (* acc base) d))
+          (bigint 0)
+          (seq->digits digits)))
+
+(defn digits->base [base digits]
+  (let [n (digits->bigint-base base digits)]
+    (if (<= Long/MIN_VALUE n Long/MAX_VALUE)
+      (long n)
+      n)))
+
+(defn transform-hex-digits [digits]
+  (digits->base 16 digits))
+
+(defn transform-dec-digits [digits]
+  (digits->base 10 digits))
 
 (defn transform-data [& xs]
   (let [data (apply val/make-data xs)
@@ -68,6 +80,27 @@
           data)
       data)))
 
+(defn transform-sign
+  ([] 1)
+  ([x]
+   (case x
+     ("+" "") 1
+     "-" -1)))
+
+(defn make-fractional [base n]
+  (/ n (Math/pow base (count (str n)))))
+
+(defn number-transformer [base]
+  (fn f
+    ([whole-sign whole-value]
+     (* whole-sign whole-value))
+    ([whole-sign whole-value fraction]
+      (* whole-sign
+         (+ whole-value (make-fractional base fraction))))
+    ([whole-sign whole-value fraction exponent-sign exponent-value]
+     (* (f whole-sign whole-value fraction)
+        (Math/pow base (* exponent-sign exponent-value))))))
+
 (def transformers
   {:file (metadata-transformer vector)
 
@@ -77,20 +110,22 @@
    :symbol (metadata-transformer identity)
    :-symbol munged-symbol
 
-   :float #(Double/parseDouble %)
-   :integer #(Long/parseLong %)
+   :dec-number (number-transformer 10)
+   :hex-number (number-transformer 16)
+
+   :dec-digits transform-dec-digits
+   :hex-digits transform-hex-digits
+
+   :sign transform-sign
 
    :string transform-data
    :string-escape-codepoint transform-codepoint
-   :string-escape-hex transform-hexnum
+   :string-escape-hex transform-hex-digits
    :string-escape-char transform-escape-char
 
    :annotation (metadata-transformer transform-annotation)
 
    :attribute-key (metadata-transformer #(munged-symbol (str % "=")))
-
-   :hexnum transform-hexnum
-   :hexdigit transform-hexdigit
    })
 
 (defn wat->wie [s]
@@ -108,7 +143,7 @@
   (inspect-ambiguity "(x (; y ;))")
 
   (->
-    "\"\""
+    "-0x0.8"
     ;(slurp "/Users/brandonbloom/Projects/wabt/test/decompile/code-metadata.txt")
     wat->wie
     ;first
