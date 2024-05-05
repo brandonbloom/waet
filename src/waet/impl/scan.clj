@@ -25,12 +25,17 @@
 
 (def ^:dynamic *input*)
 
+(def ^:dynamic *expected*)
+
 (defmacro from [input & body]
   `(binding [*input* ~input
-             *pos* (or (origin *input*) *pos*)]
+             *pos* (or (origin *input*) *pos*)
+             *expected* nil]
      (let [res# (do ~@body)]
        (when-first [x# (seq *input*)]
-         (bad-syntax x# "expected end of sequence"))
+         (if *expected*
+           (bad-syntax x# (str "expected " *expected*))
+           (bad-syntax x# "unexpected")))
        res#)))
 
 (defn tail []
@@ -42,10 +47,12 @@
 
 (def debug-no-match? true)
 
-(defn no-match []
+(defn no-match [expected]
+  (set! *expected* expected)
   (when debug-no-match?
     (throw (ex-info "no match" {::error :no-match
                                 :form (first *input*)
+                                :expected expected
                                 :near *pos*})))
   (throw no-match-exception))
 
@@ -60,16 +67,19 @@
        (when-not (no-match? ex#)
          (throw ex#)))))
 
-(defn pred [f]
+(defn pred* [label f]
   (let [[x & xs] *input*]
     (if (f x)
       (do (set! *input* xs)
           (set-pos-from x)
           x)
-      (no-match))))
+      (no-match label))))
+
+(defmacro pred [f]
+  `(pred* ~(pr-str f) ~f))
 
 (defn one []
-  (pred (constantly true)))
+  (pred* "form" (constantly true)))
 
 (defn zom [scan]
   (loop [v []]
