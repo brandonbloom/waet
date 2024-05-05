@@ -10,8 +10,6 @@ if [[ -z $WABT_HOME ]]; then
   exit 1
 fi
 
-#./build.sh
-
 cd $WABT_HOME
 
 ./test/run-tests.py \
