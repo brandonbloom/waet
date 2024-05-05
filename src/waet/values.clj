@@ -16,15 +16,15 @@
       (string? x) ; Includes names.
       (id? x)))
 
-(defn u8?  [x] (and (int? x) (<= 0 x))) ;TODO: check max.
-(defn u16? [x] (and (int? x) (<= 0 x))) ;TODO: check max.
-(defn u32? [x] (and (int? x) (<= 0 x))) ;TODO: check max.
-(defn u64? [x] (and (int? x) (<= 0 x))) ;TODO: check max.
+(defn u8?  [x] (and (integer? x) (<= 0 x))) ;TODO: check max.
+(defn u16? [x] (and (integer? x) (<= 0 x))) ;TODO: check max.
+(defn u32? [x] (and (integer? x) (<= 0 x))) ;TODO: check max.
+(defn u64? [x] (and (integer? x) (<= 0 x))) ;TODO: check max.
 
-(defn i8?  [x] (and (int? x) (<=    Byte/MIN_VALUE  x     Byte/MAX_VALUE)))
-(defn i16? [x] (and (int? x) (<=   Short/MIN_VALUE  x    Short/MAX_VALUE)))
-(defn i32? [x] (and (int? x) (<= Integer/MIN_VALUE  x  Integer/MAX_VALUE)))
-(defn i64? [x] (and (int? x) (<=    Long/MIN_VALUE  x     Long/MAX_VALUE)))
+(defn i8?  [x] (and (integer? x) (<=    Byte/MIN_VALUE  x     Byte/MAX_VALUE)))
+(defn i16? [x] (and (integer? x) (<=   Short/MIN_VALUE  x    Short/MAX_VALUE)))
+(defn i32? [x] (and (integer? x) (<= Integer/MIN_VALUE  x  Integer/MAX_VALUE)))
+(defn i64? [x] (and (integer? x) (<=    Long/MIN_VALUE  x     Long/MAX_VALUE)))
 
 (defn f32? [x] (number? x)) ;TODO: check min/max
 (defn f64? [x] (number? x)) ;TODO: check min/max
