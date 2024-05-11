@@ -322,7 +322,7 @@ test/interp/unreachable.txt
 #test/interp/throw-across-frame.txt
 #test/interp/rethrow-and-br.txt
 
-test/parse/basic.txt
+#test/parse/basic.txt
 test/parse/string-escape.txt
 
 # Skip error message.
@@ -1442,12 +1442,11 @@ test/parse/string-escape.txt
 #test/stats/cutoff.txt
 #test/two-commands.txt
 
-# Skip these because WABT's WASI support is incomplete.
-#test/wasi/empty.txt
-#test/wasi/oob_trap.txt
-#test/wasi/write_stdout.txt
-#test/wasi/clock.txt
-#test/wasi/exit.txt
+test/wasi/empty.txt
+test/wasi/oob_trap.txt
+test/wasi/write_stdout.txt
+test/wasi/clock.txt
+test/wasi/exit.txt
 
 # Skip these because our CLI tools have potentially different usage text.
 #test/help/wasm-interp.txt

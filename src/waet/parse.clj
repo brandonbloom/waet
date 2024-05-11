@@ -46,6 +46,9 @@
         field (assoc field
                      :sort :modulefield
                      :index index)]
+    (when (:import field)
+      ; TODO: Validate that all imports come before other definitions in this section.
+      )
     (change! *module* update :fields conj [section :fields index])
     (when-let [id (:id field)]
       (bind! section id index))
@@ -101,9 +104,6 @@
    (scan/pred phrase?))
   ([head]
    (scan/pred #(has-head? head %))))
-
-(defn scan-import []
-  (scan-phrase 'import))
 
 (defn scan-typeid []
   (let [[_ & tail :as form] (scan-phrase 'type)]
@@ -463,8 +463,10 @@
                :form form
                :module module
                :name name
-               :desc desc}]
-      (emit-field :imports ast))))
+               :desc desc}
+          index (emit-field :imports ast)]
+      (emit-field (:section desc) (assoc desc :import index))
+      index)))
 
 (defn parse-named [[head & tail :as form] scan-and-emit]
   (scan/from tail

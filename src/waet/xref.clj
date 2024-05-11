@@ -16,6 +16,9 @@
     (number? id) (assoc ast :index id) ; TODO: Validate consistency of id and index.
     :else (assoc ast :index (resolve-id section id))))
 
+(defn xref-import [import]
+  (update-in import [:desc :type] resolved))
+
 (defn xref-export [export]
   (update export :desc resolved))
 
@@ -85,7 +88,7 @@
             *frames* []]
     (-> func
         (update :type resolved)
-        (update :body xref-body))))
+        (cond-> (:body func) (update :body xref-body)))))
 
 (defn xref-elem [elem]
   (update elem :table resolved))
@@ -98,6 +101,7 @@
 
 (defn xref-module [module]
   (binding [*module* module]
+    (change! *module* xref-vecsec xref-import :imports)
     (change! *module* xref-vecsec xref-export :exports)
     (change! *module* xref-vecsec xref-func :funcs)
     (change! *module* xref-vecsec xref-elem :elems)

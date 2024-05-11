@@ -175,6 +175,9 @@
     (writing-section secid
       (write-vec write fields))))
 
+(defn remove-imports [v]
+  (remove :import v))
+
 (defn write-utf8 [s]
   (write-byte-vec (io/utf-8-bytes s)))
 
@@ -294,18 +297,18 @@
 
 ;;; Imports.
 
-(defn write-importdesc [{:keys [head index] :as desc}]
+(defn write-importdesc [{:keys [head type] :as desc}]
   (write-byte (case head
-                type   0x00
+                func   0x00
                 table  0x01
                 mem    0x02
                 global 0x03
                 (fail "Invalid importdesc head" {:desc desc})))
-  (write-u32-leb128 index))
+  (write-u32-leb128 (:index type)))
 
 (defn write-import [{:keys [name module desc] :as import}]
-  (write-name name)
   (write-name module)
+  (write-name name)
   (write-importdesc desc))
 
 (defn write-importsec [imports]
@@ -317,7 +320,7 @@
   (write-index index))
 
 (defn write-funcsec [funcs]
-  (write-vecsec 3 write-type (map :type funcs)))
+  (write-vecsec 3 write-type (->> funcs remove-imports (map :type))))
 
 ;;; Tables.
 
@@ -330,7 +333,7 @@
   (write-limits limits))
 
 (defn write-tablesec [tables]
-  (write-vecsec 4 write-tabletype tables))
+  (write-vecsec 4 write-tabletype (remove-imports tables)))
 
 ;;; Memory.
 
@@ -341,7 +344,7 @@
   (write-memtype type))
 
 (defn write-memsec [mems]
-  (write-vecsec 5 write-mem mems))
+  (write-vecsec 5 write-mem (remove-imports mems)))
 
 ;;; Tags.
 
@@ -364,7 +367,7 @@
   (write-expr expr))
 
 (defn write-globalsec [globals]
-  (write-vecsec 6 write-global globals))
+  (write-vecsec 6 write-global (remove-imports globals)))
 
 ;;; Exports.
 
@@ -418,7 +421,7 @@
     (write-expr body)))
 
 (defn write-codesec [funcs]
-  (write-vecsec 10 write-code funcs))
+  (write-vecsec 10 write-code (remove-imports funcs)))
 
 ;;; Data.
 
