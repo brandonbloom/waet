@@ -157,7 +157,7 @@
       (write-bytes bs))
     (let [mark (begin-subsection)]
       (write-content)
-      (end-subsection))))
+      (end-subsection mark))))
 
 (defmacro writing-subsection [& body]
   `(write-subsection (fn [] ~@body)))
