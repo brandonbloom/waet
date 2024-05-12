@@ -1,6 +1,6 @@
 (ns waet.io
   (:require [clojure.core :as clj])
-  (:import [java.io RandomAccessFile Closeable]
+  (:import [java.io File RandomAccessFile Closeable]
            [java.util Arrays]
            [java.nio.charset Charset StandardCharsets]))
 
@@ -29,8 +29,8 @@
 
 
 (defprotocol IWriteSeeker
-  (^long position [self])
-  (seek [self ^long pos])
+  (position [self])
+  (seek [self pos])
   (write-byte [self, value])
   (write-bytes [self, ^bytes value]))
 
@@ -57,8 +57,10 @@
   (close [self]
     (.close f)))
 
-(defn open-file-writer [^String path]
-  (let [f (RandomAccessFile. path "rw")]
+(defn open-file-writer [path-or-file]
+  (let [f (if (string? path-or-file)
+            (RandomAccessFile. ^String path-or-file "rw")
+            (RandomAccessFile. ^File path-or-file "rw"))]
     (.setLength f 0)
     (FileWriter. f)))
 
