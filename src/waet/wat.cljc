@@ -3,10 +3,10 @@
   (:require [clojure.java.io :as io]
             [instaparse.core :as insta]
             [waet.values :as val])
-  (:import [java.util.Math]))
+  (:import (java.lang Math)))
 
 (def grammar
-  (slurp (io/resource "wat.ebnf")))
+  (slurp (io/resource "waet/wat.ebnf")))
 
 (def parser (insta/parser grammar))
 
